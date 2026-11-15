@@ -969,10 +969,26 @@ function trimQ(a,c,b,r1,r2){const d1=Math.hypot(c[0]-a[0],c[1]-a[1]),d2=Math.hyp
 function qLen(a,c,b){let L=0,p=a;for(let i=1;i<=12;i++){const n=bez(a,c,b,i/12);L+=Math.hypot(n[0]-p[0],n[1]-p[1]);p=n}return L}
 let plR=17;/* drawn player radius (bigger in the phone builder); the screen bar sits just outside it */
 function screenBar(at,toward,op,connect){/* T-bar just outside the screener, facing the player he screens for, plus a faint dotted line toward that player */
-  const dx=toward[0]-at[0],dy=toward[1]-at[1],L=Math.hypot(dx,dy);const u=L>1?[dx/L,dy/L]:[0,-1];const off=plR+5;const c=[at[0]+u[0]*off,at[1]+u[1]*off];
-  let o=`<line x1="${c[0]-u[1]*12}" y1="${c[1]+u[0]*12}" x2="${c[0]+u[1]*12}" y2="${c[1]-u[0]*12}" stroke="#f2e6cf" stroke-width="3.5" stroke-linecap="round" opacity="${op}"/>`;
+  const dx=toward[0]-at[0],dy=toward[1]-at[1],L=Math.hypot(dx,dy);const u=L>1?[dx/L,dy/L]:[0,-1];const off=plR+4;const c=[at[0]+u[0]*off,at[1]+u[1]*off];
+  let o=`<line x1="${c[0]-u[1]*14}" y1="${c[1]+u[0]*14}" x2="${c[0]+u[1]*14}" y2="${c[1]-u[0]*14}" stroke="#f2e6cf" stroke-width="3.5" stroke-linecap="round" opacity="${op}"/>`;
   if(connect&&L>off+26)o+=`<line x1="${c[0]+u[0]*5}" y1="${c[1]+u[1]*5}" x2="${toward[0]-u[0]*20}" y2="${toward[1]-u[1]*20}" stroke="#f2e6cf" stroke-width="1.6" stroke-dasharray="2 5" stroke-linecap="round" opacity="${op*.5}"/>`;
   return o}
+/* Screen geometry. A screen lives on the step where the screener arrives (phases[k].screens).
+   The teammate uses it in that same step if he moves then, otherwise in the next step.
+   The bar is the screener's shoulders: perpendicular to the cutter's path where he passes,
+   on the side the cutter (and his defender) come from, so the screener's back faces where the cutter goes. */
+function segPath(play,j,id){const A=play.phases[j],B=play.phases[j+1];if(!A||!B||!A.pos[id]||!B.pos[id])return null;const a=A.pos[id],b=B.pos[id];if(Math.hypot(b[0]-a[0],b[1]-a[1])<6)return null;const c=curveOf(B,id)||[(a[0]+b[0])/2,(a[1]+b[1])/2];return{a,b,c}}
+function useSeg(play,k,tgt){if(k<1||!tgt)return -1;if(segPath(play,k-1,tgt))return k-1;if(k+1<play.phases.length&&segPath(play,k,tgt))return k;return -1}
+function closestOn(P,S){let best=null;for(let i=0;i<=40;i++){const f=i/40,q=bez(P.a,P.c,P.b,f),d=Math.hypot(q[0]-S[0],q[1]-S[1]);if(!best||d<best.d)best={f,q,d}}const f=best.f,u=1-f;let tx=2*u*(P.c[0]-P.a[0])+2*f*(P.b[0]-P.c[0]),ty=2*u*(P.c[1]-P.a[1])+2*f*(P.b[1]-P.c[1]);const tl=Math.hypot(tx,ty)||1;best.t=[tx/tl,ty/tl];return best}
+function screenFace(play,k,id,tgt){const S=play.phases[k].pos[id];const j=useSeg(play,k,tgt);if(j>=0){const P=segPath(play,j,tgt);const cl=closestOn(P,S);
+    /* face back along the cutter's path, toward where he and his defender come from */
+    return[S[0]-cl.t[0]*40,S[1]-cl.t[1]*40]}
+  const T=(play.phases[k].pos||{})[tgt]||(play.phases[k-1]&&play.phases[k-1].pos[tgt]);return T||[S[0],S[1]-40]}
+/* If the cutter's path runs through the screener, bend it so he comes off shoulder to shoulder. */
+function wrapCut(play,k,id,tgt){const j=useSeg(play,k,tgt);if(j<0)return false;const B=play.phases[j+1];if(curveOf(B,tgt))return false;const P=segPath(play,j,tgt);const S=play.phases[k].pos[id];const cl=closestOn(P,S);const want=plR*2+6;if(cl.d>=want)return false;
+  const f=clamp(cl.f,.2,.8);let n=[cl.q[0]-S[0],cl.q[1]-S[1]];let nl=Math.hypot(n[0],n[1]);if(nl<1){n=[-cl.t[1],cl.t[0]];nl=1}n=[n[0]/nl,n[1]/nl];
+  const Q=[S[0]+n[0]*want,S[1]+n[1]*want],u=1-f;const c=[(Q[0]-u*u*P.a[0]-f*f*P.b[0])/(2*u*f),(Q[1]-u*u*P.a[1]-f*f*P.b[1])/(2*u*f)];
+  B.curve=B.curve||{};B.curve[tgt]=[Math.round(c[0]),Math.round(c[1])];return true}
 function arrowsFor(play,k,sel){
   if(k<0||k>=play.phases.length-1)return"";const A=play.phases[k],B=play.phases[k+1];let out="";const sf=B.scrFor||{};
   for(const id of IDS){const a=A.pos[id],b=B.pos[id];if(!a||!b)continue;const moved=Math.hypot(b[0]-a[0],b[1]-a[1])>=6;const scr=(B.screens||[]).includes(id);if(!moved&&!scr)continue;
@@ -987,8 +1003,9 @@ function arrowsFor(play,k,sel){
         if(drb){const n=Math.max(4,Math.floor(L/14));let d=`M${s[0]},${s[1]}`;for(let i=1;i<n;i++){const f=i/n,px=lerp(s[0],e[0],f),py=lerp(s[1],e[1],f),o=(i%2?6:-6);d+=` L${px-uy*o},${py+ux*o}`}d+=` L${e[0]},${e[1]}`;out+=`<path d="${d}" fill="none" stroke="#f2e6cf" stroke-width="2.2" marker-end="url(#ah)" opacity="${op}"/>`}
         else if(scr&&!tgt)out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="#f2e6cf" stroke-width="2.2" opacity="${op}"/><line x1="${e[0]-uy*11}" y1="${e[1]+ux*11}" x2="${e[0]+uy*11}" y2="${e[1]-ux*11}" stroke="#f2e6cf" stroke-width="3.5" stroke-linecap="round" opacity="${op}"/>`;
         else out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="#f2e6cf" stroke-width="2.2" ${scr?"":'marker-end="url(#ah)"'} opacity="${op}"/>`}}
-    if(tgt)out+=screenBar(b,A.pos[tgt],op,true);
+    if(tgt)out+=screenBar(b,screenFace(play,k+1,id,tgt),op,false);
     else if(scr&&!moved){const h=A.ball!==id&&A.pos[A.ball]?A.pos[A.ball]:[b[0],b[1]-40];out+=screenBar(b,h,op,false)}}
+  if(k>=1){const sa=A.scrFor||{};for(const id of (A.screens||[])){const t=sa[id];if(!t||t===id||useSeg(play,k,t)!==k)continue;const op=sel&&sel!==id&&sel!==t?.22:.6;out+=screenBar(A.pos[id],screenFace(play,k,id,t),op,false)}}
   if(A.ball!==B.ball){const a=B.pos[A.ball],b=B.pos[B.ball];const [s,e]=shorten(a,b,18,22);const op=sel&&sel!==A.ball&&sel!==B.ball?.22:1;out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="var(--gold-2)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#ahp)" opacity="${op}"/>`}
   return out;
 }
@@ -998,7 +1015,7 @@ function playSVG(play,mode){
   ${courtSVG(isFull(play))}<g id="ghosts"></g><g id="arrows"></g>
   ${(()=>{const big=window.innerWidth<=820&&mode;const k=big?(isFull(play)?1.7:1.35):1;plR=Math.round(17*k);return ["1","2","3","4","5"].map(id=>`<g class="pl" data-p="${id}" tabindex="0" role="button" aria-label="Position ${id}"><circle r="${Math.round(30*k)}" fill="transparent"/><circle class="ring" r="${Math.round(17*k)}" fill="#c2b08a" stroke="#fff" stroke-width="2"/><text y="${Math.round(6*k)}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="${Math.round(19*k)}" fill="#1c3045" pointer-events="none">${id}</text></g>`).join("")})()}
   <g id="ball" pointer-events="none"><circle r="7.5" fill="#e07a2f" stroke="#7a3a10" stroke-width="1.5"/><path d="M-7.5 0h15M0-7.5v15" stroke="#7a3a10" stroke-width="1"/></g>${mode?'<g id="bends"></g>':""}</svg>
-  <div class="keylegend"><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#f2e6cf" stroke-width="2"/><path d="M19 0L26 4L19 8z" fill="#f2e6cf"/></svg>Cut</span><span><svg width="26" height="10"><path d="M0 5L5 1L10 9L15 1L20 5" fill="none" stroke="#f2e6cf" stroke-width="2"/><path d="M19 1L26 5L19 9z" fill="#f2e6cf"/></svg>Dribble</span><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#c2b08a" stroke-width="2" stroke-dasharray="5 4"/><path d="M19 0L26 4L19 8z" fill="#c2b08a"/></svg>Pass</span><span><svg width="34" height="12"><line x1="0" y1="6" x2="14" y2="6" stroke="#f2e6cf" stroke-width="2"/><line x1="14" y1="0" x2="14" y2="12" stroke="#f2e6cf" stroke-width="3"/><line x1="18" y1="6" x2="34" y2="6" stroke="#f2e6cf" stroke-width="1.5" stroke-dasharray="2 4" opacity=".6"/></svg>Screen (faces who it's for)</span></div>`;
+  <div class="keylegend"><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#f2e6cf" stroke-width="2"/><path d="M19 0L26 4L19 8z" fill="#f2e6cf"/></svg>Cut</span><span><svg width="26" height="10"><path d="M0 5L5 1L10 9L15 1L20 5" fill="none" stroke="#f2e6cf" stroke-width="2"/><path d="M19 1L26 5L19 9z" fill="#f2e6cf"/></svg>Dribble</span><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#c2b08a" stroke-width="2" stroke-dasharray="5 4"/><path d="M19 0L26 4L19 8z" fill="#c2b08a"/></svg>Pass</span><span><svg width="34" height="12"><line x1="0" y1="6" x2="14" y2="6" stroke="#f2e6cf" stroke-width="2"/><line x1="14" y1="0" x2="14" y2="12" stroke="#f2e6cf" stroke-width="3"/><line x1="18" y1="6" x2="34" y2="6" stroke="#f2e6cf" stroke-width="1.5" stroke-dasharray="2 4" opacity=".6"/></svg>Screen</span></div>`;
 }
 function paint(play,t,sel,seg,opts={}){
   const svg=$("#court");if(!svg)return;
@@ -1064,13 +1081,13 @@ const BASE_SETS=[
   roles:{1:"Left slot. Reverse to 2, then down screen for 4.",2:"Right slot. Catch the reversal; look for the flex cutter.",3:"Left corner. Flex cut baseline off 4 to the other block.",4:"Left block. Flex screen for 3, then come up off 1's down screen.",5:"Right block. Post up; make room for the cutter."}},
  {id:"base-spreadpnr",cat:"Half court",name:"Spread pick-and-roll",desc:"5 sets a ball screen for 1, who comes off it curling toward the elbow.",court:"half",phases:[
    PH([[250,320],[462,32],[38,32],[70,210],[332,192]],"1",{cap:"Spread the floor: corners filled, 4 on the left wing."}),
-   PH([[250,320],[462,32],[38,32],[70,210],[292,298]],"1",{screens:["5"],scrFor:{5:"1"},cap:"5 sprints up and sets the ball screen for 1."}),
-   PH([[345,200],[462,32],[38,32],[70,210],[262,95]],"1",{curve:{1:[335,375]},cap:"1 comes off the screen tight; 5 rolls to the rim."})],
+   PH([[250,320],[462,32],[38,32],[70,210],[312,284]],"1",{screens:["5"],scrFor:{5:"1"},cap:"5 sprints up and sets the ball screen for 1."}),
+   PH([[345,200],[462,32],[38,32],[70,210],[262,95]],"1",{curve:{1:[392,364]},cap:"1 comes off the screen tight; 5 rolls to the rim."})],
   roles:{1:"Ball handler. Wait for the screen, come off tight, read the roll.",2:"Right corner. Spot up for the kick-out.",3:"Left corner. Spot up for the kick-out.",4:"Left wing. Stay spaced; be ready for the skip pass.",5:"Screener. Sprint up, set it facing 1, then roll hard."}},
  {id:"base-floppy",cat:"Half court",name:"Floppy",desc:"2 starts under the rim and picks a side: 5's single screen or the 4-3 stagger.",court:"half",phases:[
    PH([[250,320],[250,35],[100,160],[155,85],[345,85]],"1",{cap:"2 under the rim. Single (5) on the right, stagger (4 and 3) on the left."}),
    PH([[250,320],[300,40],[105,170],[160,100],[345,100]],"1",{screens:["5"],scrFor:{5:"2"},curve:{2:[285,20]},cap:"2 sets his man up toward 5's single screen."}),
-   PH([[250,320],[60,225],[105,170],[160,100],[345,100]],"2",{screens:["4","3"],scrFor:{4:"2",3:"2"},curve:{2:[150,-10]},cap:"2 cuts baseline off the 4-3 stagger; 1 hits him on the wing."})],
+   PH([[250,320],[55,250],[105,170],[160,100],[345,100]],"2",{screens:["4","3"],scrFor:{4:"2",3:"2"},curve:{2:[152,135]},cap:"2 cuts baseline off the 4-3 stagger; 1 hits him on the wing."})],
   roles:{1:"Point. Read which side 2 takes and hit him on time.",2:"Shooter. Set your man up, then go the side he doesn't.",3:"Stagger, top. Second screen for 2, then space.",4:"Stagger, bottom. First screen for 2, then seal.",5:"Single. Screen for 2; if he goes away, post up."}},
  {id:"base-boxblob",cat:"Out of bounds",name:"Box BLOB",desc:"3 inbounds under our basket; box at the blocks and elbows.",court:"half",phases:[PH([[168,192],[332,192],[320,-20],[148,72],[352,72]],"3")],
   roles:{1:"Left elbow. Safety: step back toward the top.",2:"Right elbow. Cut to the ball-side corner for the shot.",3:"Inbounder. Slap the ball to start; look at the rim cut first.",4:"Left block. Cross screen for 5, then pop.",5:"Right block. Use the screen and seal to the rim."}},
@@ -1102,7 +1119,7 @@ function builderHint(){
   if(ed.cur===0)return "Screens happen in a later step. Add a step first.";
   if(ed.scrPick)return `<b>${ed.scrPick} is screening.</b> Now tap the teammate he screens for, or tap ${ed.scrPick} again for a screen with no target.`;
   const sc=ph.screens||[],sf=ph.scrFor||{};
-  return `<b>Screens in step ${ed.cur+1}.</b> Tap the screener, then the teammate he screens for. Tap a marked screener to remove his screen.${sc.length?" Now: "+sc.map(id=>sf[id]?id+" for "+sf[id]:id).join(", ")+".":""}`;
+  return `<b>Screens in step ${ed.cur+1}.</b> First move the screener to his spot (Move tool). Then tap him, then the teammate he screens for. The teammate can cut in this step or the next one, and the screen turns to face his cut. Tap a marked screener to remove it.${sc.length?" Now: "+sc.map(id=>sf[id]?id+" for "+sf[id]:id).join(", ")+".":""}`;
 }
 function builderView(){
   const p=ed.play;const N=p.phases.length;const cats=["Half court","Out of bounds","Press break","Transition","Defense","Special situations"];const cap=(p.phases[ed.cur]||{}).cap||"";
@@ -1155,7 +1172,7 @@ function bindPlaybook(){
           ed.scrPick=id;ed.flash=id;edDraw();return}
         const s0=ed.scrPick;ed.scrPick=null;snapshot();if(!scr.includes(s0))scr.push(s0);
         if(id===s0){if(ph.scrFor){delete ph.scrFor[s0];if(!Object.keys(ph.scrFor).length)delete ph.scrFor}ed.flash=s0;edRender();toast(s0+" sets a screen in step "+st);return}
-        ph.scrFor=ph.scrFor||{};ph.scrFor[s0]=id;ed.flash=s0;edRender();toast(s0+" screens for "+id+" in step "+st)}};
+        ph.scrFor=ph.scrFor||{};ph.scrFor[s0]=id;const wr=wrapCut(ed.play,ed.cur,s0,id);ed.flash=s0;edRender();toast(s0+" screens for "+id+" in step "+st+(wr?". "+id+"'s cut now curves around the screen.":""))}};
     g.onpointermove=e=>{if(!drag||drag.id!==g.dataset.p)return;const pt=svgPoint(svg,e);const B=BOUNDS(ed.play);drag.moved=true;setPos(drag.id,[Math.round(clamp(pt.x,B.x0,B.x1)),Math.round(clamp(pt.y,B.y0,B.y1))]);edDraw()};
     g.onpointerup=g.onpointercancel=()=>{if(drag&&drag.id){if(!drag.moved)ed.hist.pop();drag=null;edRender()}};
     g.onkeydown=e=>{const m={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];if(!m||ed.mode!=="move"||ed.previewing)return;e.preventDefault();const id=g.dataset.p;if(!ed.kbBurst||ed.kbBurst.id!==id){snapshot();ed.kbBurst={id}}clearTimeout(ed.kbT);ed.kbT=setTimeout(()=>{if(ed)ed.kbBurst=null},700);const p=ed.play.phases[ed.cur].pos[id];const B=BOUNDS(ed.play);setPos(id,[clamp(p[0]+m[0],B.x0,B.x1),clamp(p[1]+m[1],B.y0,B.y1)]);ed.flash=id;edDraw()};
