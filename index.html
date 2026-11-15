@@ -586,7 +586,7 @@ const IC={
 };
 const LABEL={home:"Home",schedule:"Schedule",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"League",playbook:"Playbook",glossary:"Glossary & calls",badges:"Badges",more:"More"};
 const ico=k=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
-const MARK=(w=36)=>`<svg width="${w}" height="${Math.round(w*1.1)}" viewBox="0 0 38 42" aria-hidden="true"><path d="M19 1.5L35.5 7v13.5c0 9.5-7 16.7-16.5 20-9.5-3.3-16.5-10.5-16.5-20V7z" fill="#1c3045" stroke="#c2b08a" stroke-width="2"/><path d="M8 17c4-1 7.5 0 11 3 3.5-3 7-4 11-3-2.5 1.5-4 3.5-5 6-2-1-4-1.2-6 0-2-1.2-4-1-6 0-1-2.5-2.5-4.5-5-6z" fill="#c2b08a"/><text x="19" y="34" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="9" fill="#fff" letter-spacing="1">CPC</text></svg>`;
+const MARK=(w=36)=>`<img src="logo.png" width="${w}" height="${w}" alt="" aria-hidden="true" style="display:block;flex:none;object-fit:contain">`;
 const openSet=new Set(["keys","players-know","feed","play-roles","play-notes"]);
 function panel(id,title,summary,body,cls=""){return `<details class="panel ${cls}" data-panel="${id}" ${openSet.has(id)?"open":""}><summary>${CHEV}<h2>${title}</h2><span class="sum">${summary||""}</span></summary><div class="pbody">${body}</div></details>`}
 const ebtn=(act,attrs="",label="Edit")=>isCoach()?`<button class="btn sm edit" data-act="${act}" ${attrs}>${PEN}${label}</button>`:"";
@@ -596,7 +596,7 @@ const abtn=(act,attrs="",label="Add")=>isCoach()?`<button class="btn sm edit" da
 function whoLabel(){return isCoach()?["Coach","Signed in with the coach login"]:["Eagles player","Signed in with the player login"]}
 function render(){
   pendingRender=false;const app=$("#app");
-  const msgScreen=(msg,btns)=>`<div class="login"><div class="loginbox" style="text-align:center">${MARK(56)}<p class="lead" style="margin-top:16px" role="status">${msg}</p>${btns?`<div class="row" style="justify-content:center;gap:10px;margin-top:16px">${btns}</div>`:""}</div></div>`;
+  const msgScreen=(msg,btns)=>`<div class="login"><div class="loginbox" style="text-align:center">${MARK(84)}<p class="lead" style="margin-top:16px" role="status">${msg}</p>${btns?`<div class="row" style="justify-content:center;gap:10px;margin-top:16px">${btns}</div>`:""}</div></div>`;
   if(SB_FATAL){app.innerHTML=msgScreen("Couldn't load the team site. Check your connection and refresh.",`<button class="btn gold" data-act="sbReload">Refresh</button>`);return}
   if(SB&&sbBooting){app.innerHTML=msgScreen("Loading the team hub…");return}
   if(!user||!["coach","player"].includes(user.role)){user=null;app.innerHTML=loginView();bindLogin();return}
@@ -637,7 +637,7 @@ function loginView(){
   const st=loginStage;
   const body=st.step==="create"?`<p class="small" style="margin:0;color:#c3cfdb"><b style="color:#fff">First-time setup.</b> Create the two team passwords. Coaches use the coach password; every player uses the player password.</p>${pwField("lg-new","Coach password (at least "+CONFIG.minPassword.coach+" characters)","new-password")}${pwField("lg-new2","Coach password again","new-password")}${pwField("lg-pl","Player password (at least "+CONFIG.minPassword.player+" characters)","new-password")}<div class="loginerr" id="lg-err" aria-live="polite"></div><button class="btn gold" type="submit">Save passwords and sign in</button><button class="btn" type="button" id="lg-back">Back</button>`
    :`<label class="f" for="lg-user">Login<select id="lg-user" autocomplete="username"><option value="player" ${st.u==="coach"?"":"selected"}>Player</option><option value="coach" ${st.u==="coach"?"selected":""}>Coach</option></select></label>${pwField("lg-pass","Password","current-password")}<div class="loginerr" id="lg-err" aria-live="polite"></div><button class="btn gold" type="submit">Sign in</button>`;
-  return `<div class="login"><div class="loginbox">${MARK(56)}<h1>Eagles Basketball Hub</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${esc(CONFIG.level)}</p>
+  return `<div class="login"><div class="loginbox">${MARK(84)}<h1>Eagles Basketball Hub</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${esc(CONFIG.level)}</p>
   <form class="loginform" id="loginform" autocomplete="on" novalidate>${body}</form>
   <p class="fine">Players: get the team password from your coach.${SB?"":" Coaches can change both passwords anytime."}</p></div></div>`;
 }
@@ -778,7 +778,7 @@ function gameView(date){
 /* ================= Roster & player pages ================= */
 function rosterView(){
   const ss=seasonStats();
-  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · ${esc(CONFIG.level)}</div><h1>Roster</h1><p>${COACHES.map(c=>esc(c.title.split(" · ")[0])+" "+esc(c.name)).join(" · ")}${isCoach()?". Tap a player for stats, badges and editing.":""}</p></div><div class="row">${isCoach()?`<a class="btn sm" href="#badges">${BADGE_IC}Badges</a>`:""}${abtn("addPlayer","","Add player")}</div></div>
+  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · ${esc(CONFIG.level)}</div><h1>Roster</h1>${isCoach()?"<p>Tap a player for stats, badges and editing.</p>":""}</div><div class="row">${isCoach()?`<a class="btn sm" href="#badges">${BADGE_IC}Badges</a>`:""}${abtn("addPlayer","","Add player")}</div></div>
   ${players().length?"":`<div class="empty">No players yet.${isCoach()?" Tap Add player to build the roster.":""}</div>`}<div class="grid g3">${players().map(p=>{const s=ss.find(x=>x.id===p.id)||{};const inner=`<div class="jersey">${p.no}</div><div><div class="pname">${esc(pName(p))}</div><div class="pline">${parts(p.pos,p.yr,p.ht)}</div><div class="pline num">${s.gp?`${fmt1(s.ppg)} pts · ${fmt1(s.rpg)} reb · ${fmt1(s.apg)} ast`:"No games yet"}</div></div>`;
     return `<a class="card pcard" data-no="${p.no}" href="#player-${p.id}">${inner}</a>`}).join("")}</div>`;
 }
