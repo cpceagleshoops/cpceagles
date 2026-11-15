@@ -708,7 +708,7 @@ function openSheet(cfg){
 function escClose(e){if(e.key==="Escape"&&!$("#cfmroot"))requestClose()}
 const sheetDirty=()=>!!(sheetCfg&&$("#sheetform")&&formState()!==sheetInit);
 function requestClose(){if(sheetDirty())confirmDiscard(()=>closeSheet());else closeSheet()}
-function closeSheet(silent,viaPop){if(!$("#sheetroot").firstChild)return;$("#sheetroot").innerHTML="";sheetCfg=null;document.removeEventListener("keydown",escClose);if(!silent&&!viaPop&&history.state&&history.state.sheet){suppressPop++;history.back()}const lf=lastFocus;lastFocus=null;const sel=lf&&lf.dataset&&lf.dataset.act?`[data-act="${lf.dataset.act}"]${lf.dataset.id?`[data-id="${lf.dataset.id}"]`:""}`:null;setTimeout(()=>{let t=lf&&lf.isConnected?lf:(sel?document.querySelector(sel):null);if(t)try{t.focus()}catch(e){}},60);if(!silent){if(pendingRender){pendingRender=false;render()}else render()}}
+function closeSheet(silent,viaPop){if(!$("#sheetroot").firstChild)return;if(ed&&ed.previewing){stopPlayback();ed.previewing=false}$("#sheetroot").innerHTML="";sheetCfg=null;document.removeEventListener("keydown",escClose);if(!silent&&!viaPop&&history.state&&history.state.sheet){suppressPop++;history.back()}const lf=lastFocus;lastFocus=null;const sel=lf&&lf.dataset&&lf.dataset.act?`[data-act="${lf.dataset.act}"]${lf.dataset.id?`[data-id="${lf.dataset.id}"]`:""}`:null;setTimeout(()=>{let t=lf&&lf.isConnected?lf:(sel?document.querySelector(sel):null);if(t)try{t.focus()}catch(e){}},60);if(!silent){if(pendingRender){pendingRender=false;render()}else render()}}
 
 /* ================= Shared view bits ================= */
 function gameRow(g){
@@ -926,7 +926,7 @@ let curPlay=null;let pb={t:0,playing:false,sel:null,speed:1,raf:0,last:0,seg:-2}
 const lerp=(a,b,f)=>a+(b-a)*f;const ease=f=>f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2;const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const isFull=p=>p.court==="full";
 const BOUNDS=p=>isFull(p)?{x0:-32,x1:972,y0:12,y1:488}:{x0:12,x1:488,y0:-32,y1:458};
-function posAt(play,t,id){const N=play.phases.length;if(N===1)return play.phases[0].pos[id];const k=Math.min(Math.floor(t),N-2);const f=ease(clamp(t-k,0,1));const a=play.phases[k].pos[id],b=play.phases[k+1].pos[id];return[lerp(a[0],b[0],f),lerp(a[1],b[1],f)]}
+function posAt(play,t,id){const ph=play.phases||[];const N=ph.length;if(!N)return[0,0];const at=i=>(ph[i]&&ph[i].pos&&ph[i].pos[id])||[0,0];if(N===1)return at(0);const k=clamp(Math.floor(t)||0,0,N-2);const f=ease(clamp(t-k,0,1));const a=at(k),b=at(k+1);return[lerp(a[0],b[0],f),lerp(a[1],b[1],f)]}
 function ballAt(play,t){const N=play.phases.length;if(N===1)return posAt(play,0,play.phases[0].ball);const k=Math.min(Math.floor(t),N-2);const hA=play.phases[k].ball,hB=play.phases[k+1].ball;if(hA===hB)return posAt(play,t,hA);const g=ease(clamp((t-k-.4)/.6,0,1));const a=posAt(play,t,hA),b=posAt(play,t,hB);return[lerp(a[0],b[0],g),lerp(a[1],b[1],g)]}
 function halfCourtLines(){const L="var(--court-line)";return `<rect x="0" y="0" width="500" height="470" fill="none" stroke="${L}" stroke-width="2"/><rect x="170" y="0" width="160" height="190" fill="var(--court-paint)" stroke="${L}" stroke-width="2"/><path d="M190 190 A60 60 0 0 0 310 190" fill="none" stroke="${L}" stroke-width="2"/><path d="M190 190 A60 60 0 0 1 310 190" fill="none" stroke="${L}" stroke-width="2" stroke-dasharray="7 7"/><path d="M52.5 0 L52.5 52.5 A197.5 197.5 0 0 0 447.5 52.5 L447.5 0" fill="none" stroke="${L}" stroke-width="2"/><path d="M210 52.5 A40 40 0 0 0 290 52.5" fill="none" stroke="${L}" stroke-width="1.5"/><line x1="220" y1="40" x2="280" y2="40" stroke="#e7ecf2" stroke-width="3"/><circle cx="250" cy="52.5" r="7.5" fill="none" stroke="#e07a2f" stroke-width="2.5"/><path d="M190 470 A60 60 0 0 1 310 470" fill="none" stroke="${L}" stroke-width="2"/>`}
 function courtSVG(full){
@@ -970,7 +970,7 @@ const PLAY='<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1.5v11l9
 const PAUSE='<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor"/></svg>';
 const REPLAY='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 7a4.5 4.5 0 1 0 1.4-3.3"/><path d="M2 1.5v3h3"/></svg>';
 function syncViewer(){const play=getPlay();if(!play||ed)return;const N=play.phases.length;paint(play,pb.t,pb.sel,viewerSeg(play));const r=$("#scrub");if(r)r.value=pb.t;const st=$("#stepl");if(st)st.textContent=`Step ${Math.min(N,Math.floor(pb.t+1e-6)+1)} of ${N}`;const b=$("#pbplay");if(b)b.innerHTML=pb.playing?PAUSE:(pb.t>=N-1-1e-6?REPLAY:PLAY)}
-function animate(play,from,to,onFrame,done){stopPlayback();pb.playing=true;pb.t=from;pb.last=performance.now();const step=ts=>{if(!pb.playing)return;const dt=Math.min(.05,(ts-pb.last)/1000);pb.last=ts;pb.t+=dt*pb.speed/1.25;if(pb.t>=to){pb.t=to;pb.playing=false;onFrame();done&&done();return}onFrame();pb.raf=requestAnimationFrame(step)};pb.raf=requestAnimationFrame(step)}
+function animate(play,from,to,onFrame,done){stopPlayback();pb.playing=true;pb.t=from;pb.last=performance.now();const step=ts=>{if(!pb.playing)return;const dt=clamp((ts-pb.last)/1000,0,.05);pb.last=ts;pb.t+=dt*pb.speed/1.25;if(pb.t>=to){pb.t=to;pb.playing=false;onFrame();done&&done();return}onFrame();pb.raf=requestAnimationFrame(step)};pb.raf=requestAnimationFrame(step)}
 function stopPlayback(){pb.playing=false;cancelAnimationFrame(pb.raf)}
 
 /* ================= Playbook views ================= */
@@ -1039,7 +1039,7 @@ function bindPlaybook(){
     g.onkeydown=e=>{const m={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];if(!m||ed.mode!=="move")return;e.preventDefault();const id=g.dataset.p;const p=ed.play.phases[ed.cur].pos[id];const B=BOUNDS(ed.play);ed.play.phases[ed.cur].pos[id]=[clamp(p[0]+m[0],B.x0,B.x1),clamp(p[1]+m[1],B.y0,B.y1)];ed.flash=id;edDraw()};
   });
   $$("#playform input,#playform textarea,#playform select").forEach(el=>el.addEventListener("input",()=>{ed.dirty=true}));
-  $("#pe-cat").onchange=e=>{const v=e.target.value;if((v==="Press break"||v==="Transition")&&!isFull(ed.play)&&ed.play.phases.length===1){readEd();ed.play.court="full";ed.play.phases=START.full();ed.cur=0;edRender();toast("Switched to full court for "+v.toLowerCase())}};
+  $("#pe-cat").onchange=e=>{if(ed.previewing){stopPlayback();ed.previewing=false}const v=e.target.value;if((v==="Press break"||v==="Transition")&&!isFull(ed.play)&&ed.play.phases.length===1){readEd();ed.play.court="full";ed.play.phases=START.full();ed.cur=0;edRender();toast("Switched to full court for "+v.toLowerCase())}};
 }
 
 /* ================= Actions (all edits go through Save + toast) ================= */
@@ -1103,17 +1103,17 @@ const ACT={
   newPlay(){stopPlayback();ed={play:{name:"",cat:"",court:"half",roles:{1:"",2:"",3:"",4:"",5:""},notes:"",phases:START.half()},cur:0,mode:"move",isNew:true,id:null,hist:[],rolesOpen:false};render();window.scrollTo({top:0})},
   editPlay(d){stopPlayback();const p=JSON.parse(JSON.stringify(get("plays",d.id)));p.roles=p.roles||{};ed={play:p,cur:0,mode:"move",isNew:false,id:d.id,hist:[],rolesOpen:false};render();window.scrollTo({top:0})},
   edTool(d){readEd();ed.mode=d.v;ed.flash=null;edRender()},
-  edStep(d){readEd();ed.cur=+d.v;ed.flash=null;edRender()},
-  edAdd(){readEd();snapshot();const c=JSON.parse(JSON.stringify(ed.play.phases[ed.cur]));c.screens=[];ed.play.phases.splice(ed.cur+1,0,c);ed.cur++;ed.mode="move";ed.flash=null;edRender();toast("Step "+(ed.cur+1)+" added")},
-  edDelStep(){readEd();if(ed.play.phases.length<2)return;snapshot();ed.play.phases.splice(ed.cur,1);ed.cur=Math.max(0,ed.cur-1);edRender();toast("Step removed")},
-  edUndo(){if(!ed.hist.length)return;readEd();const s=JSON.parse(ed.hist.pop());ed.play.phases=s.phases;ed.cur=Math.min(s.cur,s.phases.length-1);ed.play.court=s.court;edRender()},
-  edCourt(d){if((ed.play.court||"half")===d.v)return;readEd();snapshot();ed.play.court=d.v;ed.play.phases=START[d.v]();ed.cur=0;edRender();toast(d.v==="full"?"Full court. Players reset to a press-break start.":"Half court. Players reset.")},
+  edStep(d){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}readEd();ed.cur=+d.v;ed.flash=null;edRender()},
+  edAdd(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();snapshot();const c=JSON.parse(JSON.stringify(ed.play.phases[ed.cur]));c.screens=[];ed.play.phases.splice(ed.cur+1,0,c);ed.cur++;ed.mode="move";ed.flash=null;edRender();toast("Step "+(ed.cur+1)+" added")},
+  edDelStep(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();if(ed.play.phases.length<2)return;snapshot();ed.play.phases.splice(ed.cur,1);ed.cur=Math.max(0,ed.cur-1);edRender();toast("Step removed")},
+  edUndo(){if(ed.previewing){stopPlayback();ed.previewing=false}if(!ed.hist.length)return;readEd();const s=JSON.parse(ed.hist.pop());ed.play.phases=s.phases;ed.cur=Math.min(s.cur,s.phases.length-1);ed.play.court=s.court;edRender()},
+  edCourt(d){if(ed.previewing){stopPlayback();ed.previewing=false}if((ed.play.court||"half")===d.v)return;readEd();snapshot();ed.play.court=d.v;ed.play.phases=START[d.v]();ed.cur=0;edRender();toast(d.v==="full"?"Full court. Players reset to a press-break start.":"Half court. Players reset.")},
   edPreview(){readEd();const p=ed.play;if(p.phases.length<2)return;ed.previewing=true;const h=$("#bhint");if(h)h.innerHTML=builderHint();
     animate(p,0,p.phases.length-1,()=>paint(p,pb.t,null,Math.min(Math.floor(pb.t),p.phases.length-2),{editing:true}),()=>setTimeout(()=>{if(!ed)return;ed.previewing=false;edDraw()},500))},
-  async edSave(){readEd();const p=ed.play;if(!p.name.trim()){toast("Give the play a name",true);$("#pe-name").focus();return}if(!p.cat){toast("Pick a category",true);$("#pe-cat").focus();return}if(p.phases.length<2){toast("Add at least one more step so the play moves",true);return}
+  async edSave(){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}readEd();const p=ed.play;if(!p.name.trim()){toast("Give the play a name",true);$("#pe-name").focus();return}if(!p.cat){toast("Pick a category",true);$("#pe-cat").focus();return}if(p.phases.length<2){toast("Add at least one more step so the play moves",true);return}
     const obj={name:p.name.trim().slice(0,80),cat:p.cat,court:p.court||"half",roles:p.roles,notes:(p.notes||"").slice(0,3000),phases:p.phases,author:user.cid,ts:Date.now()};
     const id=ed.isNew?uid("pl"):ed.id;await saveDoc("plays",id,obj);curPlay=id;ed=null;pb.t=0;pb.sel=null;render();toast("Play saved: "+obj.name)},
-  edCancel(){const go=()=>{ed=null;render()};if(ed&&ed.dirty)confirmDiscard(go,"Discard this play?","Your changes to the diagram, roles and notes will be lost.");else go()},
+  edCancel(){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}const go=()=>{ed=null;render()};if(ed&&ed.dirty)confirmDiscard(go,"Discard this play?","Your changes to the diagram, roles and notes will be lost.");else go()},
   async edDelete(d,el){if(!el.dataset.confirm){el.dataset.confirm="1";el.textContent="Tap again to delete";setTimeout(()=>{if(el.isConnected){delete el.dataset.confirm;el.textContent="Delete play"}},3000);return}
     await removeDoc("plays",ed.id);ed=null;curPlay=null;render();toast("Play deleted")}
 };
