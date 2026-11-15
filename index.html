@@ -1437,7 +1437,15 @@ if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then
 /* Helper for Claude to add plays for the coaches (signed in as Coach): CPC.addPlay({name,cat,court,roles,notes,phases}) */
 window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a coach first");if(!o||!String(o.name||"").trim()||!o.cat||!Array.isArray(o.phases)||o.phases.length<2)throw new Error("A play needs a name, a category and at least 2 steps");
   const dup=plays().find(p=>p.name.trim().toLowerCase()===String(o.name).trim().toLowerCase());if(dup)throw new Error("A play named "+dup.name+" already exists");
-  const id=uid("pl");await saveDoc("plays",id,{name:String(o.name).trim().slice(0,80),cat:o.cat,court:o.court==="full"?"full":"half",roles:o.roles||{},notes:String(o.notes||"").slice(0,3000),phases:cleanPhases(o.phases),author:user.cid,ts:Date.now()});render();return id}};
+  const id=uid("pl");await saveDoc("plays",id,{name:String(o.name).trim().slice(0,80),cat:o.cat,court:o.court==="full"?"full":"half",roles:o.roles||{},notes:String(o.notes||"").slice(0,3000),phases:cleanPhases(o.phases),author:user.cid,ts:Date.now()});render();return id},
+  /* CPC.addGames([{date:"YYYY-MM-DD",time,opp:"Opponent name",home:true|false,lg?:bool}]) creates missing opponents; skips dates that already have a game */
+  async addGames(list){if(!user||!isCoach())throw new Error("Sign in as a coach first");const out={added:[],skipped:[]};
+    for(const g of list){if(!/^\d{4}-\d{2}-\d{2}$/.test(g.date||"")||!String(g.opp||"").trim())throw new Error("Bad game: "+JSON.stringify(g));
+      if(games().find(x=>x.date===g.date)){out.skipped.push(g.date);continue}
+      const nm=String(g.opp).trim();let o=opps().find(x=>x.name.trim().toLowerCase()===nm.toLowerCase());
+      if(!o){const oid=uid("o");await saveDoc("opps",oid,{name:nm,city:g.city||"",status:"none",league:!!g.lg,coach:{},keys:[],players:[],last:[]});o={id:oid}}
+      await saveDoc("games",uid("g"),{date:g.date,time:String(g.time||""),opp:o.id,home:!!g.home,lg:!!g.lg});out.added.push(g.date)}
+    render();return out}};
 render();initDb();
 })();
 </script>
