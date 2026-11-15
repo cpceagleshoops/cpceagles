@@ -1434,6 +1434,10 @@ function bindView(r){
 /* ================= Plain website: remove any app install left from earlier versions ================= */
 if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if(window.caches)caches.keys().then(ks=>ks.filter(k=>k.startsWith("eagles-hub")).forEach(k=>caches.delete(k))).catch(()=>{})}
 
+/* Helper for Claude to add plays for the coaches (signed in as Coach): CPC.addPlay({name,cat,court,roles,notes,phases}) */
+window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a coach first");if(!o||!String(o.name||"").trim()||!o.cat||!Array.isArray(o.phases)||o.phases.length<2)throw new Error("A play needs a name, a category and at least 2 steps");
+  const dup=plays().find(p=>p.name.trim().toLowerCase()===String(o.name).trim().toLowerCase());if(dup)throw new Error("A play named "+dup.name+" already exists");
+  const id=uid("pl");await saveDoc("plays",id,{name:String(o.name).trim().slice(0,80),cat:o.cat,court:o.court==="full"?"full":"half",roles:o.roles||{},notes:String(o.notes||"").slice(0,3000),phases:cleanPhases(o.phases),author:user.cid,ts:Date.now()});render();return id}};
 render();initDb();
 })();
 </script>
