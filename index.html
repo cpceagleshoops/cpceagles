@@ -385,7 +385,8 @@ button.bdg{cursor:pointer;font:inherit;font-size:12px}
        posts    {author,text,pinned,ts}
        calls    {cat, name, def}                              terms {cat,name,def}
        plays    {name, cat, court:"half|full", roles, notes, phases:[{pos:{1:[x,y],..},ball,screens,scrFor?,curve?,cap?}]}
-                phases[k].scrFor = {"<screener id>":"<id he screens for>"} (optional; screens[] still lists every screener)
+                phases[k].scrAng = {"<screener id>":degrees} the way his screen faces, set by the coach (optional)
+                phases[k].scrFor = {"<screener id>":"<id he screens for>"} (templates only; used when no scrAng)
                 phases[k].curve  = {"<id>":[cx,cy]} quadratic Bezier control point for that player's path from phases[k-1] (optional; missing = straight)
                 phases[k].cap    = short caption for that step (optional)
        templates {name, desc, court, phases, roles?}  coach-only starting points for the play builder; never shown in the playbook
@@ -984,6 +985,15 @@ function screenFace(play,k,id,tgt){const S=play.phases[k].pos[id];const j=useSeg
     /* face back along the cutter's path, toward where he and his defender come from */
     return[S[0]-cl.t[0]*40,S[1]-cl.t[1]*40]}
   const T=(play.phases[k].pos||{})[tgt]||(play.phases[k-1]&&play.phases[k-1].pos[tgt]);return T||[S[0],S[1]-40]}
+/* Which way a screen faces (unit vector from the screener to his bar).
+   1) the coach's aim (phases[k].scrAng[id], degrees); 2) templates' scrFor target; 3) default:
+   the end of his own path (classic T), or toward the ball if he didn't move. */
+function screenDir(play,k,id){const B=play.phases[k];if(!B||!B.pos[id])return[0,-1];const S=B.pos[id];
+  const g=B.scrAng&&B.scrAng[id];if(typeof g==="number"&&isFinite(g)){const r=g*Math.PI/180;return[Math.cos(r),Math.sin(r)]}
+  const t=B.scrFor&&B.scrFor[id];if(t&&t!==id){const f=screenFace(play,k,id,t);const dx=f[0]-S[0],dy=f[1]-S[1],L=Math.hypot(dx,dy);if(L>1)return[dx/L,dy/L]}
+  const P=k>0?segPath(play,k-1,id):null;if(P){const tx=P.b[0]-P.c[0],ty=P.b[1]-P.c[1],L=Math.hypot(tx,ty);if(L>1)return[tx/L,ty/L];const ux=P.b[0]-P.a[0],uy=P.b[1]-P.a[1],U=Math.hypot(ux,uy)||1;return[ux/U,uy/U]}
+  const A=k>0?play.phases[k-1]:B;const h=A.ball&&A.ball!==id?B.pos[A.ball]:null;if(h){const dx=h[0]-S[0],dy=h[1]-S[1],L=Math.hypot(dx,dy);if(L>1)return[dx/L,dy/L]}return[0,-1]}
+const dirPt=(S,u)=>[S[0]+u[0]*40,S[1]+u[1]*40];
 /* If the cutter's path runs through the screener, bend it so he comes off shoulder to shoulder. */
 function wrapCut(play,k,id,tgt){const j=useSeg(play,k,tgt);if(j<0)return false;const B=play.phases[j+1];if(curveOf(B,tgt))return false;const P=segPath(play,j,tgt);const S=play.phases[k].pos[id];const cl=closestOn(P,S);const want=plR*2+6;if(cl.d>=want)return false;
   const f=clamp(cl.f,.2,.8);let n=[cl.q[0]-S[0],cl.q[1]-S[1]];let nl=Math.hypot(n[0],n[1]);if(nl<1){n=[-cl.t[1],cl.t[0]];nl=1}n=[n[0]/nl,n[1]/nl];
@@ -995,17 +1005,15 @@ function arrowsFor(play,k,sel){
     const tgt=scr&&sf[id]&&sf[id]!==id&&A.pos[sf[id]]?sf[id]:null;
     const op=sel&&sel!==id&&sel!==tgt?.22:1;const drb=A.ball===id&&B.ball===id;const cv=moved?curveOf(B,id):null;
     if(moved){
-      if(cv){const [s,e]=trimQ(a,cv,b,18,scr?(tgt?18:6):20);
+      if(cv){const [s,e]=trimQ(a,cv,b,18,scr?18:20);
         if(drb){const n=Math.max(4,Math.floor(qLen(s,cv,e)/14));let d=`M${s[0]},${s[1]}`;for(let i=1;i<n;i++){const f=i/n,p=bez(s,cv,e,f);const tx=2*(1-f)*(cv[0]-s[0])+2*f*(e[0]-cv[0]),ty=2*(1-f)*(cv[1]-s[1])+2*f*(e[1]-cv[1]);const tl=Math.hypot(tx,ty)||1,ux=tx/tl,uy=ty/tl,o=(i%2?6:-6);d+=` L${p[0]-uy*o},${p[1]+ux*o}`}d+=` L${e[0]},${e[1]}`;out+=`<path d="${d}" fill="none" stroke="#f2e6cf" stroke-width="2.2" marker-end="url(#ah)" opacity="${op}"/>`}
         else out+=`<path d="M${s[0]},${s[1]} Q${cv[0]},${cv[1]} ${e[0]},${e[1]}" fill="none" stroke="#f2e6cf" stroke-width="2.2" ${scr?"":'marker-end="url(#ah)"'} opacity="${op}"/>`;
-        if(scr&&!tgt){const [,e2,q]=trimQ(a,cv,b,18,6);out+=`<line x1="${e2[0]+q[1]*11}" y1="${e2[1]-q[0]*11}" x2="${e2[0]-q[1]*11}" y2="${e2[1]+q[0]*11}" stroke="#f2e6cf" stroke-width="3.5" stroke-linecap="round" opacity="${op}"/>`}}
-      else{const [s,e,ux,uy,L]=shorten(a,b,18,scr?(tgt?18:6):20);
+}
+      else{const [s,e,ux,uy,L]=shorten(a,b,18,scr?18:20);
         if(drb){const n=Math.max(4,Math.floor(L/14));let d=`M${s[0]},${s[1]}`;for(let i=1;i<n;i++){const f=i/n,px=lerp(s[0],e[0],f),py=lerp(s[1],e[1],f),o=(i%2?6:-6);d+=` L${px-uy*o},${py+ux*o}`}d+=` L${e[0]},${e[1]}`;out+=`<path d="${d}" fill="none" stroke="#f2e6cf" stroke-width="2.2" marker-end="url(#ah)" opacity="${op}"/>`}
-        else if(scr&&!tgt)out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="#f2e6cf" stroke-width="2.2" opacity="${op}"/><line x1="${e[0]-uy*11}" y1="${e[1]+ux*11}" x2="${e[0]+uy*11}" y2="${e[1]-ux*11}" stroke="#f2e6cf" stroke-width="3.5" stroke-linecap="round" opacity="${op}"/>`;
         else out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="#f2e6cf" stroke-width="2.2" ${scr?"":'marker-end="url(#ah)"'} opacity="${op}"/>`}}
-    if(tgt)out+=screenBar(b,screenFace(play,k+1,id,tgt),op,false);
-    else if(scr&&!moved){const h=A.ball!==id&&A.pos[A.ball]?A.pos[A.ball]:[b[0],b[1]-40];out+=screenBar(b,h,op,false)}}
-  if(k>=1){const sa=A.scrFor||{};for(const id of (A.screens||[])){const t=sa[id];if(!t||t===id||useSeg(play,k,t)!==k)continue;const op=sel&&sel!==id&&sel!==t?.22:.6;out+=screenBar(A.pos[id],screenFace(play,k,id,t),op,false)}}
+    if(scr)out+=screenBar(b,dirPt(b,screenDir(play,k+1,id)),op,false)}
+  if(k>=1){for(const id of (A.screens||[])){if(!A.pos[id])continue;const a=A.pos[id],b=B.pos[id];const stays=(B.screens||[]).includes(id)&&b&&Math.hypot(b[0]-a[0],b[1]-a[1])<6;if(stays)continue;const op=sel&&sel!==id?.15:.45;out+=screenBar(a,dirPt(a,screenDir(play,k,id)),op,false)}}
   if(A.ball!==B.ball){const a=B.pos[A.ball],b=B.pos[B.ball];const [s,e]=shorten(a,b,18,22);const op=sel&&sel!==A.ball&&sel!==B.ball?.22:1;out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="var(--gold-2)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#ahp)" opacity="${op}"/>`}
   return out;
 }
@@ -1107,8 +1115,9 @@ function miniCourt(t){const f=t.court==="full";const ph=(t.phases||[])[0];if(!ph
 /* drop data that means nothing: straight "curves", screens-for that point nowhere, empty captions */
 function cleanPhases(phs){return JSON.parse(JSON.stringify(phs)).map((ph,k)=>{
   if(ph.cap!=null){const c=String(ph.cap).trim().slice(0,140);if(c)ph.cap=c;else delete ph.cap}
-  if(k===0){delete ph.curve;delete ph.scrFor;return ph}const A=phs[k-1];
+  if(k===0){delete ph.curve;delete ph.scrFor;delete ph.scrAng;return ph}const A=phs[k-1];
   if(ph.curve){for(const id of Object.keys(ph.curve)){const a=A.pos[id],b=ph.pos[id],c=curveOf(ph,id);if(!c||!a||!b||Math.hypot(b[0]-a[0],b[1]-a[1])<6)delete ph.curve[id]}if(!Object.keys(ph.curve).length)delete ph.curve}
+  if(ph.scrAng){for(const id of Object.keys(ph.scrAng)){const g=ph.scrAng[id];if(!(ph.screens||[]).includes(id)||typeof g!=="number"||!isFinite(g))delete ph.scrAng[id];else ph.scrAng[id]=Math.round(g)}if(!Object.keys(ph.scrAng).length)delete ph.scrAng}
   if(ph.scrFor){for(const id of Object.keys(ph.scrFor)){const t=ph.scrFor[id];if(!(ph.screens||[]).includes(id)||!IDS.includes(t)||t===id)delete ph.scrFor[id]}if(!Object.keys(ph.scrFor).length)delete ph.scrFor}
   return ph})}
 function builderHint(){
@@ -1117,16 +1126,15 @@ function builderHint(){
   if(ed.mode==="move")return ed.cur===0?"<b>Step 1 · Starting spots.</b> Drag each player to where they line up. Then tap <b>+ Add step</b>.":`<b>Step ${ed.cur+1}.</b> Drag players to where they end up. Faded circles show where they were. Drag a gold dot to curve a path; double-tap it to straighten.`;
   if(ed.mode==="pass")return ed.cur===0?`<b>Who starts with the ball?</b> Tap a player. (Now: ${ph.ball})`:`<b>Pass in step ${ed.cur+1}.</b> Tap the player who catches it. Currently ${ph.ball} has the ball.`;
   if(ed.cur===0)return "Screens happen in a later step. Add a step first.";
-  if(ed.scrPick)return `<b>${ed.scrPick} is screening.</b> Now tap the teammate he screens for, or tap ${ed.scrPick} again for a screen with no target.`;
-  const sc=ph.screens||[],sf=ph.scrFor||{};
-  return `<b>Screens in step ${ed.cur+1}.</b> First move the screener to his spot (Move tool). Then tap him, then the teammate he screens for. The teammate can cut in this step or the next one, and the screen turns to face his cut. Tap a marked screener to remove it.${sc.length?" Now: "+sc.map(id=>sf[id]?id+" for "+sf[id]:id).join(", ")+".":""}`;
+  const sc=ph.screens||[];
+  return `<b>Screens in step ${ed.cur+1}.</b> Drag a player to where he sets the screen. Then drag the gold dot to aim it (double-tap the dot to reset). Tap a screener to remove his screen.${sc.length?" Screening now: "+sc.join(", ")+".":""}`;
 }
 function builderView(){
   const p=ed.play;const N=p.phases.length;const cats=["Half court","Out of bounds","Press break","Transition","Defense","Special situations"];const cap=(p.phases[ed.cur]||{}).cap||"";
   const pv=ed.previewing?`<div class="pvbar" role="group" aria-label="Preview controls"><button class="btn gold icon" type="button" id="edpvplay" data-act="edPvPlay" aria-label="Play or pause">${PLAY}</button><span class="stepl" id="edstepl">Step 1 of ${N}</span><input type="range" id="edscrub" min="0" max="${N-1}" step="0.01" value="${pb.t}" aria-label="Scrub through the preview">${speedSeg()}<button class="btn sm" type="button" data-act="edPvStop">Back to editing</button></div>`:"";
   return `<div class="stage ${isFull(p)?"wide":""}"><div class="builder"><div class="courtbox">${playSVG(p,ed.mode)}</div>${pv}
    <div class="bhint" id="bhint">${builderHint()}</div>
-   <div class="tools" role="group" aria-label="Tool">${[["move","Move","Drag players"],["pass","Pass","Tap the receiver"],["screen","Screen","Screener, then target"]].map(([k,l,s])=>`<button class="tool ${ed.mode===k?"on":""}" data-act="edTool" data-v="${k}" aria-pressed="${ed.mode===k}">${TOOL_IC[k]}${l}<small>${s}</small></button>`).join("")}</div>
+   <div class="tools" role="group" aria-label="Tool">${[["move","Move","Drag players"],["pass","Pass","Tap the receiver"],["screen","Screen","Drag, then aim"]].map(([k,l,s])=>`<button class="tool ${ed.mode===k?"on":""}" data-act="edTool" data-v="${k}" aria-pressed="${ed.mode===k}">${TOOL_IC[k]}${l}<small>${s}</small></button>`).join("")}</div>
    <div class="steps"><span class="small muted" style="font-weight:700">STEPS</span>${p.phases.map((_,i)=>`<button class="btn sm stepbtn ${i===ed.cur?"on":""}" data-act="edStep" data-v="${i}">${i+1}</button>`).join("")}<button class="btn sm gold" data-act="edAdd">${PLUS} Add step</button>${N>1?`<button class="btn sm" data-act="edDelStep">Remove step ${ed.cur+1}</button>`:""}<span style="flex:1"></span>${ed.previewing?"":`<button class="btn sm" data-act="edPreview" ${N<2?"disabled":""}>${PLAY} Preview</button>`}<button class="btn sm" data-act="edUndo" ${ed.hist.length?"":"disabled"}>Undo</button></div>
    <label class="f" for="pe-cap">Step ${ed.cur+1} caption (optional)<input type="text" id="pe-cap" maxlength="140" value="${esc(cap)}" autocomplete="off"></label></div>
    <div class="card"><form class="form" id="playform" onsubmit="return false">
@@ -1143,9 +1151,12 @@ function readEd(){const p=ed.play;const f=s=>$(s);if(!f("#pe-name"))return;p.nam
 function edRender(){readEd();$("#main").innerHTML=playbookView();bindPlaybook()}
 function endPreview(){if(ed&&ed.previewing){stopPlayback();ed.previewing=false;return true}return false}
 function edPaintPV(){const p=ed.play;const N=p.phases.length;paint(p,pb.t,null,viewerSeg(p),{editing:true});const g=$("#bends");if(g)g.innerHTML="";const r=$("#edscrub");if(r)r.value=pb.t;const st=$("#edstepl");if(st)st.textContent=`Step ${Math.min(N,Math.floor(pb.t+1e-6)+1)} of ${N}`;const b=$("#edpvplay");if(b)b.innerHTML=pb.playing?PAUSE:(pb.t>=N-1-1e-6?REPLAY:PLAY)}
-function edDraw(){if(ed.previewing){edPaintPV();return}const p=ed.play;paint(p,ed.cur,null,ed.cur-1,{editing:true,highlight:ed.scrPick||ed.flash,ghostStep:ed.cur>0?ed.cur-1:null});drawBends();const h=$("#bhint");if(h)h.innerHTML=builderHint()}
+function edDraw(){if(ed.previewing){edPaintPV();return}const p=ed.play;paint(p,ed.cur,null,ed.cur-1,{editing:true,highlight:ed.flash,ghostStep:ed.cur>0?ed.cur-1:null});drawBends();const h=$("#bhint");if(h)h.innerHTML=builderHint()}
 /* gold bend handles: one per player who moved in this step (Move mode, step 2+) */
-function drawBends(){const g=$("#bends");if(!g)return;const svg=$("#court");if(!ed||ed.previewing||ed.mode!=="move"||ed.cur<1){g.innerHTML="";return}
+function drawBends(){const g=$("#bends");if(!g)return;const svg=$("#court");if(!ed||ed.previewing||ed.cur<1||(ed.mode!=="move"&&ed.mode!=="screen")){g.innerHTML="";return}
+  if(ed.mode==="screen"){const m=svg.getScreenCTM();const sc=m&&m.a?Math.abs(m.a):1;const hit=Math.max(16,17/sc),vis=Math.max(7,7.5/sc);const B=ed.play.phases[ed.cur];
+    g.innerHTML=(B.screens||[]).map(id=>{const S=B.pos[id];if(!S)return"";const u=screenDir(ed.play,ed.cur,id);const r=plR+30;const h=[S[0]+u[0]*r,S[1]+u[1]*r];
+      return `<line x1="${S[0]+u[0]*(plR+6)}" y1="${S[1]+u[1]*(plR+6)}" x2="${h[0]}" y2="${h[1]}" stroke="#d6c299" stroke-width="${Math.max(1.5,1.5/sc)}" stroke-dasharray="3 3" pointer-events="none"/><g class="aim" data-aim="${id}" transform="translate(${h[0]},${h[1]})" role="button" aria-label="Aim ${id}'s screen"><circle r="${hit}" fill="transparent"/><circle r="${vis}" fill="#d6c299" stroke="#0a1420" stroke-width="${Math.max(1.5,1.5/sc)}"/><path d="M${-vis*.45},0 L${vis*.45},0" stroke="#0a1420" stroke-width="${Math.max(1.5,1.5/sc)}"/></g>`}).join("");return}
   const m=svg.getScreenCTM();const sc=m&&m.a?Math.abs(m.a):1;const hit=Math.max(16,17/sc),vis=Math.max(6,6.5/sc);const A=ed.play.phases[ed.cur-1],B=ed.play.phases[ed.cur];
   g.innerHTML=IDS.map(id=>{const a=A.pos[id],b=B.pos[id];if(!a||!b||Math.hypot(b[0]-a[0],b[1]-a[1])<40)return"";const c=curveOf(B,id);const h=c?bez(a,c,b,.5):mid(a,b);
     return `<g class="bend" data-bend="${id}" transform="translate(${h[0]},${h[1]})" role="button" aria-label="Curve ${id}'s path"><circle r="${hit}" fill="transparent"/><circle r="${vis}" fill="${c?"#d6c299":"#ab8c59"}" stroke="#0a1420" stroke-width="${Math.max(1.5,1.5/sc)}"/></g>`}).join("")}
@@ -1166,26 +1177,31 @@ function bindPlaybook(){
       if(ed.mode==="move"){snapshot();drag={id,moved:false};g.setPointerCapture(e.pointerId);ed.flash=id;edDraw();return}
       if(ed.mode==="pass"){if(ph.ball===id){toast(id+" already has the ball");return}snapshot();ph.ball=id;
         ed.flash=id;edRender();toast(ed.cur===0?id+" starts with the ball":"Pass to "+id+" in step "+(ed.cur+1));return}
-      if(ed.mode==="screen"){if(ed.cur===0){toast("Add a step first, then mark screens",true);return}
-        const scr=ph.screens=ph.screens||[];const st=ed.cur+1;
-        if(!ed.scrPick){if(scr.includes(id)){snapshot();scr.splice(scr.indexOf(id),1);if(ph.scrFor){delete ph.scrFor[id];if(!Object.keys(ph.scrFor).length)delete ph.scrFor}ed.flash=id;edRender();toast(id+" is no longer screening");return}
-          ed.scrPick=id;ed.flash=id;edDraw();return}
-        const s0=ed.scrPick;ed.scrPick=null;snapshot();if(!scr.includes(s0))scr.push(s0);
-        if(id===s0){if(ph.scrFor){delete ph.scrFor[s0];if(!Object.keys(ph.scrFor).length)delete ph.scrFor}ed.flash=s0;edRender();toast(s0+" sets a screen in step "+st);return}
-        ph.scrFor=ph.scrFor||{};ph.scrFor[s0]=id;const wr=wrapCut(ed.play,ed.cur,s0,id);ed.flash=s0;edRender();toast(s0+" screens for "+id+" in step "+st+(wr?". "+id+"'s cut now curves around the screen.":""))}};
+      if(ed.mode==="screen"){if(ed.cur===0){toast("Add a step first, then set screens",true);return}snapshot();drag={id,moved:false,scr:true};g.setPointerCapture(e.pointerId);ed.flash=id;edDraw()}};
     g.onpointermove=e=>{if(!drag||drag.id!==g.dataset.p)return;const pt=svgPoint(svg,e);const B=BOUNDS(ed.play);drag.moved=true;setPos(drag.id,[Math.round(clamp(pt.x,B.x0,B.x1)),Math.round(clamp(pt.y,B.y0,B.y1))]);edDraw()};
-    g.onpointerup=g.onpointercancel=()=>{if(drag&&drag.id){if(!drag.moved)ed.hist.pop();drag=null;edRender()}};
+    g.onpointerup=g.onpointercancel=()=>{if(!(drag&&drag.id))return;const d=drag;drag=null;
+      if(d.scr){const ph=ed.play.phases[ed.cur];const scr=ph.screens=ph.screens||[];const on=scr.includes(d.id);
+        if(!d.moved&&on){scr.splice(scr.indexOf(d.id),1);for(const k of ["scrAng","scrFor"])if(ph[k]){delete ph[k][d.id];if(!Object.keys(ph[k]).length)delete ph[k]}edRender();toast(d.id+" is no longer screening");return}
+        if(!on){scr.push(d.id);edRender();toast(d.id+" sets a screen in step "+(ed.cur+1)+". Drag the gold dot to aim it.");return}
+        edRender();return}
+      if(!d.moved)ed.hist.pop();edRender()};
     g.onkeydown=e=>{const m={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];if(!m||ed.mode!=="move"||ed.previewing)return;e.preventDefault();const id=g.dataset.p;if(!ed.kbBurst||ed.kbBurst.id!==id){snapshot();ed.kbBurst={id}}clearTimeout(ed.kbT);ed.kbT=setTimeout(()=>{if(ed)ed.kbBurst=null},700);const p=ed.play.phases[ed.cur].pos[id];const B=BOUNDS(ed.play);setPos(id,[clamp(p[0]+m[0],B.x0,B.x1),clamp(p[1]+m[1],B.y0,B.y1)]);ed.flash=id;edDraw()};
   });
   /* bend handles: pointer captured on the svg so the handle can be redrawn while dragging */
   const bends=$("#bends");
-  if(bends){bends.onpointerdown=e=>{const h=e.target.closest(".bend");if(!h||ed.previewing)return;e.preventDefault();e.stopPropagation();const id=h.dataset.bend;const now=Date.now();const lt=ed.lastBend;
+  if(bends){bends.onpointerdown=e=>{const am=e.target.closest(".aim");if(am&&!ed.previewing){e.preventDefault();e.stopPropagation();const id=am.dataset.aim;const now=Date.now();const lt=ed.lastAim;
+        if(lt&&lt.id===id&&now-lt.t<400){ed.lastAim=null;const B=ed.play.phases[ed.cur];if(B.scrAng&&id in B.scrAng){snapshot();delete B.scrAng[id];if(!Object.keys(B.scrAng).length)delete B.scrAng;edRender();toast(id+"'s screen is back to its default angle")}return}
+        ed.lastAim={id,t:now};snapshot();drag={aim:id,moved:false};try{svg.setPointerCapture(e.pointerId)}catch(err){}return}
+      const h=e.target.closest(".bend");if(!h||ed.previewing)return;e.preventDefault();e.stopPropagation();const id=h.dataset.bend;const now=Date.now();const lt=ed.lastBend;
       if(lt&&lt.id===id&&now-lt.t<400){ed.lastBend=null;const B=ed.play.phases[ed.cur];if(curveOf(B,id)){snapshot();delete B.curve[id];if(!Object.keys(B.curve).length)delete B.curve;edRender();toast(id+"'s path is straight again")}return}
       ed.lastBend={id,t:now};snapshot();drag={bend:id,moved:false};try{svg.setPointerCapture(e.pointerId)}catch(err){}};
-    svg.onpointermove=e=>{if(!drag||!drag.bend)return;const id=drag.bend;const A=ed.play.phases[ed.cur-1],B=ed.play.phases[ed.cur];const a=A.pos[id],b=B.pos[id];const pt=svgPoint(svg,e);const bd=BOUNDS(ed.play);const M=[clamp(pt.x,bd.x0,bd.x1),clamp(pt.y,bd.y0,bd.y1)];const m0=mid(a,b);
+    svg.onpointermove=e=>{if(drag&&drag.aim){const id=drag.aim;const B=ed.play.phases[ed.cur];const S=B.pos[id];const pt=svgPoint(svg,e);const dx=pt.x-S[0],dy=pt.y-S[1];if(Math.hypot(dx,dy)<8)return;drag.moved=true;ed.lastAim=null;
+        let deg=Math.round(Math.atan2(dy,dx)*180/Math.PI/5)*5;B.scrAng=B.scrAng||{};B.scrAng[id]=deg;if(B.scrFor){delete B.scrFor[id];if(!Object.keys(B.scrFor).length)delete B.scrFor}edDraw();return}
+      if(!drag||!drag.bend)return;const id=drag.bend;const A=ed.play.phases[ed.cur-1],B=ed.play.phases[ed.cur];const a=A.pos[id],b=B.pos[id];const pt=svgPoint(svg,e);const bd=BOUNDS(ed.play);const M=[clamp(pt.x,bd.x0,bd.x1),clamp(pt.y,bd.y0,bd.y1)];const m0=mid(a,b);
       if(!drag.moved&&Math.hypot(M[0]-bez(a,curveOf(B,id)||m0,b,.5)[0],M[1]-bez(a,curveOf(B,id)||m0,b,.5)[1])<3)return;drag.moved=true;ed.lastBend=null;
       const c=[Math.round(2*M[0]-m0[0]),Math.round(2*M[1]-m0[1])];B.curve=B.curve||{};if(Math.hypot(c[0]-m0[0],c[1]-m0[1])<4)delete B.curve[id];else B.curve[id]=c;edDraw()};
-    svg.onpointerup=svg.onpointercancel=()=>{if(!drag||!drag.bend)return;const moved=drag.moved;drag=null;if(!moved){ed.hist.pop();return}const B=ed.play.phases[ed.cur];if(B.curve&&!Object.keys(B.curve).length)delete B.curve;edRender()};
+    svg.onpointerup=svg.onpointercancel=()=>{if(drag&&drag.aim){const moved=drag.moved;drag=null;if(!moved){ed.hist.pop();return}edRender();return}
+      if(!drag||!drag.bend)return;const moved=drag.moved;drag=null;if(!moved){ed.hist.pop();return}const B=ed.play.phases[ed.cur];if(B.curve&&!Object.keys(B.curve).length)delete B.curve;edRender()};
     bends.ondblclick=e=>e.preventDefault()}
   $$("#playform input,#playform textarea,#playform select").forEach(el=>el.addEventListener("input",()=>{ed.dirty=true}));
   {const cp=$("#pe-cap");if(cp)cp.addEventListener("focus",()=>{if(endPreview()){edRender();const n=$("#pe-cap");if(n)n.focus()}})}
@@ -1261,7 +1277,7 @@ const ACT={
   editPlay(d){stopPlayback();const p=JSON.parse(JSON.stringify(get("plays",d.id)));p.roles=p.roles||{};ed={play:p,cur:0,mode:"move",isNew:false,id:d.id,hist:[],rolesOpen:false,scrPick:null};render();window.scrollTo({top:0})},
   edTool(d){endPreview();readEd();ed.mode=d.v;ed.flash=null;ed.scrPick=null;edRender()},
   edStep(d){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}readEd();ed.cur=+d.v;ed.flash=null;ed.scrPick=null;edRender()},
-  edAdd(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();snapshot();const c=JSON.parse(JSON.stringify(ed.play.phases[ed.cur]));c.screens=[];delete c.scrFor;delete c.curve;delete c.cap;ed.scrPick=null;ed.play.phases.splice(ed.cur+1,0,c);ed.cur++;ed.mode="move";ed.flash=null;edRender();toast("Step "+(ed.cur+1)+" added")},
+  edAdd(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();snapshot();const c=JSON.parse(JSON.stringify(ed.play.phases[ed.cur]));c.screens=[];delete c.scrFor;delete c.scrAng;delete c.curve;delete c.cap;ed.scrPick=null;ed.play.phases.splice(ed.cur+1,0,c);ed.cur++;ed.mode="move";ed.flash=null;edRender();toast("Step "+(ed.cur+1)+" added")},
   edDelStep(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();ed.scrPick=null;if(ed.play.phases.length<2)return;snapshot();ed.play.phases.splice(ed.cur,1);{const nx=ed.play.phases[ed.cur];if(nx&&ed.cur>0){delete nx.curve}}ed.cur=Math.max(0,ed.cur-1);edRender();toast("Step removed")},
   edUndo(){if(ed.previewing){stopPlayback();ed.previewing=false}if(!ed.hist.length)return;readEd();ed.scrPick=null;const s=JSON.parse(ed.hist.pop());ed.play.phases=s.phases;ed.cur=Math.min(s.cur,s.phases.length-1);ed.play.court=s.court;edRender()},
   edCourt(d){const was=endPreview();if((ed.play.court||"half")===d.v){if(was)edRender();return}readEd();ed.scrPick=null;snapshot();ed.play.court=d.v;ed.play.phases=START[d.v]();ed.cur=0;edRender();toast(d.v==="full"?"Full court. Players reset to a press-break start.":"Half court. Players reset.")},
