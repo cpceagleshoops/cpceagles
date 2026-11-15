@@ -266,6 +266,20 @@ input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);bo
 .steps{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
 .stepbtn{min-width:40px}
 .stepbtn.on{background:var(--gold);color:#101a27;border-color:var(--gold)}
+.court .bend{cursor:grab;touch-action:none}
+.pbcap{margin-top:8px;padding:8px 12px;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);font-size:13.5px;color:#e3e9f0;min-height:20px}
+.pbcap[hidden]{display:none}
+.pvbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:8px 10px;border-radius:12px;border:1px solid rgba(194,176,138,.45);background:var(--gold-bg)}
+.pvbar input[type=range]{flex:1;min-width:110px;accent-color:var(--gold)}
+@media (max-width:820px){.controls input[type=range],.pvbar input[type=range]{height:36px}}
+.tplgroup{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:6px 0 2px}
+.tplitem{display:flex;gap:6px;align-items:center}
+.tplrow{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;flex:1;min-width:0;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);text-align:left;cursor:pointer;color:inherit;font:inherit;min-height:56px}
+.tplrow:hover,.tplrow:focus-visible{border-color:var(--gold)}
+.tplrow b{display:block;font-size:14px}
+.tplrow span{display:block;font-size:12.5px;color:var(--muted);line-height:1.35}
+.mini{width:64px;height:auto;display:block;background:var(--court);border-radius:6px;border:1px solid var(--line)}
+.mini.full{width:96px}
 .bhint{background:var(--surface-2);border:1px dashed rgba(194,176,138,.35);border-radius:10px;padding:9px 12px;font-size:13px;color:#d9e1ea}
 
 .shotwrap{background:var(--court);border:1px solid var(--line);border-radius:12px;padding:8px}
@@ -370,7 +384,11 @@ button.bdg{cursor:pointer;font:inherit;font-size:12px}
        notes    {opp, author, vis:"coach|team", text, ts}    clips {opp,label,t,url,author}
        posts    {author,text,pinned,ts}
        calls    {cat, name, def}                              terms {cat,name,def}
-       plays    {name, cat, court:"half|full", roles, notes, phases:[{pos:{1:[x,y],..},ball,screens}]}
+       plays    {name, cat, court:"half|full", roles, notes, phases:[{pos:{1:[x,y],..},ball,screens,scrFor?,curve?,cap?}]}
+                phases[k].scrFor = {"<screener id>":"<id he screens for>"} (optional; screens[] still lists every screener)
+                phases[k].curve  = {"<id>":[cx,cy]} quadratic Bezier control point for that player's path from phases[k-1] (optional; missing = straight)
+                phases[k].cap    = short caption for that step (optional)
+       templates {name, desc, court, phases, roles?}  coach-only starting points for the play builder; never shown in the playbook
        stand    {lw, ll, w, l}  id = opps id or "cpc"          lres  {date,a,as,b,bs}
        statgames {lines:[{id:<player id>,min,pts,reb,ast,stl,blk,to,fgm,fga,tpm,tpa,ftm,fta}],by,ts}  id = game date
        badges   {name, stat, min, on, desc}                   awards {pid,name,note,by,ts}
@@ -443,7 +461,7 @@ const DEF={
   ["Analytics","eFG%","Effective field goal %. (FGM + 0.5 × 3PM) ÷ FGA. Gives extra credit for 3s."],
   ["Analytics","TS%","True shooting %. Points ÷ (2 × (FGA + 0.44 × FTA)). Counts 2s, 3s and free throws together."]
  ].map(([cat,name,def],i)=>({id:"t"+i,cat,name,def})),
- stand:[],lres:[],plays:[],statgames:[],badges:[],awards:[],accounts:[]
+ stand:[],lres:[],plays:[],templates:[],statgames:[],badges:[],awards:[],accounts:[]
 };
 const COLLS=Object.keys(DEF);
 const DEFMAP={};COLLS.forEach(c=>{DEFMAP[c]={};DEF[c].forEach(x=>DEFMAP[c][x.id]=x)});
@@ -922,11 +940,18 @@ function glossaryView(){
 
 /* ================= Playbook: court drawing & animation ================= */
 const plays=()=>items("plays");
-let curPlay=null;let pb={t:0,playing:false,sel:null,speed:1,raf:0,last:0,seg:-2};let ed=null;let drag=null;
+const SPEEDS={slow:.5,normal:1,fast:1.8};const SPEED_KEY="cpc_pb_speed";const STEP_SECONDS=2.2;
+const savedSpeed=(()=>{try{const v=localStorage.getItem(SPEED_KEY);return SPEEDS[v]?v:"normal"}catch(e){return"normal"}})();
+let curPlay=null;let pb={t:0,playing:false,sel:null,speed:SPEEDS[savedSpeed],speedKey:savedSpeed,raf:0,last:0,seg:-2};let ed=null;let drag=null;
 const lerp=(a,b,f)=>a+(b-a)*f;const ease=f=>f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2;const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const isFull=p=>p.court==="full";
 const BOUNDS=p=>isFull(p)?{x0:-32,x1:972,y0:12,y1:488}:{x0:12,x1:488,y0:-32,y1:458};
-function posAt(play,t,id){const ph=play.phases||[];const N=ph.length;if(!N)return[0,0];const at=i=>(ph[i]&&ph[i].pos&&ph[i].pos[id])||[0,0];if(N===1)return at(0);const k=clamp(Math.floor(t)||0,0,N-2);const f=ease(clamp(t-k,0,1));const a=at(k),b=at(k+1);return[lerp(a[0],b[0],f),lerp(a[1],b[1],f)]}
+const IDS=["1","2","3","4","5"];
+/* Curved paths: phases[k+1].curve[id] = quadratic Bezier control point for id's path phases[k] -> phases[k+1] */
+function curveOf(B,id){const c=B&&B.curve&&B.curve[id];return Array.isArray(c)&&c.length===2&&isFinite(c[0])&&isFinite(c[1])?c:null}
+function bez(a,c,b,f){const u=1-f;return[u*u*a[0]+2*u*f*c[0]+f*f*b[0],u*u*a[1]+2*u*f*c[1]+f*f*b[1]]}
+const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
+function posAt(play,t,id){const ph=play.phases||[];const N=ph.length;if(!N)return[0,0];const at=i=>(ph[i]&&ph[i].pos&&ph[i].pos[id])||[0,0];if(N===1)return at(0);const k=clamp(Math.floor(t)||0,0,N-2);const f=ease(clamp(t-k,0,1));const a=at(k),b=at(k+1);const c=curveOf(ph[k+1],id);if(c)return bez(a,c,b,f);return[lerp(a[0],b[0],f),lerp(a[1],b[1],f)]}
 function ballAt(play,t){const N=play.phases.length;if(N===1)return posAt(play,0,play.phases[0].ball);const k=Math.min(Math.floor(t),N-2);const hA=play.phases[k].ball,hB=play.phases[k+1].ball;if(hA===hB)return posAt(play,t,hA);const g=ease(clamp((t-k-.4)/.6,0,1));const a=posAt(play,t,hA),b=posAt(play,t,hB);return[lerp(a[0],b[0],g),lerp(a[1],b[1],g)]}
 function halfCourtLines(){const L="var(--court-line)";return `<rect x="0" y="0" width="500" height="470" fill="none" stroke="${L}" stroke-width="2"/><rect x="170" y="0" width="160" height="190" fill="var(--court-paint)" stroke="${L}" stroke-width="2"/><path d="M190 190 A60 60 0 0 0 310 190" fill="none" stroke="${L}" stroke-width="2"/><path d="M190 190 A60 60 0 0 1 310 190" fill="none" stroke="${L}" stroke-width="2" stroke-dasharray="7 7"/><path d="M52.5 0 L52.5 52.5 A197.5 197.5 0 0 0 447.5 52.5 L447.5 0" fill="none" stroke="${L}" stroke-width="2"/><path d="M210 52.5 A40 40 0 0 0 290 52.5" fill="none" stroke="${L}" stroke-width="1.5"/><line x1="220" y1="40" x2="280" y2="40" stroke="#e7ecf2" stroke-width="3"/><circle cx="250" cy="52.5" r="7.5" fill="none" stroke="#e07a2f" stroke-width="2.5"/><path d="M190 470 A60 60 0 0 1 310 470" fill="none" stroke="${L}" stroke-width="2"/>`}
 function courtSVG(full){
@@ -939,13 +964,31 @@ function courtSVG(full){
   <text x="880" y="490" text-anchor="end" font-size="12" fill="rgba(194,176,138,.6)" font-family="Manrope,sans-serif" letter-spacing="2">ATTACKING →</text>`;
 }
 function shorten(a,b,r1,r2){const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1;return[[a[0]+dx/L*r1,a[1]+dy/L*r1],[b[0]-dx/L*r2,b[1]-dy/L*r2],dx/L,dy/L,L]}
+/* trim a quadratic path at both ends along its end tangents */
+function trimQ(a,c,b,r1,r2){const d1=Math.hypot(c[0]-a[0],c[1]-a[1]),d2=Math.hypot(b[0]-c[0],b[1]-c[1]);const ua=d1>1?[(c[0]-a[0])/d1,(c[1]-a[1])/d1]:null,ub=d2>1?[(b[0]-c[0])/d2,(b[1]-c[1])/d2]:null;const L=Math.hypot(b[0]-a[0],b[1]-a[1])||1,u=[(b[0]-a[0])/L,(b[1]-a[1])/L];const p=ua||u,q=ub||u;return[[a[0]+p[0]*r1,a[1]+p[1]*r1],[b[0]-q[0]*r2,b[1]-q[1]*r2],q]}
+function qLen(a,c,b){let L=0,p=a;for(let i=1;i<=12;i++){const n=bez(a,c,b,i/12);L+=Math.hypot(n[0]-p[0],n[1]-p[1]);p=n}return L}
+let plR=17;/* drawn player radius (bigger in the phone builder); the screen bar sits just outside it */
+function screenBar(at,toward,op,connect){/* T-bar just outside the screener, facing the player he screens for, plus a faint dotted line toward that player */
+  const dx=toward[0]-at[0],dy=toward[1]-at[1],L=Math.hypot(dx,dy);const u=L>1?[dx/L,dy/L]:[0,-1];const off=plR+5;const c=[at[0]+u[0]*off,at[1]+u[1]*off];
+  let o=`<line x1="${c[0]-u[1]*12}" y1="${c[1]+u[0]*12}" x2="${c[0]+u[1]*12}" y2="${c[1]-u[0]*12}" stroke="#f2e6cf" stroke-width="3.5" stroke-linecap="round" opacity="${op}"/>`;
+  if(connect&&L>off+26)o+=`<line x1="${c[0]+u[0]*5}" y1="${c[1]+u[1]*5}" x2="${toward[0]-u[0]*20}" y2="${toward[1]-u[1]*20}" stroke="#f2e6cf" stroke-width="1.6" stroke-dasharray="2 5" stroke-linecap="round" opacity="${op*.5}"/>`;
+  return o}
 function arrowsFor(play,k,sel){
-  if(k<0||k>=play.phases.length-1)return"";const A=play.phases[k],B=play.phases[k+1];let out="";
-  for(const id of ["1","2","3","4","5"]){const a=A.pos[id],b=B.pos[id];if(Math.hypot(b[0]-a[0],b[1]-a[1])<6)continue;
-    const op=sel&&sel!==id?.22:1;const scr=(B.screens||[]).includes(id);const drb=A.ball===id&&B.ball===id;const [s,e,ux,uy,L]=shorten(a,b,18,scr?6:20);
-    if(drb){const n=Math.max(4,Math.floor(L/14));let d=`M${s[0]},${s[1]}`;for(let i=1;i<n;i++){const f=i/n,px=lerp(s[0],e[0],f),py=lerp(s[1],e[1],f),o=(i%2?6:-6);d+=` L${px-uy*o},${py+ux*o}`}d+=` L${e[0]},${e[1]}`;out+=`<path d="${d}" fill="none" stroke="#f2e6cf" stroke-width="2.2" marker-end="url(#ah)" opacity="${op}"/>`}
-    else if(scr)out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="#f2e6cf" stroke-width="2.2" opacity="${op}"/><line x1="${e[0]-uy*11}" y1="${e[1]+ux*11}" x2="${e[0]+uy*11}" y2="${e[1]-ux*11}" stroke="#f2e6cf" stroke-width="3.5" stroke-linecap="round" opacity="${op}"/>`;
-    else out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="#f2e6cf" stroke-width="2.2" marker-end="url(#ah)" opacity="${op}"/>`}
+  if(k<0||k>=play.phases.length-1)return"";const A=play.phases[k],B=play.phases[k+1];let out="";const sf=B.scrFor||{};
+  for(const id of IDS){const a=A.pos[id],b=B.pos[id];if(!a||!b)continue;const moved=Math.hypot(b[0]-a[0],b[1]-a[1])>=6;const scr=(B.screens||[]).includes(id);if(!moved&&!scr)continue;
+    const tgt=scr&&sf[id]&&sf[id]!==id&&A.pos[sf[id]]?sf[id]:null;
+    const op=sel&&sel!==id&&sel!==tgt?.22:1;const drb=A.ball===id&&B.ball===id;const cv=moved?curveOf(B,id):null;
+    if(moved){
+      if(cv){const [s,e]=trimQ(a,cv,b,18,scr?(tgt?18:6):20);
+        if(drb){const n=Math.max(4,Math.floor(qLen(s,cv,e)/14));let d=`M${s[0]},${s[1]}`;for(let i=1;i<n;i++){const f=i/n,p=bez(s,cv,e,f);const tx=2*(1-f)*(cv[0]-s[0])+2*f*(e[0]-cv[0]),ty=2*(1-f)*(cv[1]-s[1])+2*f*(e[1]-cv[1]);const tl=Math.hypot(tx,ty)||1,ux=tx/tl,uy=ty/tl,o=(i%2?6:-6);d+=` L${p[0]-uy*o},${p[1]+ux*o}`}d+=` L${e[0]},${e[1]}`;out+=`<path d="${d}" fill="none" stroke="#f2e6cf" stroke-width="2.2" marker-end="url(#ah)" opacity="${op}"/>`}
+        else out+=`<path d="M${s[0]},${s[1]} Q${cv[0]},${cv[1]} ${e[0]},${e[1]}" fill="none" stroke="#f2e6cf" stroke-width="2.2" ${scr?"":'marker-end="url(#ah)"'} opacity="${op}"/>`;
+        if(scr&&!tgt){const [,e2,q]=trimQ(a,cv,b,18,6);out+=`<line x1="${e2[0]+q[1]*11}" y1="${e2[1]-q[0]*11}" x2="${e2[0]-q[1]*11}" y2="${e2[1]+q[0]*11}" stroke="#f2e6cf" stroke-width="3.5" stroke-linecap="round" opacity="${op}"/>`}}
+      else{const [s,e,ux,uy,L]=shorten(a,b,18,scr?(tgt?18:6):20);
+        if(drb){const n=Math.max(4,Math.floor(L/14));let d=`M${s[0]},${s[1]}`;for(let i=1;i<n;i++){const f=i/n,px=lerp(s[0],e[0],f),py=lerp(s[1],e[1],f),o=(i%2?6:-6);d+=` L${px-uy*o},${py+ux*o}`}d+=` L${e[0]},${e[1]}`;out+=`<path d="${d}" fill="none" stroke="#f2e6cf" stroke-width="2.2" marker-end="url(#ah)" opacity="${op}"/>`}
+        else if(scr&&!tgt)out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="#f2e6cf" stroke-width="2.2" opacity="${op}"/><line x1="${e[0]-uy*11}" y1="${e[1]+ux*11}" x2="${e[0]+uy*11}" y2="${e[1]-ux*11}" stroke="#f2e6cf" stroke-width="3.5" stroke-linecap="round" opacity="${op}"/>`;
+        else out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="#f2e6cf" stroke-width="2.2" ${scr?"":'marker-end="url(#ah)"'} opacity="${op}"/>`}}
+    if(tgt)out+=screenBar(b,A.pos[tgt],op,true);
+    else if(scr&&!moved){const h=A.ball!==id&&A.pos[A.ball]?A.pos[A.ball]:[b[0],b[1]-40];out+=screenBar(b,h,op,false)}}
   if(A.ball!==B.ball){const a=B.pos[A.ball],b=B.pos[B.ball];const [s,e]=shorten(a,b,18,22);const op=sel&&sel!==A.ball&&sel!==B.ball?.22:1;out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="var(--gold-2)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#ahp)" opacity="${op}"/>`}
   return out;
 }
@@ -953,9 +996,9 @@ function playSVG(play,mode){
   return `<svg class="court ${mode?"mode-"+mode:""}" id="court" viewBox="${isFull(play)?"-40 0 1020 500":"0 -40 500 510"}" role="img" aria-label="Play diagram: ${esc(play.name||"New play")}">
   <defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f2e6cf"/></marker><marker id="ahp" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c2b08a"/></marker></defs>
   ${courtSVG(isFull(play))}<g id="ghosts"></g><g id="arrows"></g>
-  ${(()=>{const big=window.innerWidth<=820&&mode;const k=big?(isFull(play)?1.7:1.35):1;return ["1","2","3","4","5"].map(id=>`<g class="pl" data-p="${id}" tabindex="0" role="button" aria-label="Position ${id}"><circle r="${Math.round(30*k)}" fill="transparent"/><circle class="ring" r="${Math.round(17*k)}" fill="#c2b08a" stroke="#fff" stroke-width="2"/><text y="${Math.round(6*k)}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="${Math.round(19*k)}" fill="#1c3045" pointer-events="none">${id}</text></g>`).join("")})()}
-  <g id="ball" pointer-events="none"><circle r="7.5" fill="#e07a2f" stroke="#7a3a10" stroke-width="1.5"/><path d="M-7.5 0h15M0-7.5v15" stroke="#7a3a10" stroke-width="1"/></g></svg>
-  <div class="keylegend"><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#f2e6cf" stroke-width="2"/><path d="M19 0L26 4L19 8z" fill="#f2e6cf"/></svg>Cut</span><span><svg width="26" height="10"><path d="M0 5L5 1L10 9L15 1L20 5" fill="none" stroke="#f2e6cf" stroke-width="2"/><path d="M19 1L26 5L19 9z" fill="#f2e6cf"/></svg>Dribble</span><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#c2b08a" stroke-width="2" stroke-dasharray="5 4"/><path d="M19 0L26 4L19 8z" fill="#c2b08a"/></svg>Pass</span><span><svg width="26" height="12"><line x1="0" y1="6" x2="20" y2="6" stroke="#f2e6cf" stroke-width="2"/><line x1="20" y1="0" x2="20" y2="12" stroke="#f2e6cf" stroke-width="3"/></svg>Screen</span></div>`;
+  ${(()=>{const big=window.innerWidth<=820&&mode;const k=big?(isFull(play)?1.7:1.35):1;plR=Math.round(17*k);return ["1","2","3","4","5"].map(id=>`<g class="pl" data-p="${id}" tabindex="0" role="button" aria-label="Position ${id}"><circle r="${Math.round(30*k)}" fill="transparent"/><circle class="ring" r="${Math.round(17*k)}" fill="#c2b08a" stroke="#fff" stroke-width="2"/><text y="${Math.round(6*k)}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="${Math.round(19*k)}" fill="#1c3045" pointer-events="none">${id}</text></g>`).join("")})()}
+  <g id="ball" pointer-events="none"><circle r="7.5" fill="#e07a2f" stroke="#7a3a10" stroke-width="1.5"/><path d="M-7.5 0h15M0-7.5v15" stroke="#7a3a10" stroke-width="1"/></g>${mode?'<g id="bends"></g>':""}</svg>
+  <div class="keylegend"><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#f2e6cf" stroke-width="2"/><path d="M19 0L26 4L19 8z" fill="#f2e6cf"/></svg>Cut</span><span><svg width="26" height="10"><path d="M0 5L5 1L10 9L15 1L20 5" fill="none" stroke="#f2e6cf" stroke-width="2"/><path d="M19 1L26 5L19 9z" fill="#f2e6cf"/></svg>Dribble</span><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#c2b08a" stroke-width="2" stroke-dasharray="5 4"/><path d="M19 0L26 4L19 8z" fill="#c2b08a"/></svg>Pass</span><span><svg width="34" height="12"><line x1="0" y1="6" x2="14" y2="6" stroke="#f2e6cf" stroke-width="2"/><line x1="14" y1="0" x2="14" y2="12" stroke="#f2e6cf" stroke-width="3"/><line x1="18" y1="6" x2="34" y2="6" stroke="#f2e6cf" stroke-width="1.5" stroke-dasharray="2 4" opacity=".6"/></svg>Screen (faces who it's for)</span></div>`;
 }
 function paint(play,t,sel,seg,opts={}){
   const svg=$("#court");if(!svg)return;
@@ -965,12 +1008,15 @@ function paint(play,t,sel,seg,opts={}){
   const gh=$("#ghosts");gh.innerHTML=opts.ghostStep!=null&&opts.ghostStep>=0?["1","2","3","4","5"].map(id=>{const [x,y]=play.phases[opts.ghostStep].pos[id];return `<g opacity=".28"><circle cx="${x}" cy="${y}" r="15" fill="none" stroke="#c2b08a" stroke-width="2" stroke-dasharray="4 3"/><text x="${x}" y="${y+5}" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="15" fill="#c2b08a">${id}</text></g>`}).join(""):"";
 }
 function viewerSeg(play){const N=play.phases.length;if(N<2)return -1;if(pb.playing)return Math.min(Math.floor(pb.t),N-2);return pb.t>=N-1-1e-6?-1:Math.floor(pb.t+1e-6)}
+const speedSeg=()=>`<div class="seg" role="group" aria-label="Speed">${[["slow","Slow"],["normal","Normal"],["fast","Fast"]].map(([k,l])=>`<button type="button" data-act="pbSpeed" data-v="${k}" class="${pb.speedKey===k?"on":""}" aria-pressed="${pb.speedKey===k}">${l}</button>`).join("")}</div>`;
+/* caption for the action whose arrows are drawn (step numbers match the builder) */
+function capFor(play,seg,t){const ph=play.phases||[];const N=ph.length;if(!N)return"";if(t<1e-6&&!pb.playing&&ph[0]&&ph[0].cap)return ph[0].cap;const i=seg>=0?seg+1:N-1;return(ph[i]&&ph[i].cap)||""}
 const getPlay=()=>{const all=plays();return all.find(p=>p.id===curPlay)||all[0]};
 const PLAY='<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg>';
 const PAUSE='<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor"/></svg>';
 const REPLAY='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 7a4.5 4.5 0 1 0 1.4-3.3"/><path d="M2 1.5v3h3"/></svg>';
-function syncViewer(){const play=getPlay();if(!play||ed)return;const N=play.phases.length;paint(play,pb.t,pb.sel,viewerSeg(play));const r=$("#scrub");if(r)r.value=pb.t;const st=$("#stepl");if(st)st.textContent=`Step ${Math.min(N,Math.floor(pb.t+1e-6)+1)} of ${N}`;const b=$("#pbplay");if(b)b.innerHTML=pb.playing?PAUSE:(pb.t>=N-1-1e-6?REPLAY:PLAY)}
-function animate(play,from,to,onFrame,done){stopPlayback();pb.playing=true;pb.t=from;pb.last=performance.now();const step=ts=>{if(!pb.playing)return;const dt=clamp((ts-pb.last)/1000,0,.05);pb.last=ts;pb.t+=dt*pb.speed/1.25;if(pb.t>=to){pb.t=to;pb.playing=false;onFrame();done&&done();return}onFrame();pb.raf=requestAnimationFrame(step)};pb.raf=requestAnimationFrame(step)}
+function syncViewer(){const play=getPlay();if(!play||ed)return;const N=play.phases.length;const sg=viewerSeg(play);paint(play,pb.t,pb.sel,sg);const cp=$("#pbcap");if(cp){const c=capFor(play,sg,pb.t);cp.textContent=c;cp.hidden=!c}const r=$("#scrub");if(r)r.value=pb.t;const st=$("#stepl");if(st)st.textContent=`Step ${Math.min(N,Math.floor(pb.t+1e-6)+1)} of ${N}`;const b=$("#pbplay");if(b)b.innerHTML=pb.playing?PAUSE:(pb.t>=N-1-1e-6?REPLAY:PLAY)}
+function animate(play,from,to,onFrame,done){stopPlayback();pb.playing=true;pb.t=from;pb.last=performance.now();const step=ts=>{if(!pb.playing)return;const dt=clamp((ts-pb.last)/1000,0,.05);pb.last=ts;pb.t+=dt*pb.speed/STEP_SECONDS;if(pb.t>=to){pb.t=to;pb.playing=false;onFrame();done&&done();return}onFrame();pb.raf=requestAnimationFrame(step)};pb.raf=requestAnimationFrame(step)}
 function stopPlayback(){pb.playing=false;cancelAnimationFrame(pb.raf)}
 
 /* ================= Playbook views ================= */
@@ -987,60 +1033,154 @@ function viewerView(){
   return `<div class="stage ${isFull(play)?"wide":""}"><div><div class="courtbox">${playSVG(play)}</div>
     <div class="controls"><button class="btn icon" data-act="pbPrev" aria-label="Previous step"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2h2v10H3zM12 2v10L5.5 7z" fill="currentColor"/></svg></button><button class="btn gold icon" id="pbplay" data-act="pbPlay" aria-label="Play or pause">${PLAY}</button><button class="btn icon" data-act="pbNext" aria-label="Next step"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M9 2h2v10H9zM2 2v10l6.5-5z" fill="currentColor"/></svg></button>
     <span class="stepl" id="stepl">Step 1 of ${N}</span><input type="range" id="scrub" min="0" max="${N-1}" step="0.01" value="${pb.t}" aria-label="Scrub through the play">
-    <div class="seg" role="group" aria-label="Speed">${[.5,1,2].map(s=>`<button data-act="pbSpeed" data-v="${s}" class="${pb.speed===s?"on":""}">${s}×</button>`).join("")}</div></div></div>
-   <div><div class="spread" style="margin-bottom:10px"><div><div class="eyebrow">${esc(play.cat)} · ${isFull(play)?"Full court":"Half court"}</div><h2 style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2></div><div class="row">${ebtn("editPlay",`data-id="${esc(play.id)}"`,"Edit play")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="play" data-id="${esc(play.id)}" aria-label="Delete play">${TRASH}</button>`:""}</div></div>
+    ${speedSeg()}</div>${(play.phases||[]).some(ph=>ph&&ph.cap)?'<div class="pbcap" id="pbcap" aria-live="polite"></div>':""}</div>
+   <div><div class="spread" style="margin-bottom:10px"><div><div class="eyebrow">${esc(play.cat)} · ${isFull(play)?"Full court":"Half court"}</div><h2 style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2></div><div class="row">${ebtn("editPlay",`data-id="${esc(play.id)}"`,"Edit play")}${isCoach()?`<button class="btn sm" data-act="dupPlay" data-id="${esc(play.id)}">Duplicate play</button>`:""}${isCoach()?`<button class="btn sm del" data-act="del" data-k="play" data-id="${esc(play.id)}" aria-label="Delete play">${TRASH}</button>`:""}</div></div>
     ${panel("play-roles","Positions & roles",pb.sel?"Following "+pb.sel:"Tap one to follow it",`<div class="legend">${["1","2","3","4","5"].map(id=>`<button class="prole ${pb.sel===id?"on":""}" data-act="pbSel" data-v="${id}"><span class="badge">${id}</span><span><b>Position ${id}</b><span>${esc(play.roles&&play.roles[id]||"No role written yet.")}</span></span></button>`).join("")}</div>`)}
     ${panel("play-notes","Notes & reads",play.notes?"":"None yet",play.notes?`<p style="margin:0;white-space:pre-wrap">${esc(play.notes)}</p>`:'<p class="muted" style="margin:0">No notes yet.</p>')}</div></div>`;
 }
 /* --- Play builder: Move / Pass / Screen, one step at a time --- */
 const START={half:()=>[{pos:PP([[250,320],[425,230],[75,230],[455,30],[45,30]]),ball:"1",screens:[]}],full:()=>[{pos:PP([[70,150],[150,410],[-18,320],[290,250],[560,250]]),ball:"3",screens:[]}]};
 const TOOL_IC={move:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18M12 3l-3 3m3-3l3 3M12 21l-3-3m3 3l3-3M3 12l3-3m-3 3l3 3M21 12l-3-3m3 3l-3 3"/></svg>',pass:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-dasharray="3 3"><path d="M4 18L19 6"/><path d="M13 6h6v6" stroke-dasharray="none"/></svg>',screen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 18L15 7"/><path d="M11 3l8 8"/></svg>'};
+/* --- Base sets (built-in templates, read-only). Half court: baseline y=0, hoop (250,52.5). Full court: attacking right. --- */
+const PH=(pos,ball,x={})=>({pos:PP(pos),ball,screens:[],...x});
+const BASE_SETS=[
+ {id:"base-5out",cat:"Half court",name:"5-Out",desc:"Everyone outside the arc. The lane stays open for drives and back cuts.",court:"half",phases:[PH([[250,300],[430,210],[70,210],[462,32],[38,32]],"1")],
+  roles:{1:"Point. Start it: drive, or pass and cut.",2:"Right wing. Attack closeouts; back-cut if overplayed.",3:"Left wing. Attack closeouts; back-cut if overplayed.",4:"Right corner. Stay spaced; lift when the ball drives your way.",5:"Left corner. Stay spaced; lift when the ball drives your way."}},
+ {id:"base-4out",cat:"Half court",name:"4-Out 1-In",desc:"Four around the arc, 5 working the block.",court:"half",phases:[PH([[250,300],[430,210],[70,210],[38,32],[345,78]],"1")],
+  roles:{1:"Point. Feed the post or swing it.",2:"Right wing. Entry pass to 5; relocate after.",3:"Left wing. Spot up for the skip.",4:"Left corner. Spot up and fill behind drives.",5:"Post. Seal on the block and follow the ball side to side."}},
+ {id:"base-horns",cat:"Half court",name:"Horns",desc:"Bigs at both elbows, shooters in the corners.",court:"half",phases:[PH([[250,310],[462,32],[38,32],[168,192],[332,192]],"1")],
+  roles:{1:"Point. Pick a side: use the ball screen or hit the elbow.",2:"Right corner. Spot up; lift if your man helps.",3:"Left corner. Spot up; lift if your man helps.",4:"Left elbow. Ball screen, then pop.",5:"Right elbow. Ball screen, then roll."}},
+ {id:"base-14high",cat:"Half court",name:"1-4 High",desc:"Four across the free-throw line extended. Easy entries and back cuts.",court:"half",phases:[PH([[250,320],[440,192],[60,192],[168,192],[332,192]],"1")],
+  roles:{1:"Point. Enter to a wing or an elbow.",2:"Right wing. Back-cut if denied, or catch and attack.",3:"Left wing. Back-cut if denied, or catch and attack.",4:"Left elbow. Catch and face; look high-low and for back cuts.",5:"Right elbow. Catch the entry, or screen for a wing."}},
+ {id:"base-14low",cat:"Half court",name:"1-4 Low",desc:"Bigs on the blocks, shooters in the corners, the top wide open.",court:"half",phases:[PH([[250,310],[462,32],[38,32],[148,72],[352,72]],"1")],
+  roles:{1:"Point. Drive the gap or kick to a corner.",2:"Right corner. Spot up; cut baseline if your man turns his head.",3:"Left corner. Spot up; cut baseline if your man turns his head.",4:"Left block. Seal, or step up to screen.",5:"Right block. Seal, or step up to screen."}},
+ {id:"base-box",cat:"Half court",name:"Box",desc:"Two on the blocks, two at the elbows. Screens in every direction.",court:"half",phases:[PH([[250,320],[352,72],[148,72],[168,192],[332,192]],"1")],
+  roles:{1:"Point. Hit whoever comes open off the screens.",2:"Right block. Use 5's down screen: pop to the wing or curl.",3:"Left block. Use 4's down screen: pop to the wing or curl.",4:"Left elbow. Down screen for 3, then seal.",5:"Right elbow. Down screen for 2, then seal."}},
+ {id:"base-131",cat:"Half court",name:"1-3-1 High Post",desc:"Point, two wings, a high post at the free-throw line and a low post.",court:"half",phases:[PH([[250,320],[440,200],[60,200],[250,185],[352,60]],"1")],
+  roles:{1:"Point. Enter to a wing or the high post.",2:"Right wing. Catch and look inside.",3:"Left wing. Catch and look inside.",4:"High post. Flash to the free-throw line, catch and face.",5:"Low post. Run the baseline to the ball side."}},
+ {id:"base-stack",cat:"Half court",name:"Stack",desc:"Double stack on both blocks. Guards pop out off the bigs.",court:"half",phases:[PH([[250,320],[352,62],[148,62],[148,112],[352,112]],"1")],
+  roles:{1:"Point. Read which guard comes open first.",2:"Right stack, low. Pop to the wing or curl over 5.",3:"Left stack, low. Pop to the wing or curl over 4.",4:"Left stack, high. Screen for 3, then post up.",5:"Right stack, high. Screen for 2, then post up."}},
+ {id:"base-flex",cat:"Half court",name:"Flex",desc:"Two up top, one in the corner, one on each block.",court:"half",phases:[PH([[180,295],[320,295],[38,32],[148,72],[352,72]],"1")],
+  roles:{1:"Left slot. Reverse to 2, then down screen for 4.",2:"Right slot. Catch the reversal; look for the flex cutter.",3:"Left corner. Flex cut baseline off 4 to the other block.",4:"Left block. Flex screen for 3, then come up off 1's down screen.",5:"Right block. Post up; make room for the cutter."}},
+ {id:"base-spreadpnr",cat:"Half court",name:"Spread pick-and-roll",desc:"5 sets a ball screen for 1, who comes off it curling toward the elbow.",court:"half",phases:[
+   PH([[250,320],[462,32],[38,32],[70,210],[332,192]],"1",{cap:"Spread the floor: corners filled, 4 on the left wing."}),
+   PH([[250,320],[462,32],[38,32],[70,210],[292,298]],"1",{screens:["5"],scrFor:{5:"1"},cap:"5 sprints up and sets the ball screen for 1."}),
+   PH([[345,200],[462,32],[38,32],[70,210],[262,95]],"1",{curve:{1:[335,375]},cap:"1 comes off the screen tight; 5 rolls to the rim."})],
+  roles:{1:"Ball handler. Wait for the screen, come off tight, read the roll.",2:"Right corner. Spot up for the kick-out.",3:"Left corner. Spot up for the kick-out.",4:"Left wing. Stay spaced; be ready for the skip pass.",5:"Screener. Sprint up, set it facing 1, then roll hard."}},
+ {id:"base-floppy",cat:"Half court",name:"Floppy",desc:"2 starts under the rim and picks a side: 5's single screen or the 4-3 stagger.",court:"half",phases:[
+   PH([[250,320],[250,35],[100,160],[155,85],[345,85]],"1",{cap:"2 under the rim. Single (5) on the right, stagger (4 and 3) on the left."}),
+   PH([[250,320],[300,40],[105,170],[160,100],[345,100]],"1",{screens:["5"],scrFor:{5:"2"},curve:{2:[285,20]},cap:"2 sets his man up toward 5's single screen."}),
+   PH([[250,320],[60,225],[105,170],[160,100],[345,100]],"2",{screens:["4","3"],scrFor:{4:"2",3:"2"},curve:{2:[150,-10]},cap:"2 cuts baseline off the 4-3 stagger; 1 hits him on the wing."})],
+  roles:{1:"Point. Read which side 2 takes and hit him on time.",2:"Shooter. Set your man up, then go the side he doesn't.",3:"Stagger, top. Second screen for 2, then space.",4:"Stagger, bottom. First screen for 2, then seal.",5:"Single. Screen for 2; if he goes away, post up."}},
+ {id:"base-boxblob",cat:"Out of bounds",name:"Box BLOB",desc:"3 inbounds under our basket; box at the blocks and elbows.",court:"half",phases:[PH([[168,192],[332,192],[320,-20],[148,72],[352,72]],"3")],
+  roles:{1:"Left elbow. Safety: step back toward the top.",2:"Right elbow. Cut to the ball-side corner for the shot.",3:"Inbounder. Slap the ball to start; look at the rim cut first.",4:"Left block. Cross screen for 5, then pop.",5:"Right block. Use the screen and seal to the rim."}},
+ {id:"base-stackblob",cat:"Out of bounds",name:"Stack BLOB",desc:"3 inbounds; the other four stacked up the ball-side lane line.",court:"half",phases:[PH([[345,225],[345,180],[320,-20],[345,135],[345,90]],"3")],
+  roles:{1:"Top of the stack. Safety: go back toward the top.",2:"Third. Pop to the ball-side corner for the shot.",3:"Inbounder. Read the stack as it breaks.",4:"Second. Cut to the opposite block.",5:"Bottom of the stack. Seal or step to the rim."}},
+ {id:"base-lineslob",cat:"Out of bounds",name:"Line SLOB",desc:"3 inbounds from the sideline; everyone else in a line facing him.",court:"half",phases:[PH([[270,300],[320,300],[488,300],[370,300],[420,300]],"3")],
+  roles:{1:"Back of the line. Safety: come back to the ball if nothing opens.",2:"Third. Cut to the corner for the shot.",3:"Inbounder. Read the line as it breaks.",4:"Second. Screen for 2, then pop.",5:"Front of the line. Step to the ball or go to the rim."}},
+ {id:"base-pb14",cat:"Press break",name:"Press break 1-4",desc:"4 inbounds; 3, 1, 2 and 5 line up across the free-throw line extended.",court:"full",phases:[PH([[190,200],[190,300],[190,55],[-18,320],[190,445]],"4")],
+  roles:{1:"Inside. Break to the ball for the inbound.",2:"Inside. Break to the ball, or go long if denied.",3:"Sideline. Release up the sideline for the next pass.",4:"Inbounder. Find the open guard, then trail the play.",5:"Sideline. Release up the floor to the middle."}},
+ {id:"base-pb212",cat:"Press break",name:"Press break 2-1-2",desc:"4 inbounds; 1 and 2 back, 5 in the middle at half court, 3 deep.",court:"full",phases:[PH([[150,140],[150,360],[700,90],[-18,320],[440,250]],"4")],
+  roles:{1:"Back. Get open for the inbound.",2:"Back. Get open for the inbound.",3:"Deep. Stay long for the pass over the top.",4:"Inbounder, then trailer behind the ball.",5:"Middle. Flash to the ball at half court."}}
+];
+const tplAll=()=>items("templates");
+const tplGet=id=>BASE_SETS.find(t=>t.id===id)||get("templates",id);
+function miniCourt(t){const f=t.court==="full";const ph=(t.phases||[])[0];if(!ph)return"";
+  return `<svg class="mini ${f?"full":""}" viewBox="${f?"-40 0 1020 500":"0 -40 500 510"}" aria-hidden="true">${courtSVG(f).replace(/<text[\s\S]*?<\/text>/g,"")}${IDS.map(id=>{const p=ph.pos&&ph.pos[id];if(!p)return"";return `<circle cx="${p[0]}" cy="${p[1]}" r="${f?30:24}" fill="${ph.ball===id?"#e07a2f":"#c2b08a"}" stroke="#fff" stroke-width="4"/>`}).join("")}</svg>`}
+/* drop data that means nothing: straight "curves", screens-for that point nowhere, empty captions */
+function cleanPhases(phs){return JSON.parse(JSON.stringify(phs)).map((ph,k)=>{
+  if(ph.cap!=null){const c=String(ph.cap).trim().slice(0,140);if(c)ph.cap=c;else delete ph.cap}
+  if(k===0){delete ph.curve;delete ph.scrFor;return ph}const A=phs[k-1];
+  if(ph.curve){for(const id of Object.keys(ph.curve)){const a=A.pos[id],b=ph.pos[id],c=curveOf(ph,id);if(!c||!a||!b||Math.hypot(b[0]-a[0],b[1]-a[1])<6)delete ph.curve[id]}if(!Object.keys(ph.curve).length)delete ph.curve}
+  if(ph.scrFor){for(const id of Object.keys(ph.scrFor)){const t=ph.scrFor[id];if(!(ph.screens||[]).includes(id)||!IDS.includes(t)||t===id)delete ph.scrFor[id]}if(!Object.keys(ph.scrFor).length)delete ph.scrFor}
+  return ph})}
 function builderHint(){
   const p=ed.play,ph=p.phases[ed.cur];
-  if(ed.previewing)return "Previewing the whole play…";
-  if(ed.mode==="move")return ed.cur===0?"<b>Step 1 · Starting spots.</b> Drag each player to where they line up. Then tap <b>+ Add step</b>.":`<b>Step ${ed.cur+1}.</b> Drag players to where they end up. Faded circles show where they were. The ball handler's move draws as a dribble.`;
+  if(ed.previewing)return "<b>Previewing the whole play.</b> Pause, scrub or change the speed. Tap <b>Back to editing</b> when you're done.";
+  if(ed.mode==="move")return ed.cur===0?"<b>Step 1 · Starting spots.</b> Drag each player to where they line up. Then tap <b>+ Add step</b>.":`<b>Step ${ed.cur+1}.</b> Drag players to where they end up. Faded circles show where they were. Drag a gold dot to curve a path; double-tap it to straighten.`;
   if(ed.mode==="pass")return ed.cur===0?`<b>Who starts with the ball?</b> Tap a player. (Now: ${ph.ball})`:`<b>Pass in step ${ed.cur+1}.</b> Tap the player who catches it. Currently ${ph.ball} has the ball.`;
-  return ed.cur===0?"Screens happen in a later step. Add a step first.":`<b>Screens in step ${ed.cur+1}.</b> Tap a player to mark or unmark him as the screener.`;
+  if(ed.cur===0)return "Screens happen in a later step. Add a step first.";
+  if(ed.scrPick)return `<b>${ed.scrPick} is screening.</b> Now tap the teammate he screens for, or tap ${ed.scrPick} again for a screen with no target.`;
+  const sc=ph.screens||[],sf=ph.scrFor||{};
+  return `<b>Screens in step ${ed.cur+1}.</b> Tap the screener, then the teammate he screens for. Tap a marked screener to remove his screen.${sc.length?" Now: "+sc.map(id=>sf[id]?id+" for "+sf[id]:id).join(", ")+".":""}`;
 }
 function builderView(){
-  const p=ed.play;const N=p.phases.length;const cats=["Half court","Out of bounds","Press break","Transition","Defense","Special situations"];
-  return `<div class="stage ${isFull(p)?"wide":""}"><div class="builder"><div class="courtbox">${playSVG(p,ed.mode)}</div>
+  const p=ed.play;const N=p.phases.length;const cats=["Half court","Out of bounds","Press break","Transition","Defense","Special situations"];const cap=(p.phases[ed.cur]||{}).cap||"";
+  const pv=ed.previewing?`<div class="pvbar" role="group" aria-label="Preview controls"><button class="btn gold icon" type="button" id="edpvplay" data-act="edPvPlay" aria-label="Play or pause">${PLAY}</button><span class="stepl" id="edstepl">Step 1 of ${N}</span><input type="range" id="edscrub" min="0" max="${N-1}" step="0.01" value="${pb.t}" aria-label="Scrub through the preview">${speedSeg()}<button class="btn sm" type="button" data-act="edPvStop">Back to editing</button></div>`:"";
+  return `<div class="stage ${isFull(p)?"wide":""}"><div class="builder"><div class="courtbox">${playSVG(p,ed.mode)}</div>${pv}
    <div class="bhint" id="bhint">${builderHint()}</div>
-   <div class="tools" role="group" aria-label="Tool">${[["move","Move","Drag players"],["pass","Pass","Tap the receiver"],["screen","Screen","Tap the screener"]].map(([k,l,s])=>`<button class="tool ${ed.mode===k?"on":""}" data-act="edTool" data-v="${k}" aria-pressed="${ed.mode===k}">${TOOL_IC[k]}${l}<small>${s}</small></button>`).join("")}</div>
-   <div class="steps"><span class="small muted" style="font-weight:700">STEPS</span>${p.phases.map((_,i)=>`<button class="btn sm stepbtn ${i===ed.cur?"on":""}" data-act="edStep" data-v="${i}">${i+1}</button>`).join("")}<button class="btn sm gold" data-act="edAdd">${PLUS} Add step</button>${N>1?`<button class="btn sm" data-act="edDelStep">Remove step ${ed.cur+1}</button>`:""}<span style="flex:1"></span><button class="btn sm" data-act="edPreview" ${N<2?"disabled":""}>${PLAY} Preview</button><button class="btn sm" data-act="edUndo" ${ed.hist.length?"":"disabled"}>Undo</button></div></div>
+   <div class="tools" role="group" aria-label="Tool">${[["move","Move","Drag players"],["pass","Pass","Tap the receiver"],["screen","Screen","Screener, then target"]].map(([k,l,s])=>`<button class="tool ${ed.mode===k?"on":""}" data-act="edTool" data-v="${k}" aria-pressed="${ed.mode===k}">${TOOL_IC[k]}${l}<small>${s}</small></button>`).join("")}</div>
+   <div class="steps"><span class="small muted" style="font-weight:700">STEPS</span>${p.phases.map((_,i)=>`<button class="btn sm stepbtn ${i===ed.cur?"on":""}" data-act="edStep" data-v="${i}">${i+1}</button>`).join("")}<button class="btn sm gold" data-act="edAdd">${PLUS} Add step</button>${N>1?`<button class="btn sm" data-act="edDelStep">Remove step ${ed.cur+1}</button>`:""}<span style="flex:1"></span>${ed.previewing?"":`<button class="btn sm" data-act="edPreview" ${N<2?"disabled":""}>${PLAY} Preview</button>`}<button class="btn sm" data-act="edUndo" ${ed.hist.length?"":"disabled"}>Undo</button></div>
+   <label class="f" for="pe-cap">Step ${ed.cur+1} caption (optional)<input type="text" id="pe-cap" maxlength="140" value="${esc(cap)}" autocomplete="off"></label></div>
    <div class="card"><form class="form" id="playform" onsubmit="return false">
+    <div class="row"><button class="btn sm" type="button" data-act="tplOpen">Start from a template</button><button class="btn sm" type="button" data-act="tplSave">Save as template</button></div>
     <label class="f" for="pe-name">Play name<input type="text" id="pe-name" value="${esc(p.name)}" required></label>
     <div class="grid g2" style="gap:10px"><label class="f" for="pe-cat">Category<select id="pe-cat" required><option value="" disabled ${p.cat?"":"selected"}>—</option>${cats.map(c=>`<option ${p.cat===c?"selected":""}>${c}</option>`).join("")}</select></label>
      <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--muted)">Court<div class="seg" role="group" aria-label="Court"><button type="button" data-act="edCourt" data-v="half" class="${isFull(p)?"":"on"}">Half</button><button type="button" data-act="edCourt" data-v="full" class="${isFull(p)?"on":""}">Full</button></div></div></div>
     <details ${ed.rolesOpen?"open":""} id="roledet"><summary style="cursor:pointer;font-weight:700;color:var(--accent-text);font-size:13px">Roles & reads (optional)</summary><div class="form" style="margin-top:10px">
-     ${["1","2","3","4","5"].map(id=>`<label class="f" for="pe-r${id}">Position ${id}<input type="text" id="pe-r${id}" value="${esc(p.roles[id]||"")}" ></label>`).join("")}
+     ${IDS.map(id=>`<label class="f" for="pe-r${id}">Position ${id}<input type="text" id="pe-r${id}" value="${esc(p.roles[id]||"")}" ></label>`).join("")}
      <label class="f" for="pe-notes">Notes & reads<textarea id="pe-notes" >${esc(p.notes||"")}</textarea></label></div></details>
     <div class="row" style="margin-top:4px"><button class="btn gold" type="button" data-act="edSave">Save play</button><button class="btn" type="button" data-act="edCancel">Cancel</button>${ed.id&&!ed.isNew?`<button class="btn del" type="button" data-act="del" data-k="play" data-id="${esc(ed.id)}" style="margin-left:auto">${TRASH}Delete play</button>`:""}</div></form></div></div>`;
 }
-function readEd(){const p=ed.play;const f=s=>$(s);if(!f("#pe-name"))return;p.name=f("#pe-name").value;p.cat=f("#pe-cat").value;["1","2","3","4","5"].forEach(id=>p.roles[id]=f("#pe-r"+id).value);p.notes=f("#pe-notes").value;ed.rolesOpen=f("#roledet").open}
+function readEd(){const p=ed.play;const f=s=>$(s);if(!f("#pe-name"))return;p.name=f("#pe-name").value;p.cat=f("#pe-cat").value;IDS.forEach(id=>p.roles[id]=f("#pe-r"+id).value);p.notes=f("#pe-notes").value;ed.rolesOpen=f("#roledet").open}
 function edRender(){readEd();$("#main").innerHTML=playbookView();bindPlaybook()}
-function edDraw(){const p=ed.play;paint(p,ed.cur,null,ed.cur-1,{editing:true,highlight:ed.flash,ghostStep:ed.cur>0?ed.cur-1:null});const h=$("#bhint");if(h)h.innerHTML=builderHint()}
+function endPreview(){if(ed&&ed.previewing){stopPlayback();ed.previewing=false;return true}return false}
+function edPaintPV(){const p=ed.play;const N=p.phases.length;paint(p,pb.t,null,viewerSeg(p),{editing:true});const g=$("#bends");if(g)g.innerHTML="";const r=$("#edscrub");if(r)r.value=pb.t;const st=$("#edstepl");if(st)st.textContent=`Step ${Math.min(N,Math.floor(pb.t+1e-6)+1)} of ${N}`;const b=$("#edpvplay");if(b)b.innerHTML=pb.playing?PAUSE:(pb.t>=N-1-1e-6?REPLAY:PLAY)}
+function edDraw(){if(ed.previewing){edPaintPV();return}const p=ed.play;paint(p,ed.cur,null,ed.cur-1,{editing:true,highlight:ed.scrPick||ed.flash,ghostStep:ed.cur>0?ed.cur-1:null});drawBends();const h=$("#bhint");if(h)h.innerHTML=builderHint()}
+/* gold bend handles: one per player who moved in this step (Move mode, step 2+) */
+function drawBends(){const g=$("#bends");if(!g)return;const svg=$("#court");if(!ed||ed.previewing||ed.mode!=="move"||ed.cur<1){g.innerHTML="";return}
+  const m=svg.getScreenCTM();const sc=m&&m.a?Math.abs(m.a):1;const hit=Math.max(16,17/sc),vis=Math.max(6,6.5/sc);const A=ed.play.phases[ed.cur-1],B=ed.play.phases[ed.cur];
+  g.innerHTML=IDS.map(id=>{const a=A.pos[id],b=B.pos[id];if(!a||!b||Math.hypot(b[0]-a[0],b[1]-a[1])<40)return"";const c=curveOf(B,id);const h=c?bez(a,c,b,.5):mid(a,b);
+    return `<g class="bend" data-bend="${id}" transform="translate(${h[0]},${h[1]})" role="button" aria-label="Curve ${id}'s path"><circle r="${hit}" fill="transparent"/><circle r="${vis}" fill="${c?"#d6c299":"#ab8c59"}" stroke="#0a1420" stroke-width="${Math.max(1.5,1.5/sc)}"/></g>`}).join("")}
 function snapshot(){ed.dirty=true;ed.hist.push(JSON.stringify({phases:ed.play.phases,cur:ed.cur,court:ed.play.court}));if(ed.hist.length>40)ed.hist.shift()}
 function svgPoint(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const m=svg.getScreenCTM();return m?pt.matrixTransform(m.inverse()):{x:0,y:0}}
+/* move a player in the current step; keep his bends (into and out of this step) shaped the same */
+function setPos(id,np){const ph=ed.play.phases;const o=ph[ed.cur].pos[id];const dx=(np[0]-o[0])/2,dy=(np[1]-o[1])/2;ph[ed.cur].pos[id]=np;
+  [ed.cur,ed.cur+1].forEach(k=>{const c=ph[k]&&curveOf(ph[k],id);if(c)ph[k].curve[id]=[Math.round(c[0]+dx),Math.round(c[1]+dy)]})}
 function bindPlaybook(){
   if(!ed){const play=getPlay();if(!play)return;pb.seg=-2;syncViewer();
     $("#scrub").oninput=e=>{stopPlayback();pb.t=+e.target.value;syncViewer()};
     $$("#court .pl").forEach(g=>{g.onclick=()=>ACT.pbSel({v:g.dataset.p});g.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();ACT.pbSel({v:g.dataset.p})}}});return}
   edDraw();const svg=$("#court");
+  const sc=$("#edscrub");if(sc)sc.oninput=e=>{stopPlayback();pb.t=+e.target.value;edPaintPV()};
+  const cap=$("#pe-cap");if(cap)cap.oninput=()=>{const ph=ed.play.phases[ed.cur];if(!ph)return;ed.dirty=true;const v=cap.value.slice(0,140);if(v.trim())ph.cap=v;else delete ph.cap};
   $$("#court .pl").forEach(g=>{
-    g.onpointerdown=e=>{e.preventDefault();if(ed.previewing)return;const id=g.dataset.p;const ph=ed.play.phases[ed.cur];
+    g.onpointerdown=e=>{e.preventDefault();if(endPreview()){edRender();return}const id=g.dataset.p;const ph=ed.play.phases[ed.cur];
       if(ed.mode==="move"){snapshot();drag={id,moved:false};g.setPointerCapture(e.pointerId);ed.flash=id;edDraw();return}
       if(ed.mode==="pass"){if(ph.ball===id){toast(id+" already has the ball");return}snapshot();ph.ball=id;
-        for(let k=ed.cur+1;k<ed.play.phases.length;k++){const n=ed.play.phases[k];if(n.ball===ph.ball)break}
         ed.flash=id;edRender();toast(ed.cur===0?id+" starts with the ball":"Pass to "+id+" in step "+(ed.cur+1));return}
-      if(ed.mode==="screen"){if(ed.cur===0){toast("Add a step first, then mark screens",true);return}snapshot();const sc=ph.screens=ph.screens||[];const i=sc.indexOf(id);i>=0?sc.splice(i,1):sc.push(id);ed.flash=id;edRender();toast(i>=0?id+" is no longer screening":id+" sets a screen in step "+(ed.cur+1))}};
-    g.onpointermove=e=>{if(!drag||drag.id!==g.dataset.p)return;const pt=svgPoint(svg,e);const B=BOUNDS(ed.play);drag.moved=true;ed.play.phases[ed.cur].pos[drag.id]=[Math.round(clamp(pt.x,B.x0,B.x1)),Math.round(clamp(pt.y,B.y0,B.y1))];edDraw()};
-    g.onpointerup=g.onpointercancel=()=>{if(drag){if(!drag.moved)ed.hist.pop();drag=null;edRender()}};
-    g.onkeydown=e=>{const m={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];if(!m||ed.mode!=="move")return;e.preventDefault();const id=g.dataset.p;const p=ed.play.phases[ed.cur].pos[id];const B=BOUNDS(ed.play);ed.play.phases[ed.cur].pos[id]=[clamp(p[0]+m[0],B.x0,B.x1),clamp(p[1]+m[1],B.y0,B.y1)];ed.flash=id;edDraw()};
+      if(ed.mode==="screen"){if(ed.cur===0){toast("Add a step first, then mark screens",true);return}
+        const scr=ph.screens=ph.screens||[];const st=ed.cur+1;
+        if(!ed.scrPick){if(scr.includes(id)){snapshot();scr.splice(scr.indexOf(id),1);if(ph.scrFor){delete ph.scrFor[id];if(!Object.keys(ph.scrFor).length)delete ph.scrFor}ed.flash=id;edRender();toast(id+" is no longer screening");return}
+          ed.scrPick=id;ed.flash=id;edDraw();return}
+        const s0=ed.scrPick;ed.scrPick=null;snapshot();if(!scr.includes(s0))scr.push(s0);
+        if(id===s0){if(ph.scrFor){delete ph.scrFor[s0];if(!Object.keys(ph.scrFor).length)delete ph.scrFor}ed.flash=s0;edRender();toast(s0+" sets a screen in step "+st);return}
+        ph.scrFor=ph.scrFor||{};ph.scrFor[s0]=id;ed.flash=s0;edRender();toast(s0+" screens for "+id+" in step "+st)}};
+    g.onpointermove=e=>{if(!drag||drag.id!==g.dataset.p)return;const pt=svgPoint(svg,e);const B=BOUNDS(ed.play);drag.moved=true;setPos(drag.id,[Math.round(clamp(pt.x,B.x0,B.x1)),Math.round(clamp(pt.y,B.y0,B.y1))]);edDraw()};
+    g.onpointerup=g.onpointercancel=()=>{if(drag&&drag.id){if(!drag.moved)ed.hist.pop();drag=null;edRender()}};
+    g.onkeydown=e=>{const m={ArrowLeft:[-10,0],ArrowRight:[10,0],ArrowUp:[0,-10],ArrowDown:[0,10]}[e.key];if(!m||ed.mode!=="move"||ed.previewing)return;e.preventDefault();const id=g.dataset.p;if(!ed.kbBurst||ed.kbBurst.id!==id){snapshot();ed.kbBurst={id}}clearTimeout(ed.kbT);ed.kbT=setTimeout(()=>{if(ed)ed.kbBurst=null},700);const p=ed.play.phases[ed.cur].pos[id];const B=BOUNDS(ed.play);setPos(id,[clamp(p[0]+m[0],B.x0,B.x1),clamp(p[1]+m[1],B.y0,B.y1)]);ed.flash=id;edDraw()};
   });
+  /* bend handles: pointer captured on the svg so the handle can be redrawn while dragging */
+  const bends=$("#bends");
+  if(bends){bends.onpointerdown=e=>{const h=e.target.closest(".bend");if(!h||ed.previewing)return;e.preventDefault();e.stopPropagation();const id=h.dataset.bend;const now=Date.now();const lt=ed.lastBend;
+      if(lt&&lt.id===id&&now-lt.t<400){ed.lastBend=null;const B=ed.play.phases[ed.cur];if(curveOf(B,id)){snapshot();delete B.curve[id];if(!Object.keys(B.curve).length)delete B.curve;edRender();toast(id+"'s path is straight again")}return}
+      ed.lastBend={id,t:now};snapshot();drag={bend:id,moved:false};try{svg.setPointerCapture(e.pointerId)}catch(err){}};
+    svg.onpointermove=e=>{if(!drag||!drag.bend)return;const id=drag.bend;const A=ed.play.phases[ed.cur-1],B=ed.play.phases[ed.cur];const a=A.pos[id],b=B.pos[id];const pt=svgPoint(svg,e);const bd=BOUNDS(ed.play);const M=[clamp(pt.x,bd.x0,bd.x1),clamp(pt.y,bd.y0,bd.y1)];const m0=mid(a,b);
+      if(!drag.moved&&Math.hypot(M[0]-bez(a,curveOf(B,id)||m0,b,.5)[0],M[1]-bez(a,curveOf(B,id)||m0,b,.5)[1])<3)return;drag.moved=true;ed.lastBend=null;
+      const c=[Math.round(2*M[0]-m0[0]),Math.round(2*M[1]-m0[1])];B.curve=B.curve||{};if(Math.hypot(c[0]-m0[0],c[1]-m0[1])<4)delete B.curve[id];else B.curve[id]=c;edDraw()};
+    svg.onpointerup=svg.onpointercancel=()=>{if(!drag||!drag.bend)return;const moved=drag.moved;drag=null;if(!moved){ed.hist.pop();return}const B=ed.play.phases[ed.cur];if(B.curve&&!Object.keys(B.curve).length)delete B.curve;edRender()};
+    bends.ondblclick=e=>e.preventDefault()}
   $$("#playform input,#playform textarea,#playform select").forEach(el=>el.addEventListener("input",()=>{ed.dirty=true}));
-  $("#pe-cat").onchange=e=>{if(ed.previewing){stopPlayback();ed.previewing=false}const v=e.target.value;if((v==="Press break"||v==="Transition")&&!isFull(ed.play)&&ed.play.phases.length===1){readEd();ed.play.court="full";ed.play.phases=START.full();ed.cur=0;edRender();toast("Switched to full court for "+v.toLowerCase())}};
+  {const cp=$("#pe-cap");if(cp)cp.addEventListener("focus",()=>{if(endPreview()){edRender();const n=$("#pe-cap");if(n)n.focus()}})}
+  $("#pe-cat").onchange=e=>{const was=endPreview();const v=e.target.value;if((v==="Press break"||v==="Transition")&&!isFull(ed.play)&&ed.play.phases.length===1){readEd();ed.play.court="full";ed.play.phases=START.full();ed.cur=0;edRender();toast("Switched to full court for "+v.toLowerCase())}else if(was)edRender()};
 }
+/* --- Template picker (coach-only sheet) --- */
+function listSheet(title,body){if(!$("#sheetroot").firstChild){lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href)}sheetCfg=null;document.removeEventListener("keydown",escClose);document.addEventListener("keydown",escClose);
+  $("#sheetroot").innerHTML=`<div class="sheet-back" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title"><div class="sheet-head"><h2 id="sh-title">${esc(title)}</h2><button class="btn icon" data-act="closeSheet" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="sheet-body form">${body}</div></div>`;
+  setTimeout(()=>{const h=$(".sheet .btn.icon");h&&h.focus()},50)}
+function tplListHTML(){const row=(t,mine)=>`<div class="tplitem"><button type="button" class="tplrow" data-act="tplPick" data-id="${esc(t.id)}">${miniCourt(t)}<span><b>${esc(t.name)}</b><span>${esc(t.desc||(t.court==="full"?"Full court":"Half court")+" · "+plural((t.phases||[]).length,"step"))}</span></span></button>${mine?`<button type="button" class="btn icon edit" data-act="tplRename" data-id="${esc(t.id)}" aria-label="Rename ${esc(t.name)}">${PEN}</button><button type="button" class="btn icon del" data-act="tplDel" data-id="${esc(t.id)}" aria-label="Delete ${esc(t.name)}">${TRASH}</button>`:""}</div>`;
+  const ours=tplAll().sort((a,b)=>String(a.name).localeCompare(String(b.name)));
+  return `<p class="small muted" style="margin:0">Copies the court, steps and roles into this play. Your play name stays.</p><div class="tplgroup">Base sets</div>${BASE_SETS.map(t=>row(t,false)).join("")}<div class="tplgroup">Our templates</div>${ours.map(t=>row(t,true)).join("")||'<p class="small muted" style="margin:0">None saved yet. Build a play and tap <b>Save as template</b>.</p>'}`}
 
 /* ================= Actions (all edits go through Save + toast) ================= */
 const POS=["PG","SG","G","W","F","C"],YRS=["Fr","So","Jr","Sr"];
@@ -1097,21 +1237,36 @@ const ACT={
   pbPlay(){const play=getPlay();if(!play||play.phases.length<2)return;if(pb.playing){stopPlayback();syncViewer();return}const N=play.phases.length;const from=pb.t>=N-1-1e-6?0:pb.t;animate(play,from,N-1,syncViewer,()=>{if(pendingRender)render()})},
   pbPrev(){stopPlayback();pb.t=Math.max(0,Math.ceil(pb.t-1e-6)-1);syncViewer()},
   pbNext(){const play=getPlay();const N=play.phases.length;const from=Math.floor(pb.t+1e-6);if(from>=N-1)return;animate(play,from,from+1,syncViewer)},
-  pbSpeed(d){pb.speed=+d.v;$$('[data-act="pbSpeed"]').forEach(b=>b.classList.toggle("on",b.dataset.v===d.v))},
+  pbSpeed(d){if(!SPEEDS[d.v])return;pb.speedKey=d.v;pb.speed=SPEEDS[d.v];try{localStorage.setItem(SPEED_KEY,d.v)}catch(e){}$$('[data-act="pbSpeed"]').forEach(b=>{const on=b.dataset.v===d.v;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)})},
   pbSel(d){pb.sel=pb.sel===d.v?null:d.v;$$('[data-act="pbSel"]').forEach(b=>b.classList.toggle("on",b.dataset.v===pb.sel));const s=$('[data-panel="play-roles"] .sum');if(s)s.textContent=pb.sel?"Following "+pb.sel:"Tap one to follow it";syncViewer()},
   /* playbook builder */
-  newPlay(){stopPlayback();ed={play:{name:"",cat:"",court:"half",roles:{1:"",2:"",3:"",4:"",5:""},notes:"",phases:START.half()},cur:0,mode:"move",isNew:true,id:null,hist:[],rolesOpen:false};render();window.scrollTo({top:0})},
-  editPlay(d){stopPlayback();const p=JSON.parse(JSON.stringify(get("plays",d.id)));p.roles=p.roles||{};ed={play:p,cur:0,mode:"move",isNew:false,id:d.id,hist:[],rolesOpen:false};render();window.scrollTo({top:0})},
-  edTool(d){readEd();ed.mode=d.v;ed.flash=null;edRender()},
-  edStep(d){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}readEd();ed.cur=+d.v;ed.flash=null;edRender()},
-  edAdd(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();snapshot();const c=JSON.parse(JSON.stringify(ed.play.phases[ed.cur]));c.screens=[];ed.play.phases.splice(ed.cur+1,0,c);ed.cur++;ed.mode="move";ed.flash=null;edRender();toast("Step "+(ed.cur+1)+" added")},
-  edDelStep(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();if(ed.play.phases.length<2)return;snapshot();ed.play.phases.splice(ed.cur,1);ed.cur=Math.max(0,ed.cur-1);edRender();toast("Step removed")},
-  edUndo(){if(ed.previewing){stopPlayback();ed.previewing=false}if(!ed.hist.length)return;readEd();const s=JSON.parse(ed.hist.pop());ed.play.phases=s.phases;ed.cur=Math.min(s.cur,s.phases.length-1);ed.play.court=s.court;edRender()},
-  edCourt(d){if(ed.previewing){stopPlayback();ed.previewing=false}if((ed.play.court||"half")===d.v)return;readEd();snapshot();ed.play.court=d.v;ed.play.phases=START[d.v]();ed.cur=0;edRender();toast(d.v==="full"?"Full court. Players reset to a press-break start.":"Half court. Players reset.")},
-  edPreview(){readEd();const p=ed.play;if(p.phases.length<2)return;ed.previewing=true;const h=$("#bhint");if(h)h.innerHTML=builderHint();
-    animate(p,0,p.phases.length-1,()=>paint(p,pb.t,null,Math.min(Math.floor(pb.t),p.phases.length-2),{editing:true}),()=>setTimeout(()=>{if(!ed)return;ed.previewing=false;edDraw()},500))},
+  newPlay(){stopPlayback();ed={play:{name:"",cat:"",court:"half",roles:{1:"",2:"",3:"",4:"",5:""},notes:"",phases:START.half()},cur:0,mode:"move",isNew:true,id:null,hist:[],rolesOpen:false,scrPick:null};render();window.scrollTo({top:0})},
+  editPlay(d){stopPlayback();const p=JSON.parse(JSON.stringify(get("plays",d.id)));p.roles=p.roles||{};ed={play:p,cur:0,mode:"move",isNew:false,id:d.id,hist:[],rolesOpen:false,scrPick:null};render();window.scrollTo({top:0})},
+  edTool(d){endPreview();readEd();ed.mode=d.v;ed.flash=null;ed.scrPick=null;edRender()},
+  edStep(d){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}readEd();ed.cur=+d.v;ed.flash=null;ed.scrPick=null;edRender()},
+  edAdd(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();snapshot();const c=JSON.parse(JSON.stringify(ed.play.phases[ed.cur]));c.screens=[];delete c.scrFor;delete c.curve;delete c.cap;ed.scrPick=null;ed.play.phases.splice(ed.cur+1,0,c);ed.cur++;ed.mode="move";ed.flash=null;edRender();toast("Step "+(ed.cur+1)+" added")},
+  edDelStep(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();ed.scrPick=null;if(ed.play.phases.length<2)return;snapshot();ed.play.phases.splice(ed.cur,1);{const nx=ed.play.phases[ed.cur];if(nx&&ed.cur>0){delete nx.curve}}ed.cur=Math.max(0,ed.cur-1);edRender();toast("Step removed")},
+  edUndo(){if(ed.previewing){stopPlayback();ed.previewing=false}if(!ed.hist.length)return;readEd();ed.scrPick=null;const s=JSON.parse(ed.hist.pop());ed.play.phases=s.phases;ed.cur=Math.min(s.cur,s.phases.length-1);ed.play.court=s.court;edRender()},
+  edCourt(d){const was=endPreview();if((ed.play.court||"half")===d.v){if(was)edRender();return}readEd();ed.scrPick=null;snapshot();ed.play.court=d.v;ed.play.phases=START[d.v]();ed.cur=0;edRender();toast(d.v==="full"?"Full court. Players reset to a press-break start.":"Half court. Players reset.")},
+  edPreview(){readEd();const p=ed.play;if(p.phases.length<2)return;ed.previewing=true;ed.scrPick=null;pb.t=0;edRender();animate(p,0,p.phases.length-1,edPaintPV,edPaintPV)},
+  edPvPlay(){if(!ed||!ed.previewing)return;const p=ed.play;const N=p.phases.length;if(pb.playing){stopPlayback();edPaintPV();return}const from=pb.t>=N-1-1e-6?0:pb.t;animate(p,from,N-1,edPaintPV,edPaintPV)},
+  edPvStop(){endPreview();edRender()},
+  tplOpen(){if(ed&&endPreview())edRender();if(!ed||!isCoach())return;endPreview();readEd();listSheet("Start from a template",tplListHTML())},
+  tplPick(d){if(!ed)return;const t=tplGet(d.id);if(!t)return;const apply=()=>{if(!ed)return;readEd();snapshot();const p=ed.play;p.court=t.court==="full"?"full":"half";p.phases=JSON.parse(JSON.stringify(t.phases));
+      if(t.roles){p.roles={...p.roles};IDS.forEach(id=>{if(t.roles[id]!=null)p.roles[id]=t.roles[id]})}if(!p.cat)p.cat=t.cat||(p.court==="full"?"Press break":"Half court");const cs=$("#pe-cat");if(cs)cs.value=p.cat;
+      ed.cur=0;ed.mode="move";ed.flash=null;ed.scrPick=null;edRender();toast("Loaded "+t.name+(p.phases.length>1?" · "+plural(p.phases.length,"step"):""))};
+    closeSheet();const has=ed.play.phases.length>1||ed.hist.length>0;if(has)confirmDiscard(apply,"Replace this diagram?","The template's court and steps replace what you've drawn. Your play name stays.");else apply()},
+  tplSave(){if(ed&&endPreview())edRender();if(!ed||!isCoach())return;endPreview();readEd();const p=ed.play;
+    openSheet({title:"Save as template",intro:"Saves this court, its steps and roles so any coach can start a play from it. Templates never show in the playbook.",fields:[{key:"name",label:"Template name",req:true},{key:"desc",label:"One-line description (optional)"}],value:{name:p.name||""},saved:"Template saved",
+      onSave:async v=>{const name=v.name.slice(0,60);if(!name)throw new Error("Template name is required");const roles={};IDS.forEach(id=>{if((p.roles[id]||"").trim())roles[id]=p.roles[id].trim()});
+        const obj={name,desc:(v.desc||"").slice(0,120),court:p.court||"half",phases:cleanPhases(p.phases),author:user.cid,ts:Date.now()};if(Object.keys(roles).length)obj.roles=roles;await saveDoc("templates",uid("tp"),obj)}})},
+  tplRename(d){const t=get("templates",d.id);if(!t||!isCoach())return;openSheet({title:"Rename template",fields:[{key:"name",label:"Template name",req:true},{key:"desc",label:"One-line description (optional)"}],value:{name:t.name,desc:t.desc||""},saved:"Template renamed",
+    onSave:v=>saveDoc("templates",t.id,{...t,name:v.name.slice(0,60),desc:(v.desc||"").slice(0,120)})})},
+  tplDel(d){const t=get("templates",d.id);if(!t||!isCoach())return;confirmDelete({title:`Delete the ${t.name} template?`,body:"It's removed for every coach. Plays already built from it are not changed.",button:"Delete template",done:"Template deleted",run:()=>removeDoc("templates",t.id)})},
+  async dupPlay(d){const p=get("plays",d.id);if(!p||!isCoach())return;stopPlayback();const {id:_x,...rest}=JSON.parse(JSON.stringify(p));const obj={...rest,name:(p.name+" (copy)").slice(0,80),author:user.cid,ts:Date.now()};const nid=uid("pl");
+    recording=[];let snaps;try{await saveDoc("plays",nid,obj);snaps=recording}finally{recording=null}curPlay=nid;pb.t=0;pb.sel=null;render();toastUndo("Duplicated as "+obj.name,snaps)},
   async edSave(){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}readEd();const p=ed.play;if(!p.name.trim()){toast("Give the play a name",true);$("#pe-name").focus();return}if(!p.cat){toast("Pick a category",true);$("#pe-cat").focus();return}if(p.phases.length<2){toast("Add at least one more step so the play moves",true);return}
-    const obj={name:p.name.trim().slice(0,80),cat:p.cat,court:p.court||"half",roles:p.roles,notes:(p.notes||"").slice(0,3000),phases:p.phases,author:user.cid,ts:Date.now()};
+    const obj={name:p.name.trim().slice(0,80),cat:p.cat,court:p.court||"half",roles:p.roles,notes:(p.notes||"").slice(0,3000),phases:cleanPhases(p.phases),author:user.cid,ts:Date.now()};
     const id=ed.isNew?uid("pl"):ed.id;await saveDoc("plays",id,obj);curPlay=id;ed=null;pb.t=0;pb.sel=null;render();toast("Play saved: "+obj.name)},
   edCancel(){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}const go=()=>{ed=null;render()};if(ed&&ed.dirty)confirmDiscard(go,"Discard this play?","Your changes to the diagram, roles and notes will be lost.");else go()},
   async edDelete(d,el){if(!el.dataset.confirm){el.dataset.confirm="1";el.textContent="Tap again to delete";setTimeout(()=>{if(el.isConnected){delete el.dataset.confirm;el.textContent="Delete play"}},3000);return}
