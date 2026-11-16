@@ -265,6 +265,15 @@ input:disabled{opacity:.45}
 .plist button{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;border:none;background:transparent;padding:9px 10px;border-radius:9px;cursor:pointer;font-weight:600;font-size:13.5px;gap:8px}
 .plist button:hover{background:var(--surface-2)}
 .plist button.on{background:var(--gold-bg);color:var(--accent-text)}
+.plist .pbtabs{display:flex;width:100%;margin-bottom:4px}.plist .pbtabs button{flex:1;justify-content:center;gap:6px;padding:6px 8px;font-size:13px;color:var(--muted)}.plist .pbtabs button.on{background:var(--surface-3);color:#fff}
+.plist .pbtabs .cnt{font-size:11px;padding:1px 6px;border-radius:999px;background:var(--surface-2);color:var(--muted)}.plist .pbtabs button.on .cnt{background:var(--gold-bg);color:var(--accent-text)}
+.plist .prow{display:flex;align-items:center;gap:2px}.plist .prow .ppick{flex:1;min-width:0;flex-direction:column;align-items:flex-start;justify-content:center;gap:3px}
+.plist .pnm{overflow-wrap:anywhere}.plist .pchips{display:flex;gap:4px;flex-wrap:wrap}.plist .pchips .chip{font-size:10.5px;padding:1px 6px}
+.chip.basic{background:rgba(143,184,222,.14);color:#a9c8e6}
+.plist .prow .eye{flex:0 0 32px;width:32px;height:32px;padding:0;justify-content:center;color:var(--muted)}.plist .prow .eye:hover{color:#fff}.plist .prow .eye.off{color:var(--warn)}
+.plist .pnone{padding:8px 10px;margin:0}.plist .newp .btn{justify-content:center;gap:6px}
+.btn.eyeb{gap:6px}.btn.eyeb.off{color:var(--warn);border-color:rgba(214,160,72,.4)}
+.prole .badge.dbadge{background:#8fb8de;color:#0d1b2a;font-size:14px}
 .stage{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:14px;align-items:start}
 .stage.wide{grid-template-columns:1fr}
 .courtbox{background:var(--court);border:1px solid var(--line);border-radius:14px;padding:10px;position:relative}
@@ -423,8 +432,12 @@ button.bdg{cursor:pointer;font:inherit;font-size:12px}
   .sheet{left:0;right:0;top:auto;bottom:0;transform:none;width:100%;max-height:92vh;border-radius:20px 20px 0 0;animation:slideup .22s ease}
   @keyframes slideup{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
   .plist{display:flex;gap:6px;overflow-x:auto;padding:8px}
-  .plist .cat{display:none}
+  .plist{flex-wrap:wrap}.plist .pbtabs{flex:0 0 100%}.plist .pbtabs button{background:transparent}.plist .pbtabs button.on{background:var(--surface-3)}
+  .plist .pgroups{display:flex;gap:6px;overflow-x:auto;flex:0 0 100%;align-items:stretch;padding-bottom:2px}
+  .plist .cat{display:flex;align-items:center;white-space:nowrap;padding:0 2px 0 6px;font-size:10px}
   .plist button{white-space:nowrap;width:auto;background:var(--surface-2)}
+  .plist .prow{flex:0 0 auto;background:var(--surface-2);border-radius:9px}.plist .prow .ppick{background:transparent}.plist .prow .ppick.on{background:var(--gold-bg)}.plist .prow .eye{flex-basis:40px;width:40px;height:40px;background:transparent}
+  .plist .newp{flex:0 0 100%;padding:4px 0 0!important}
   .plist .newp{white-space:nowrap}
   .li{grid-template-columns:48px 1fr auto}
   .hero h2{font-size:28px}
@@ -1214,7 +1227,7 @@ const TIPS={
   roster:"<b>Building the roster:</b> tap <b>Add player</b>. Tap a player to edit him or award a badge.",
   schedule:"<b>Schedule:</b> tap <b>Add game</b>, or the pencil on any game. Enter the final score after the game to update the record.",
   scouting:"<b>Scouting:</b> add an opponent, then open it to fill in keys, players to know, their coach, film timestamps and notes. Notes can stay coaches-only or be shared with players.",
-  playbook:"<b>Playbook:</b> tap <b>New play</b>. Drag players to where they start, tap <b>Add step</b> for each action, then use Pass and Screen. Preview before you save.",
+  playbook:"<b>Playbook:</b> tap <b>New play</b> and pick Offense or Defense. Drag players to where they start, tap <b>Add step</b> for each action, then use Pass and Screen. Preview before you save.",
   stats:"<b>Stats:</b> import a box score from a spreadsheet under <b>Import</b>. Season stats, leaders and badges update on their own."
 };
 function tipFor(r){if(!isCoach())return"";const t=TIPS[r];const seen=LS.get("cpc_tips_seen")||{};if(!t||seen[r])return"";return `<div class="tip" role="note"><span class="grow">${t}</span><button class="btn sm" data-act="tipOk" data-v="${r}">Got it</button></div>`}
@@ -1560,7 +1573,25 @@ function glossaryView(){
 }
 
 /* ================= Playbook: court drawing & animation ================= */
-const plays=()=>items("plays");const shownPlays=()=>plays().filter(p=>isCoach()||!p.draft);
+const plays=()=>items("plays");
+/* Side (offense/defense), categories, visibility. Plays saved before sides existed are offense (a legacy "Defense" category reads as defense).
+   Hidden from players: our own plays use draft:true (the database rule keeps them from players);
+   built-in Basic plays ship in this page, so a hidden built-in's override carries hide:true and the page filters it. */
+const SIDE_L={offense:"Offense",defense:"Defense"};
+const CATS={offense:["Half court","Transition","Press break","Out of bounds (BLOB)","Out of bounds (SLOB)","Special situations"],defense:["Man-to-man","Zone","Press","Special situations"]};
+const sideOf=p=>p&&(p.side==="defense"||(!p.side&&p.cat==="Defense"))?"defense":"offense";
+const isDefP=p=>sideOf(p)==="defense";
+const isHidden=p=>!!(p&&(p.draft||p.hide));
+const isBasic=p=>!!(p&&DEFMAP.plays[p.id]);
+const pLabel=(p,id)=>isDefP(p)?"X"+id:id;
+const shownPlays=()=>plays().filter(p=>isCoach()||!isHidden(p));
+function playGroups(list,side){const order=CATS[side]||[];const ix=c=>{const i=order.indexOf(c);return i<0?99:i};const cs=[...new Set(list.map(p=>p.cat||"Other"))].sort((a,b)=>ix(a)-ix(b));
+  return cs.map(c=>[c,list.filter(p=>(p.cat||"Other")===c).sort((a,b)=>(isBasic(a)-isBasic(b))||String(a.name).localeCompare(String(b.name)))])}
+let pbSide=null;
+const PEYE='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>';
+const PEYE_OFF='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.7A6.6 6.6 0 0 1 8 3.5C12 3.5 14.5 8 14.5 8a12 12 0 0 1-1.9 2.5M4.3 4.9C2.6 6.1 1.5 8 1.5 8S4 12.5 8 12.5c1.2 0 2.3-.4 3.2-.9M6.6 6.6a2 2 0 0 0 2.8 2.8M2 2l12 12"/></svg>';
+const visBtn=(p,small)=>{const h=isHidden(p);return small?`<button type="button" class="eye ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}" aria-pressed="${!h}" aria-label="Visible to players: ${esc(p.name)}" title="${h?"Hidden from players. Tap to show.":"Visible to players. Tap to hide."}">${h?PEYE_OFF:PEYE}</button>`
+  :`<button type="button" class="btn sm eyeb ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}" aria-pressed="${!h}">${h?PEYE_OFF:PEYE}Visible to players</button>`};
 const SPEEDS={slow:.5,normal:1,fast:1.8};const SPEED_KEY="cpc_pb_speed";const STEP_SECONDS=2.2;
 const savedSpeed=(()=>{try{const v=localStorage.getItem(SPEED_KEY);return SPEEDS[v]?v:"normal"}catch(e){return"normal"}})();
 let curPlay=null;let pb={t:0,playing:false,sel:null,speed:SPEEDS[savedSpeed],speedKey:savedSpeed,raf:0,last:0,seg:-2};let ed=null;let drag=null;
@@ -1574,15 +1605,25 @@ function bez(a,c,b,f){const u=1-f;return[u*u*a[0]+2*u*f*c[0]+f*f*b[0],u*u*a[1]+2
 const mid=(a,b)=>[(a[0]+b[0])/2,(a[1]+b[1])/2];
 function posAt(play,t,id){const ph=play.phases||[];const N=ph.length;if(!N)return[0,0];const at=i=>(ph[i]&&ph[i].pos&&ph[i].pos[id])||[0,0];if(N===1)return at(0);const k=clamp(Math.floor(t)||0,0,N-2);const f=ease(clamp(t-k,0,1));const a=at(k),b=at(k+1);const c=curveOf(ph[k+1],id);if(c)return bez(a,c,b,f);return[lerp(a[0],b[0],f),lerp(a[1],b[1],f)]}
 function ballAt(play,t){const N=play.phases.length;if(N===1)return posAt(play,0,play.phases[0].ball);const k=Math.min(Math.floor(t),N-2);const hA=play.phases[k].ball,hB=play.phases[k+1].ball;if(hA===hB)return posAt(play,t,hA);const g=ease(clamp((t-k-.4)/.6,0,1));const a=posAt(play,t,hA),b=posAt(play,t,hB);return[lerp(a[0],b[0],g),lerp(a[1],b[1],g)]}
+/* The other team (optional): phases[k].opp = {1:[x,y],..} drawn as small hollow numbered markers; phases[k].ballAt = which of them has the ball.
+   A step without opp/ballAt keeps the last step's. On defense plays the five circles are our defenders X1-X5. */
+const hasOpp=play=>(play.phases||[]).some(ph=>ph&&ph.opp&&typeof ph.opp==="object");
+const oppBall=play=>hasOpp(play)&&(play.phases||[]).some(ph=>ph&&ph.ballAt);
+function oppOf(play,i){const ph=play.phases||[];for(let j=Math.min(i,ph.length-1);j>=0;j--)if(ph[j]&&ph[j].opp&&typeof ph[j].opp==="object")return ph[j].opp;return null}
+function ballAtOf(play,i){const ph=play.phases||[];for(let j=Math.min(i,ph.length-1);j>=0;j--){const b=ph[j]&&ph[j].ballAt;if(b)return b}return null}
+const okPt=p=>Array.isArray(p)&&p.length===2&&isFinite(p[0])&&isFinite(p[1]);
+function oppAt(play,t,id){const N=(play.phases||[]).length;if(!N)return null;const at=i=>{const o=oppOf(play,i);return o&&okPt(o[id])?o[id]:null};if(N===1)return at(0);const k=clamp(Math.floor(t)||0,0,N-2);const f=ease(clamp(t-k,0,1));const a=at(k),b=at(k+1);if(!a||!b)return a||b;return[lerp(a[0],b[0],f),lerp(a[1],b[1],f)]}
+function ballPos(play,t){if(!oppBall(play))return ballAt(play,t);const N=play.phases.length;const k=N===1?0:clamp(Math.floor(t)||0,0,N-2);const hA=ballAtOf(play,k),hB=N===1?hA:ballAtOf(play,k+1);
+  if(!hA||!hB||hA===hB)return oppAt(play,t,hA||hB);const g=ease(clamp((t-k-.4)/.6,0,1));const a=oppAt(play,t,hA),b=oppAt(play,t,hB);if(!a||!b)return a||b;return[lerp(a[0],b[0],g),lerp(a[1],b[1],g)]}
 function halfCourtLines(){const L="var(--court-line)";return `<rect x="0" y="0" width="500" height="470" fill="none" stroke="${L}" stroke-width="2"/><rect x="170" y="0" width="160" height="190" fill="var(--court-paint)" stroke="${L}" stroke-width="2"/><path d="M190 190 A60 60 0 0 0 310 190" fill="none" stroke="${L}" stroke-width="2"/><path d="M190 190 A60 60 0 0 1 310 190" fill="none" stroke="${L}" stroke-width="2" stroke-dasharray="7 7"/><path d="M52.5 0 L52.5 52.5 A197.5 197.5 0 0 0 447.5 52.5 L447.5 0" fill="none" stroke="${L}" stroke-width="2"/><path d="M210 52.5 A40 40 0 0 0 290 52.5" fill="none" stroke="${L}" stroke-width="1.5"/><line x1="220" y1="40" x2="280" y2="40" stroke="#e7ecf2" stroke-width="3"/><circle cx="250" cy="52.5" r="7.5" fill="none" stroke="#e07a2f" stroke-width="2.5"/><path d="M190 470 A60 60 0 0 1 310 470" fill="none" stroke="${L}" stroke-width="2"/>`}
-function courtSVG(full){
+function courtSVG(full,def){
   if(!full)return `<rect x="0" y="-40" width="500" height="40" fill="rgba(255,255,255,.03)"/>${halfCourtLines()}<text x="250" y="-14" text-anchor="middle" font-size="11" fill="rgba(194,176,138,.6)" font-family="Manrope,sans-serif" letter-spacing="2">BASELINE · OUT OF BOUNDS</text>`;
   const L="var(--court-line)";
   return `<rect x="-40" y="0" width="40" height="500" fill="rgba(255,255,255,.03)"/><rect x="940" y="0" width="40" height="500" fill="rgba(255,255,255,.03)"/><rect x="0" y="0" width="940" height="500" fill="none" stroke="${L}" stroke-width="2"/><line x1="470" y1="0" x2="470" y2="500" stroke="${L}" stroke-width="2"/><circle cx="470" cy="250" r="60" fill="none" stroke="${L}" stroke-width="2"/>
   <rect x="0" y="170" width="190" height="160" fill="var(--court-paint)" stroke="${L}" stroke-width="2"/><rect x="750" y="170" width="190" height="160" fill="var(--court-paint)" stroke="${L}" stroke-width="2"/><circle cx="190" cy="250" r="60" fill="none" stroke="${L}" stroke-width="2"/><circle cx="750" cy="250" r="60" fill="none" stroke="${L}" stroke-width="2"/>
   <path d="M0 52.5 L52.5 52.5 A197.5 197.5 0 0 1 52.5 447.5 L0 447.5" fill="none" stroke="${L}" stroke-width="2"/><path d="M940 52.5 L887.5 52.5 A197.5 197.5 0 0 0 887.5 447.5 L940 447.5" fill="none" stroke="${L}" stroke-width="2"/>
   <line x1="40" y1="220" x2="40" y2="280" stroke="#e7ecf2" stroke-width="3"/><circle cx="52.5" cy="250" r="7.5" fill="none" stroke="#e07a2f" stroke-width="2.5"/><line x1="900" y1="220" x2="900" y2="280" stroke="#e7ecf2" stroke-width="3"/><circle cx="887.5" cy="250" r="7.5" fill="none" stroke="#e07a2f" stroke-width="2.5"/>
-  <text x="880" y="490" text-anchor="end" font-size="12" fill="rgba(194,176,138,.6)" font-family="Manrope,sans-serif" letter-spacing="2">ATTACKING →</text>`;
+  <text x="880" y="490" text-anchor="end" font-size="12" fill="rgba(194,176,138,.6)" font-family="Manrope,sans-serif" letter-spacing="2">${def?"THEY ATTACK →":"ATTACKING →"}</text>`;
 }
 function shorten(a,b,r1,r2){const dx=b[0]-a[0],dy=b[1]-a[1],L=Math.hypot(dx,dy)||1;return[[a[0]+dx/L*r1,a[1]+dy/L*r1],[b[0]-dx/L*r2,b[1]-dy/L*r2],dx/L,dy/L,L]}
 /* trim a quadratic path at both ends along its end tangents */
@@ -1619,11 +1660,18 @@ function wrapCut(play,k,id,tgt){const j=useSeg(play,k,tgt);if(j<0)return false;c
   const f=clamp(cl.f,.2,.8);let n=[cl.q[0]-S[0],cl.q[1]-S[1]];let nl=Math.hypot(n[0],n[1]);if(nl<1){n=[-cl.t[1],cl.t[0]];nl=1}n=[n[0]/nl,n[1]/nl];
   const Q=[S[0]+n[0]*want,S[1]+n[1]*want],u=1-f;const c=[(Q[0]-u*u*P.a[0]-f*f*P.b[0])/(2*u*f),(Q[1]-u*u*P.a[1]-f*f*P.b[1])/(2*u*f)];
   B.curve=B.curve||{};B.curve[tgt]=[Math.round(c[0]),Math.round(c[1])];return true}
+/* the other team's moves (thin, faint) and passes (gold dashes between hollow markers) */
+function oppArrows(play,k){if(!hasOpp(play)||k<0||k>=play.phases.length-1)return"";const A=oppOf(play,k)||{},B=oppOf(play,k+1)||{};const bA=ballAtOf(play,k),bB=ballAtOf(play,k+1);let out="";const C="rgba(231,236,242,.55)";
+  for(const id of IDS){const a=A[id],b=B[id];if(!okPt(a)||!okPt(b)||Math.hypot(b[0]-a[0],b[1]-a[1])<6)continue;const [s,e,ux,uy,L]=shorten(a,b,14,16);
+    if(bA===id&&bB===id){const n=Math.max(4,Math.floor(L/12));let d=`M${s[0]},${s[1]}`;for(let i=1;i<n;i++){const f=i/n,px=lerp(s[0],e[0],f),py=lerp(s[1],e[1],f),o=(i%2?4:-4);d+=` L${px-uy*o},${py+ux*o}`}d+=` L${e[0]},${e[1]}`;out+=`<path d="${d}" fill="none" stroke="${C}" stroke-width="1.6" marker-end="url(#aho)"/>`}
+    else out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="${C}" stroke-width="1.6" marker-end="url(#aho)"/>`}
+  if(bA&&bB&&bA!==bB&&okPt(B[bA])&&okPt(B[bB])){const [s,e]=shorten(B[bA],B[bB],15,19);out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="var(--gold-2)" stroke-width="2.2" stroke-dasharray="7 6" marker-end="url(#ahp)" opacity=".9"/>`}
+  return out}
 function arrowsFor(play,k,sel){
-  if(k<0||k>=play.phases.length-1)return"";const A=play.phases[k],B=play.phases[k+1];let out="";const sf=B.scrFor||{};
+  if(k<0||k>=play.phases.length-1)return"";const A=play.phases[k],B=play.phases[k+1];let out=oppArrows(play,k);const sf=B.scrFor||{};const ob=oppBall(play);
   for(const id of IDS){const a=A.pos[id],b=B.pos[id];if(!a||!b)continue;const moved=Math.hypot(b[0]-a[0],b[1]-a[1])>=6;const scr=(B.screens||[]).includes(id);if(!moved&&!scr)continue;
     const tgt=scr&&sf[id]&&sf[id]!==id&&A.pos[sf[id]]?sf[id]:null;
-    const op=sel&&sel!==id&&sel!==tgt?.22:1;const drb=A.ball===id&&B.ball===id;const cv=moved?curveOf(B,id):null;
+    const op=sel&&sel!==id&&sel!==tgt?.22:1;const drb=!ob&&A.ball===id&&B.ball===id;const cv=moved?curveOf(B,id):null;
     if(moved){
       if(cv){const [s,e]=trimQ(a,cv,b,18,scr?18:20);
         if(drb){const n=Math.max(4,Math.floor(qLen(s,cv,e)/14));let d=`M${s[0]},${s[1]}`;for(let i=1;i<n;i++){const f=i/n,p=bez(s,cv,e,f);const tx=2*(1-f)*(cv[0]-s[0])+2*f*(e[0]-cv[0]),ty=2*(1-f)*(cv[1]-s[1])+2*f*(e[1]-cv[1]);const tl=Math.hypot(tx,ty)||1,ux=tx/tl,uy=ty/tl,o=(i%2?6:-6);d+=` L${p[0]-uy*o},${p[1]+ux*o}`}d+=` L${e[0]},${e[1]}`;out+=`<path d="${d}" fill="none" stroke="#f2e6cf" stroke-width="2.2" marker-end="url(#ah)" opacity="${op}"/>`}
@@ -1634,29 +1682,34 @@ function arrowsFor(play,k,sel){
         else out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="#f2e6cf" stroke-width="2.2" ${scr?"":'marker-end="url(#ah)"'} opacity="${op}"/>`}}
     if(scr)out+=screenBar(b,dirPt(b,screenDir(play,k+1,id)),op,false)}
   if(k>=1){for(const id of (A.screens||[])){if(!A.pos[id])continue;const a=A.pos[id],b=B.pos[id];const stays=(B.screens||[]).includes(id)&&b&&Math.hypot(b[0]-a[0],b[1]-a[1])<6;if(stays)continue;const op=sel&&sel!==id?.15:.45;out+=screenBar(a,dirPt(a,screenDir(play,k,id)),op,false)}}
-  if(A.ball!==B.ball){const a=B.pos[A.ball],b=B.pos[B.ball];const [s,e]=shorten(a,b,18,22);const op=sel&&sel!==A.ball&&sel!==B.ball?.22:1;out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="var(--gold-2)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#ahp)" opacity="${op}"/>`}
+  if(!ob&&A.ball!==B.ball&&B.pos[A.ball]&&B.pos[B.ball]){const a=B.pos[A.ball],b=B.pos[B.ball];const [s,e]=shorten(a,b,18,22);const op=sel&&sel!==A.ball&&sel!==B.ball?.22:1;out+=`<line x1="${s[0]}" y1="${s[1]}" x2="${e[0]}" y2="${e[1]}" stroke="var(--gold-2)" stroke-width="2.4" stroke-dasharray="7 6" marker-end="url(#ahp)" opacity="${op}"/>`}
   return out;
 }
-function playSVG(play,mode){
-  return `<svg class="court ${mode?"mode-"+mode:""}" id="court" viewBox="${isFull(play)?"-40 0 1020 500":"0 -40 500 510"}" role="img" aria-label="Play diagram: ${esc(play.name||"New play")}">
-  <defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f2e6cf"/></marker><marker id="ahp" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c2b08a"/></marker></defs>
-  ${courtSVG(isFull(play))}<g id="ghosts"></g><g id="arrows"></g>
-  ${(()=>{const big=window.innerWidth<=820&&mode;const k=big?(isFull(play)?1.7:1.35):1;plR=Math.round(17*k);return ["1","2","3","4","5"].map(id=>`<g class="pl" data-p="${id}" tabindex="0" role="button" aria-label="Position ${id}"><circle r="${Math.round(30*k)}" fill="transparent"/><circle class="ring" r="${Math.round(17*k)}" fill="#c2b08a" stroke="#fff" stroke-width="2"/><text y="${Math.round(6*k)}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="${Math.round(19*k)}" fill="#1c3045" pointer-events="none">${id}</text></g>`).join("")})()}
+const DEF_FILL="#8fb8de",DEF_TXT="#0d1b2a";
+function playSVG(play,mode){const dv=isDefP(play);const op=hasOpp(play);
+  return `<svg class="court ${mode?"mode-"+mode:""} ${dv?"defp":""}" id="court" viewBox="${isFull(play)?"-40 0 1020 500":"0 -40 500 510"}" role="img" aria-label="${dv?"Defense":"Play"} diagram: ${esc(play.name||"New play")}">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#f2e6cf"/></marker><marker id="ahp" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c2b08a"/></marker><marker id="aho" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="rgba(231,236,242,.6)"/></marker></defs>
+  ${courtSVG(isFull(play),dv)}<g id="ghosts"></g><g id="arrows"></g>
+  ${(()=>{const big=window.innerWidth<=820&&mode;const k=big?(isFull(play)?1.7:1.35):1;plR=Math.round(17*k);
+    const opps=op?`<g id="opps">${IDS.map(id=>`<g class="opm" data-o="${id}" ${mode?`tabindex="-1" role="button" aria-label="Offense ${id}"`:'pointer-events="none"'}>${mode?`<circle r="${Math.round(24*k)}" fill="transparent"/>`:""}<circle r="${Math.round(13*k)}" fill="rgba(10,20,32,.55)" stroke="rgba(231,236,242,.8)" stroke-width="${dv?2:1.6}"/><text y="${Math.round(5*k)}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="${Math.round(14*k)}" fill="rgba(231,236,242,.9)" pointer-events="none">${dv?id:"X"+id}</text></g>`).join("")}</g>`:"";
+    return opps+IDS.map(id=>`<g class="pl" data-p="${id}" tabindex="0" role="button" aria-label="${dv?"Defender X"+id:"Position "+id}"><circle r="${Math.round(30*k)}" fill="transparent"/><circle class="ring" r="${Math.round(17*k)}" fill="${dv?DEF_FILL:"#c2b08a"}" stroke="#fff" stroke-width="2"/><text y="${Math.round((dv?5:6)*k)}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,sans-serif" font-weight="700" font-size="${Math.round((dv?16:19)*k)}" fill="${dv?DEF_TXT:"#1c3045"}" pointer-events="none">${dv?"X"+id:id}</text></g>`).join("")})()}
   <g id="ball" pointer-events="none"><circle r="7.5" fill="#e07a2f" stroke="#7a3a10" stroke-width="1.5"/><path d="M-7.5 0h15M0-7.5v15" stroke="#7a3a10" stroke-width="1"/></g>${mode?'<g id="bends"></g>':""}</svg>
-  <div class="keylegend"><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#f2e6cf" stroke-width="2"/><path d="M19 0L26 4L19 8z" fill="#f2e6cf"/></svg>Cut</span><span><svg width="26" height="10"><path d="M0 5L5 1L10 9L15 1L20 5" fill="none" stroke="#f2e6cf" stroke-width="2"/><path d="M19 1L26 5L19 9z" fill="#f2e6cf"/></svg>Dribble</span><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#c2b08a" stroke-width="2" stroke-dasharray="5 4"/><path d="M19 0L26 4L19 8z" fill="#c2b08a"/></svg>Pass</span><span><svg width="34" height="12"><line x1="0" y1="6" x2="14" y2="6" stroke="#f2e6cf" stroke-width="2"/><line x1="14" y1="0" x2="14" y2="12" stroke="#f2e6cf" stroke-width="3"/><line x1="18" y1="6" x2="34" y2="6" stroke="#f2e6cf" stroke-width="1.5" stroke-dasharray="2 4" opacity=".6"/></svg>Screen</span></div>`;
+  <div class="keylegend">${dv?`<span><svg width="16" height="16"><circle cx="8" cy="8" r="7" fill="${DEF_FILL}"/></svg>Our defenders (X)</span>${op?'<span><svg width="16" height="16"><circle cx="8" cy="8" r="6" fill="none" stroke="#e7ecf2" stroke-width="1.5"/></svg>Offense</span>':""}`:""}<span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#f2e6cf" stroke-width="2"/><path d="M19 0L26 4L19 8z" fill="#f2e6cf"/></svg>${dv?"Move":"Cut"}</span><span><svg width="26" height="10"><path d="M0 5L5 1L10 9L15 1L20 5" fill="none" stroke="#f2e6cf" stroke-width="2"/><path d="M19 1L26 5L19 9z" fill="#f2e6cf"/></svg>Dribble</span><span><svg width="26" height="8"><line x1="0" y1="4" x2="20" y2="4" stroke="#c2b08a" stroke-width="2" stroke-dasharray="5 4"/><path d="M19 0L26 4L19 8z" fill="#c2b08a"/></svg>Pass</span>${dv?"":`<span><svg width="34" height="12"><line x1="0" y1="6" x2="14" y2="6" stroke="#f2e6cf" stroke-width="2"/><line x1="14" y1="0" x2="14" y2="12" stroke="#f2e6cf" stroke-width="3"/><line x1="18" y1="6" x2="34" y2="6" stroke="#f2e6cf" stroke-width="1.5" stroke-dasharray="2 4" opacity=".6"/></svg>Screen</span>`}</div>`;
 }
 function paint(play,t,sel,seg,opts={}){
   const svg=$("#court");if(!svg)return;
   ["1","2","3","4","5"].forEach(id=>{const g=svg.querySelector(`[data-p="${id}"]`);const [x,y]=posAt(play,t,id);g.setAttribute("transform",`translate(${x},${y})`);g.style.opacity=sel&&sel!==id&&!opts.editing?.35:1;const r=g.querySelector(".ring");r.setAttribute("stroke",opts.highlight===id?"#e07a2f":"#fff");r.setAttribute("stroke-width",opts.highlight===id?"4":"2")});
-  const [bx,by]=ballAt(play,t);$("#ball").setAttribute("transform",`translate(${bx+13},${by-13})`);
+  svg.querySelectorAll(".opm").forEach(g=>{const p=oppAt(play,t,g.dataset.o);if(!p){g.style.display="none";return}g.style.display="";g.setAttribute("transform",`translate(${p[0]},${p[1]})`);const c=g.querySelectorAll("circle");const ring=c[c.length-1];ring.setAttribute("stroke",opts.highlight==="o"+g.dataset.o?"#e07a2f":"rgba(231,236,242,.8)")});
+  const bp=ballPos(play,t);const bl=$("#ball");if(bp){const off=oppBall(play)?10:13;bl.style.display="";bl.setAttribute("transform",`translate(${bp[0]+off},${bp[1]-off})`)}else bl.style.display="none";
   $("#arrows").innerHTML=arrowsFor(play,seg,sel);
-  const gh=$("#ghosts");gh.innerHTML=opts.ghostStep!=null&&opts.ghostStep>=0?["1","2","3","4","5"].map(id=>{const [x,y]=play.phases[opts.ghostStep].pos[id];return `<g opacity=".28"><circle cx="${x}" cy="${y}" r="15" fill="none" stroke="#c2b08a" stroke-width="2" stroke-dasharray="4 3"/><text x="${x}" y="${y+5}" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="15" fill="#c2b08a">${id}</text></g>`}).join(""):"";
+  const gh=$("#ghosts");gh.innerHTML=opts.ghostStep!=null&&opts.ghostStep>=0?["1","2","3","4","5"].map(id=>{const [x,y]=play.phases[opts.ghostStep].pos[id];return `<g opacity=".28"><circle cx="${x}" cy="${y}" r="15" fill="none" stroke="#c2b08a" stroke-width="2" stroke-dasharray="4 3"/><text x="${x}" y="${y+5}" text-anchor="middle" font-family="Barlow Condensed,sans-serif" font-weight="700" font-size="15" fill="#c2b08a">${pLabel(play,id)}</text></g>`}).join(""):"";
 }
 function viewerSeg(play){const N=play.phases.length;if(N<2)return -1;if(pb.playing)return Math.min(Math.floor(pb.t),N-2);return pb.t>=N-1-1e-6?-1:Math.floor(pb.t+1e-6)}
 const speedSeg=()=>`<div class="seg" role="group" aria-label="Speed">${[["slow","Slow"],["normal","Normal"],["fast","Fast"]].map(([k,l])=>`<button type="button" data-act="pbSpeed" data-v="${k}" class="${pb.speedKey===k?"on":""}" aria-pressed="${pb.speedKey===k}">${l}</button>`).join("")}</div>`;
 /* caption for the action whose arrows are drawn (step numbers match the builder) */
 function capFor(play,seg,t){const ph=play.phases||[];const N=ph.length;if(!N)return"";if(t<1e-6&&!pb.playing&&ph[0]&&ph[0].cap)return ph[0].cap;const i=seg>=0?seg+1:N-1;return(ph[i]&&ph[i].cap)||""}
-const getPlay=()=>{const all=shownPlays();return all.find(p=>p.id===curPlay)||all[0]};
+const firstOf=(all,side)=>{const g=playGroups(all.filter(x=>sideOf(x)===side),side);return g.length?g[0][1][0]:null};
+const getPlay=()=>{const all=shownPlays();const p=all.find(x=>x.id===curPlay);if(p&&(!pbSide||sideOf(p)===pbSide))return p;return firstOf(all,pbSide||(p?sideOf(p):"offense"))};
 const PLAY='<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 1.5v11l9-5.5z" fill="currentColor"/></svg>';
 const PAUSE='<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2h3v10H3zM8 2h3v10H8z" fill="currentColor"/></svg>';
 const REPLAY='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 7a4.5 4.5 0 1 0 1.4-3.3"/><path d="M2 1.5v3h3"/></svg>';
@@ -1666,21 +1719,26 @@ function stopPlayback(){pb.playing=false;cancelAnimationFrame(pb.raf)}
 
 /* ================= Playbook views ================= */
 function playbookView(){
-  const all=shownPlays();if(!all.find(p=>p.id===curPlay))curPlay=all[0]&&all[0].id;
-  const cats=[...new Set(all.map(p=>p.cat))];
-  const list=`<div class="card plist">${cats.map(c=>`<div class="cat">${esc(c)}</div>${all.filter(p=>p.cat===c).map(p=>`<button data-act="pickPlay" data-id="${esc(p.id)}" class="${p.id===curPlay&&!ed?"on":""}">${esc(p.name)}<span class="row" style="gap:4px;flex-wrap:nowrap">${p.draft?'<span class="chip warn">Draft</span>':""}<span class="chip">${isFull(p)?"Full":"Half"}</span></span></button>`).join("")}`).join("")}
+  const all=shownPlays();{const c=all.find(p=>p.id===curPlay);if(!pbSide)pbSide=c?sideOf(c):"offense"}
+  const gp=getPlay();curPlay=gp?gp.id:null;
+  const bySide={offense:all.filter(p=>!isDefP(p)),defense:all.filter(isDefP)};
+  const row=p=>`<div class="prow"><button type="button" data-act="pickPlay" data-id="${esc(p.id)}" class="ppick ${p.id===curPlay&&!ed?"on":""}"><span class="pnm">${esc(p.name)}</span><span class="pchips">${isBasic(p)?'<span class="chip basic">Basic</span>':""}${isCoach()&&isHidden(p)?'<span class="chip warn">Hidden from players</span>':""}<span class="chip">${isFull(p)?"Full":"Half"}</span></span></button>${isCoach()?visBtn(p,true):""}</div>`;
+  const tabs=`<div class="seg pbtabs" role="tablist" aria-label="Offense or defense">${["offense","defense"].map(s=>`<button type="button" role="tab" data-act="pbSide" data-v="${s}" class="${pbSide===s?"on":""}" aria-selected="${pbSide===s}">${SIDE_L[s]} <span class="num cnt">${bySide[s].length}</span></button>`).join("")}</div>`;
+  const groups=playGroups(bySide[pbSide],pbSide);
+  const list=`<div class="card plist">${tabs}<div class="pgroups">${groups.map(([c,ps])=>`<div class="cat">${esc(c)}</div>${ps.map(row).join("")}`).join("")||`<p class="small muted pnone">No ${pbSide} plays yet.</p>`}</div>
    ${isCoach()?`<div style="padding:10px 6px 4px" class="newp"><button class="btn gold sm" data-act="newPlay" style="width:100%">${PLUS} New play</button></div>`:""}</div>`;
   return `<div class="head"><div><div class="eyebrow">Visual playbook</div><h1>${ed?(ed.isNew?"New play":"Edit play"):"Playbook"}</h1><p>${ed?"Set where everyone starts, then add a step for each action.":"Press play to run it. Tap a position to follow that player."}</p></div></div>
   <div class="pbwrap">${ed?"":list}<div ${ed?'style="grid-column:1/-1"':""}>${ed?builderView():viewerView()}</div></div>`;
 }
 function viewerView(){
-  const play=getPlay();if(!play)return `<div class="empty">No plays yet.${isCoach()?" Tap New play to build one.":""}</div>`;const N=play.phases.length;
+  const play=getPlay();if(!play)return `<div class="empty">No ${pbSide==="defense"?"defensive":"offensive"} plays yet.${isCoach()?" Tap New play to build one.":""}</div>`;const N=play.phases.length;const dv=isDefP(play);
   return `<div class="stage ${isFull(play)?"wide":""}"><div><div class="courtbox">${playSVG(play)}</div>
     <div class="controls"><button class="btn icon" data-act="pbPrev" aria-label="Previous step"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2h2v10H3zM12 2v10L5.5 7z" fill="currentColor"/></svg></button><button class="btn gold icon" id="pbplay" data-act="pbPlay" aria-label="Play or pause">${PLAY}</button><button class="btn icon" data-act="pbNext" aria-label="Next step"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M9 2h2v10H9zM2 2v10l6.5-5z" fill="currentColor"/></svg></button>
     <span class="stepl" id="stepl">Step 1 of ${N}</span><input type="range" id="scrub" min="0" max="${N-1}" step="0.01" value="${pb.t}" aria-label="Scrub through the play">
     ${speedSeg()}</div>${(play.phases||[]).some(ph=>ph&&ph.cap)?'<div class="pbcap" id="pbcap" aria-live="polite"></div>':""}</div>
-   <div><div class="spread" style="margin-bottom:10px"><div><div class="eyebrow">${esc(play.cat)} · ${isFull(play)?"Full court":"Half court"}${play.draft?" · Draft (coaches only)":""}</div><h2 style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2></div><div class="row">${ebtn("editPlay",`data-id="${esc(play.id)}"`,"Edit play")}${isCoach()?`<button class="btn sm" data-act="dupPlay" data-id="${esc(play.id)}">Duplicate play</button>`:""}${isCoach()?`<button class="btn sm del" data-act="del" data-k="play" data-id="${esc(play.id)}" aria-label="Delete play">${TRASH}</button>`:""}</div></div>
-    ${panel("play-roles","Positions & roles",pb.sel?"Following "+pb.sel:"Tap one to follow it",`<div class="legend">${["1","2","3","4","5"].map(id=>`<button class="prole ${pb.sel===id?"on":""}" data-act="pbSel" data-v="${id}"><span class="badge">${id}</span><span><b>Position ${id}</b><span>${esc(play.roles&&play.roles[id]||"No role written yet.")}</span></span></button>`).join("")}</div>`)}
+   <div><div class="spread" style="margin-bottom:10px;align-items:flex-start"><div><div class="eyebrow">${SIDE_L[sideOf(play)]} · ${esc(play.cat||"Other")} · ${isFull(play)?"Full court":"Half court"}</div><h2 style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2>${isBasic(play)||isCoach()?`<div class="row" style="gap:6px;margin-top:6px">${isCoach()?visBtn(play,false):""}${isBasic(play)?'<span class="chip basic">Basic</span>':""}${isCoach()&&isHidden(play)?'<span class="chip warn">Hidden from players</span>':""}</div>`:""}</div>
+    <div class="row">${ebtn("editPlay",`data-id="${esc(play.id)}"`,"Edit play")}${isCoach()?`<button class="btn sm" data-act="dupPlay" data-id="${esc(play.id)}">Duplicate play</button>`:""}${isCoach()?`<button class="btn sm del" data-act="del" data-k="play" data-id="${esc(play.id)}" aria-label="Delete play">${TRASH}</button>`:""}</div></div>
+    ${panel("play-roles",dv?"Defenders & jobs":"Positions & roles",pb.sel?"Following "+pLabel(play,pb.sel):"Tap one to follow it",`<div class="legend">${["1","2","3","4","5"].map(id=>`<button class="prole ${pb.sel===id?"on":""}" data-act="pbSel" data-v="${id}"><span class="badge ${dv?"dbadge":""}">${pLabel(play,id)}</span><span><b>${dv?"Defender X"+id:"Position "+id}</b><span>${esc(play.roles&&play.roles[id]||"No role written yet.")}</span></span></button>`).join("")}</div>`)}
     ${panel("play-notes","Notes & reads",play.notes?"":"None yet",play.notes?`<p style="margin:0;white-space:pre-wrap">${esc(play.notes)}</p>`:'<p class="muted" style="margin:0">No notes yet.</p>')}</div></div>`;
 }
 /* --- Play builder: Move / Pass / Screen, one step at a time --- */
@@ -1728,13 +1786,175 @@ const BASE_SETS=[
  {id:"base-pb212",cat:"Press break",name:"Press break 2-1-2",desc:"4 inbounds; 1 and 2 back, 5 in the middle at half court, 3 deep.",court:"full",phases:[PH([[150,140],[150,360],[700,90],[-18,320],[440,250]],"4")],
   roles:{1:"Back. Get open for the inbound.",2:"Back. Get open for the inbound.",3:"Deep. Stay long for the pass over the top.",4:"Inbounder, then trailer behind the ball.",5:"Middle. Flash to the ball at half court."}}
 ];
+BASE_SETS.forEach(t=>{t.side="offense";if(t.cat==="Out of bounds")t.cat=t.id==="base-lineslob"?"Out of bounds (SLOB)":"Out of bounds (BLOB)"});
+/* --- Basic plays: built-in library (DEF items in "plays", ids pb-<slug>). Coaches can edit (saves an override), hide or delete them. ---
+   Defense phases: pos = our defenders X1-X5, opp = their offense (hollow markers), ballAt = which offensive player has the ball. */
+const DP=(def,opp,ballAt,x={})=>({pos:PP(def),opp:PP(opp),ballAt,ball:"1",screens:[],...x});
+const O5=[[250,310],[430,210],[70,210],[462,32],[38,32]];
+const BASIC_PLAYS=[
+ /* ---------- OFFENSE ---------- */
+ {id:"pb-pass-and-cut",side:"offense",cat:"Half court",name:"Pass & cut (give-and-go)",court:"half",phases:[
+   PH(O5,"1",{cap:"Basic motion, 5-out: everyone outside the arc and the lane open."}),
+   PH(O5,"2",{cap:"1 passes to 2 on the wing."}),
+   PH([[290,115],[430,210],[250,305],[462,32],[70,210]],"2",{curve:{1:[302,215]},cap:"1 cuts hard to the rim. 3 fills the top; 5 lifts to the left wing."}),
+   PH([[262,78],[430,210],[250,305],[462,32],[70,210]],"1",{cap:"2 hits 1 on the cut for the layup. No pass? 1 fills the open corner and we go again."})],
+  roles:{1:"Pass to the wing, then cut hard to the rim in front of your man (give-and-go).",2:"Catch on the wing and look for 1 on the cut first.",3:"Fill the top when 1 cuts.",4:"Right corner. Stay wide; be ready for the kick-out.",5:"Lift from the corner to fill the empty wing."},
+  notes:"Every pass is followed by a cut, and every open spot gets filled.\nCut in front of your man if he turns his head; back cut if he overplays."},
+ {id:"pb-dribble-drive",side:"offense",cat:"Half court",name:"Dribble drive (drive & kick)",court:"half",phases:[
+   PH(O5,"1",{cap:"5-out. Stay wide so the driving gaps stay open."}),
+   PH([[310,150],[430,210],[250,300],[462,32],[70,205]],"1",{cap:"1 attacks the gap. 3 rotates up to the top behind him; 5 lifts to the wing."}),
+   PH([[310,150],[430,210],[250,300],[462,32],[70,205]],"2",{cap:"2's man helps on the drive, so 1 kicks it out to 2."}),
+   PH([[38,32],[430,210],[250,300],[462,32],[70,205]],"2",{curve:{1:[190,55]},cap:"1 empties to the open corner. 2 shoots, or attacks the closeout and we drive and kick again."})],
+  roles:{1:"Attack the gap hard. Finish, or kick to the shooter whose man helps.",2:"Right wing. Stay wide; catch and shoot or attack the closeout.",3:"Left wing. Rotate up behind the drive to the top (safety and outlet).",4:"Right corner. Stay deep in the corner for the drift pass.",5:"Left corner. Lift to the wing when 3 rotates up."},
+  notes:"Drive to score, not to pass. Ball drives at you: move away to an open spot. Ball drives away: fill behind.\nKick to whoever's man helps."},
+ {id:"pb-horns-pnr",side:"offense",cat:"Half court",name:"Horns pick-and-roll",court:"half",phases:[
+   PH([[250,310],[462,32],[38,32],[168,192],[332,192]],"1",{cap:"Horns: bigs at both elbows, shooters in both corners."}),
+   PH([[240,318],[462,32],[38,32],[168,192],[288,290]],"1",{screens:["5"],scrFor:{5:"1"},cap:"5 steps up and sets the ball screen; 1 sets his man up the other way."}),
+   PH([[370,225],[462,32],[38,32],[175,295],[275,90]],"1",{curve:{1:[345,355]},cap:"1 comes off tight. 5 rolls to the rim; 4 pops to the top."}),
+   PH([[370,225],[462,32],[38,32],[175,295],[268,80]],"5",{cap:"Read the help: 5 on the roll, 4 on the pop, or the corner shooter whose man helps."})],
+  roles:{1:"Set your man up, come off the screen shoulder to shoulder, read the big.",2:"Right corner. Spot up; your man may help on the roll.",3:"Left corner. Spot up for the skip pass.",4:"Left elbow. Pop to the top when 5 screens; shoot or swing.",5:"Right elbow. Screen 1's man, then roll hard to the rim with your hands up."},
+  notes:"Horns can go either way: the big on the side 1 picks sets the screen.\nIf they switch, attack the mismatch."},
+ {id:"pb-spread-pnr",side:"offense",cat:"Half court",name:"Spread pick-and-roll",court:"half",phases:[
+   PH([[250,330],[462,32],[38,32],[70,210],[352,80]],"1",{cap:"4-out spacing with 5 on the right block. Corners filled."}),
+   PH([[250,330],[462,32],[38,32],[70,210],[290,302]],"1",{screens:["5"],scrFor:{5:"1"},cap:"5 sprints up and sets a high ball screen on 1's right side."}),
+   PH([[375,235],[462,32],[38,32],[70,210],[280,90]],"1",{curve:{1:[350,370]},cap:"1 turns the corner. 5 rolls hard to the rim (or pops if his man drops)."}),
+   PH([[375,235],[458,38],[38,32],[70,210],[280,90]],"2",{cap:"The corner defender tags the roller, so 1 kicks to 2 for the corner three."})],
+  roles:{1:"Wait for the screen, come off tight, attack the big. Hit the open man.",2:"Right corner. Your man has to help on the roll: be ready to shoot.",3:"Left corner. Spot up for the skip pass.",4:"Left wing. Stay spaced; you're the reversal.",5:"Sprint up, screen 1's man, then roll to the rim. Pop if your man drops deep."},
+  notes:"Spread the floor so only one defender can help.\nBig drops: pull-up or pop. Big shows: hit the roll. Corner helps: corner three."},
+ {id:"pb-flex",side:"offense",cat:"Half court",name:"Flex (flex cut + down screen)",court:"half",phases:[
+   PH([[170,290],[330,290],[462,32],[38,32],[150,75]],"1",{cap:"Flex set: 1 and 2 up top, 5 on the left block, 4 and 3 in the corners."}),
+   PH([[170,290],[330,290],[462,32],[38,32],[150,75]],"2",{cap:"1 reverses the ball to 2."}),
+   PH([[170,290],[330,290],[462,32],[345,78],[150,75]],"2",{screens:["5"],scrFor:{5:"4"},curve:{4:[165,15]},cap:"5 sets the flex screen; 4 cuts baseline off it to the ball-side block. 2 looks inside."}),
+   PH([[178,128],[330,290],[462,32],[345,78],[150,75]],"2",{screens:["1"],scrFor:{1:"5"},cap:"1 down screens for 5: screen the screener."}),
+   PH([[38,32],[330,290],[462,32],[345,78],[170,290]],"5",{curve:{5:[110,195]},cap:"5 comes up to the top for the reversal; 1 clears to the corner. Same set, other side."})],
+  roles:{1:"Reverse the ball, then down screen for 5 and clear to the corner.",2:"Catch the reversal. Look for 4 on the flex cut, then 5 coming up.",3:"Right corner. Stay spaced; you're the next flex cutter when the ball comes back.",4:"Flex cutter. Set your man up, then cut baseline tight off 5's screen.",5:"Flex screener. Screen for 4, then come up off 1's down screen."},
+  notes:"Continuity: after each reversal the same pattern runs to the other side.\nScreeners: be still and wide. Cutters: wait for the screen, then cut shoulder to shoulder."},
+ {id:"pb-ucla-cut",side:"offense",cat:"Half court",name:"UCLA cut",court:"half",phases:[
+   PH([[250,310],[430,210],[70,210],[38,32],[332,192]],"1",{cap:"5 at the right elbow; 2 and 3 on the wings, 4 in the left corner."}),
+   PH([[250,310],[430,210],[70,210],[38,32],[332,192]],"2",{cap:"1 passes to 2 on the right wing."}),
+   PH([[290,85],[430,210],[70,210],[38,32],[332,192]],"2",{screens:["5"],scrFor:{5:"1"},curve:{1:[310,215]},cap:"5 back screens; 1 makes the UCLA cut off his shoulder to the rim."}),
+   PH([[345,80],[430,210],[70,210],[38,32],[250,300]],"2",{cap:"No layup? 1 posts up on the block and 5 pops to the top."}),
+   PH([[345,80],[430,210],[70,210],[38,32],[250,300]],"1",{cap:"2 feeds 1 in the post, or swings it to 5 at the top to reverse."})],
+  roles:{1:"Pass to the wing, then cut off 5's back screen to the rim. Post up if you're not open.",2:"Right wing. Look for 1 on the cut, then in the post.",3:"Left wing. Spot up for the reversal.",4:"Left corner. Stay spaced and deep.",5:"High post. Back screen for 1, then pop to the top for the ball."},
+  notes:"The UCLA cut: a guard cuts off a high-post back screen to the rim.\nCutter: take a step away first, then cut tight off the screener's shoulder."},
+ {id:"pb-box-blob",side:"offense",cat:"Out of bounds (BLOB)",name:"Box: screen the screener",court:"half",phases:[
+   PH([[168,192],[332,192],[320,-22],[345,75],[155,75]],"3",{cap:"Box: 3 inbounds on the right; bigs on the blocks, guards at the elbows."}),
+   PH([[168,192],[332,192],[320,-22],[228,85],[155,75]],"3",{screens:["4"],scrFor:{4:"5"},cap:"On the slap, 4 steps across and screens for 5."}),
+   PH([[212,150],[332,192],[320,-22],[228,85],[318,58]],"3",{screens:["1"],scrFor:{1:"4"},curve:{5:[235,12]},cap:"5 cuts under the screen to the rim. 1 down screens for 4: screen the screener."}),
+   PH([[212,150],[462,32],[320,-22],[250,205],[318,58]],"3",{curve:{4:[278,140]},cap:"4 comes off 1's screen to the free-throw line; 2 pops to the corner."}),
+   PH([[250,330],[462,32],[320,-22],[250,205],[318,58]],"4",{curve:{1:[150,260]},cap:"3 reads it: 5 at the rim, 4 at the line, 2 in the corner. 1 is the safety."})],
+  roles:{1:"Left elbow. Down screen for 4 (screen the screener), then get back as the safety.",2:"Right elbow. Pop to the ball-side corner for the shot.",3:"Inbounder. Slap to start. Look 5, then 4, then 2, then 1.",4:"Right block. Cross screen for 5, then use 1's screen to the line.",5:"Left block. Cut under 4's screen to the rim, hands up."},
+  notes:"Each screen is set as the last cut starts. Screeners hold until the cutter passes.\nIf everything is covered, 1 is the safe pass."},
+ {id:"pb-stack-blob",side:"offense",cat:"Out of bounds (BLOB)",name:"Stack: lob & flash",court:"half",phases:[
+   PH([[345,220],[345,175],[320,-22],[345,130],[345,85]],"3",{cap:"Stack on the ball-side lane line: 5 at the bottom, then 4, 2 and 1. 3 inbounds."}),
+   PH([[250,300],[462,40],[320,-22],[298,108],[345,85]],"3",{screens:["4"],scrFor:{4:"5"},cap:"On the slap: 1 releases to safety, 2 pops to the corner, 4 turns and screens for 5."}),
+   PH([[250,300],[462,40],[320,-22],[298,108],[262,62]],"3",{curve:{5:[290,225]},cap:"5 steps up the lane, then spins back off 4's screen to the rim."}),
+   PH([[250,300],[462,40],[320,-22],[352,45],[262,62]],"5",{cap:"3 throws the lob to 5. Covered? 4 flashes to the ball, then 2 in the corner, then 1."})],
+  roles:{1:"Top of the stack. Release to the top as the safety.",2:"Pop to the ball-side corner for the shot.",3:"Inbounder. Slap to start; lob to 5 first, then 4, 2, 1.",4:"Turn and screen 5's defender, then flash to the ball.",5:"Bottom of the stack. Step up, then spin to the rim for the lob."},
+  notes:"Sell the step-up so 5's defender follows him.\nThrow the lob to the rim side, away from the defender."},
+ {id:"pb-line-slob",side:"offense",cat:"Out of bounds (SLOB)",name:"Line: stagger",court:"half",phases:[
+   PH([[305,250],[350,250],[488,250],[395,250],[440,250]],"3",{cap:"Line on the right sideline: 5 nearest the ball, then 4, 2 and 1. 3 inbounds."}),
+   PH([[250,380],[350,250],[488,250],[358,146],[390,86]],"3",{screens:["4","5"],scrFor:{4:"2",5:"2"},cap:"1 goes long as the safety. 4 and 5 drop and set a stagger toward the corner."}),
+   PH([[250,380],[462,35],[488,250],[358,146],[390,86]],"3",{cap:"2 runs off the stagger, tight off both screens, to the corner."}),
+   PH([[250,380],[462,35],[488,250],[330,200],[300,65]],"2",{cap:"3 hits 2 for the corner shot. 5 slips to the rim and 4 pops to the elbow."})],
+  roles:{1:"Back of the line. Go long as the safety; come back if 3 is in trouble.",2:"Shooter. Step toward the ball, then cut tight off 4 and 5 to the corner.",3:"Inbounder. Hit 2 in the corner; then 5 on the slip, 4 at the elbow, 1 long.",4:"First screener. Screen 2's man, then pop to the elbow.",5:"Second screener. Screen, then slip to the rim."},
+  notes:"Screeners: wide and still. The shooter sets his man up first.\nYou have five seconds: 3 counts out loud."},
+ {id:"pb-press-break-212",side:"offense",cat:"Press break",name:"2-1-2 press break",court:"full",phases:[
+   PH([[150,140],[150,360],[700,90],[-18,300],[440,250]],"4",{cap:"2-1-2: 4 inbounds; 1 and 2 at the free-throw line extended, 5 at half court, 3 deep."}),
+   PH([[85,110],[150,360],[700,90],[-18,300],[440,250]],"1",{cap:"1 V-cuts and catches the inbound. Catch, face up and look up the floor."}),
+   PH([[85,110],[330,390],[640,90],[60,300],[300,170]],"1",{cap:"4 steps in behind the ball for the reversal. 5 flashes to the middle; 2 runs the far lane, 3 stays deep."}),
+   PH([[85,110],[330,390],[640,90],[60,300],[300,170]],"5",{cap:"1 hits 5 in the middle before the trap closes."}),
+   PH([[300,120],[700,410],[760,110],[240,280],[300,170]],"3",{cap:"5 turns and passes ahead to 3. 2 fills the far lane; 1 and 4 trail. Attack."})],
+  roles:{1:"V-cut and catch the inbound. Look to 5 in the middle first.",2:"Get open for the inbound; if 1 gets it, run the far lane.",3:"Deep. Stay long on the ball side; catch ahead and attack.",4:"Inbounder. Step in behind the ball for the reversal, then trail.",5:"Flash to the middle on time and catch facing up the floor."},
+  notes:"Beat the press with passes, not dribbles. Never dribble into a corner.\nTrap coming? Pass before it closes, then go."},
+ {id:"pb-numbered-break",side:"offense",cat:"Transition",name:"Numbered break (3 lanes)",court:"full",phases:[
+   PH([[180,440],[260,350],[240,110],[95,230],[130,300]],"4",{cap:"Numbered break: 4 rebounds; 1 gets wide on the ball side for the outlet."}),
+   PH([[180,440],[520,460],[520,40],[150,240],[470,250]],"1",{cap:"Outlet to 1. 2 and 3 sprint wide in the outside lanes; 5 rim runs down the middle."}),
+   PH([[430,290],[790,465],[790,35],[300,250],[850,250]],"1",{cap:"1 pushes it up the middle. 2 and 3 stay wide; 5 beats his man to the rim; 4 trails."}),
+   PH([[680,260],[915,470],[915,30],[520,320],[860,300]],"1",{cap:"Wings run to the corners, 5 seals on the block, 4 trails to the top."}),
+   PH([[680,260],[915,470],[915,30],[520,320],[860,300]],"5",{cap:"First look: 5 sealing at the rim. Then the corners, then 4 trailing for the three."})],
+  roles:{1:"Get the outlet wide, then push it up the middle with your head up.",2:"Right lane. Sprint wide all the way to the corner.",3:"Left lane. Sprint wide all the way to the corner.",4:"Rebound and outlet, then trail the play to the top.",5:"Rim runner. Sprint rim to rim and seal for the layup."},
+  notes:"Run the same lanes every time so nobody has to think.\nWide lanes stretch the defense; the rim run makes their big retreat."},
+ {id:"pb-four-corners",side:"offense",cat:"Special situations",name:"Delay: four corners",court:"half",phases:[
+   PH([[250,280],[455,385],[45,385],[38,32],[462,32]],"1",{cap:"Four corners: four players spread to the corners, 1 in the middle with the ball."}),
+   PH([[250,280],[455,385],[45,385],[38,32],[462,32]],"2",{cap:"1 handles and burns clock. If they trap, he passes to an open corner."}),
+   PH([[455,385],[250,290],[45,385],[38,32],[462,32]],"2",{curve:{1:[330,230],2:[360,420]},cap:"2 dribbles back to the middle and 1 takes his corner. Keep the floor spread."}),
+   PH([[455,385],[250,290],[225,85],[38,32],[462,32]],"2",{cap:"When a defender leaves to trap or help, his man cuts to the rim."}),
+   PH([[455,385],[250,290],[225,85],[38,32],[462,32]],"3",{cap:"2 hits 3 for the layup. Take only layups and free throws."})],
+  roles:{1:"Middle. Handle it, stay calm, and get it to a corner if trapped.",2:"Top-right corner. Catch, then dribble back to the middle.",3:"Top-left corner. Cut to the rim when your man leaves you.",4:"Left corner. Stay wide; back cut if your man turns his head.",5:"Right corner. Stay wide; back cut if your man turns his head."},
+  notes:"Use it to protect a late lead. Take only layups; make them foul.\nEveryone on the floor has to be a good free-throw shooter."},
+ /* ---------- DEFENSE ---------- */
+ {id:"pb-man-help-side",side:"defense",cat:"Man-to-man",name:"Man-to-man: help side",court:"half",phases:[
+   DP([[250,272],[398,192],[102,192],[395,65],[180,90]],[[250,310],[430,210],[70,210],[462,32],[155,80]],"1",{cap:"Ball at the top. X1 on the ball; X2 and X3 deny one pass away; X4 sinks toward the lane."}),
+   DP([[295,262],[410,182],[195,165],[435,58],[212,85]],[[250,310],[430,210],[70,210],[462,32],[155,80]],"2",{cap:"Ball on the wing: X2 on the ball. X1 and X4 deny one pass away. X3 and X5 help in the lane."}),
+   DP([[270,215],[415,160],[215,135],[440,52],[245,80]],[[250,310],[430,210],[70,210],[462,32],[155,80]],"4",{cap:"Ball in the corner: X4 on the ball, X2 denies the pass back. X5 is the low man at the rim."}),
+   DP([[295,262],[410,182],[195,165],[435,58],[212,85]],[[250,310],[430,210],[70,210],[462,32],[155,80]],"2",{cap:"Ball back out: everyone moves while the pass is in the air. Jump to the ball."})],
+  roles:{1:"On the ball at the top. Jump to the ball on every pass.",2:"Deny one pass away; take the ball on the wing.",3:"Deny at the top; help in the lane when you're two passes away.",4:"Corner man. Sink toward the lane; deny when the ball comes to your side.",5:"Guard the post. From the help side, be the low man at the rim."},
+  notes:"On the ball: pressure. One pass away: deny, hand in the passing lane. Two passes away: help, a foot in the lane.\nSee your man and the ball. Move on the pass, not the catch."},
+ {id:"pb-man-closeout-ice",side:"defense",cat:"Man-to-man",name:"Man: closeout & ICE",court:"half",phases:[
+   DP([[250,272],[385,195],[110,190],[90,70],[325,72]],[[250,310],[430,210],[70,210],[38,32],[350,80]],"1",{cap:"Ball at the top. X2 is helping in the gap, a long way from his man."}),
+   DP([[290,262],[410,192],[190,165],[175,70],[325,72]],[[250,310],[430,210],[70,210],[38,32],[350,80]],"2",{cap:"Pass to 2. X2 closes out: sprint, then short choppy steps, high hand, a stride away."}),
+   DP([[290,262],[410,232],[190,165],[175,70],[420,150]],[[250,310],[430,210],[70,210],[38,32],[385,255]],"2",{cap:"5 comes up to screen. ICE: X2 jumps above the screen to take away the middle; X5 drops to the baseline side."}),
+   DP([[280,230],[440,170],[190,165],[290,105],[440,110]],[[250,310],[458,135],[70,210],[38,32],[330,130]],"2",{cap:"2 has to go toward the baseline: X5 meets him, X2 rides his hip. X4 tags the roller."})],
+  roles:{1:"Jump to the ball on every pass.",2:"Close out under control. On the ball screen, jump to the top side and push him away from it.",3:"Help in the lane when the ball is on the other side.",4:"Low help. Tag the roller when the screen comes.",5:"Call ICE, then drop to the baseline side and stop the drive."},
+  notes:"Closeout: sprint two-thirds of the way, then chop your feet, hand high, weight back.\nICE (also called blue): on a side ball screen we keep the ball on the sideline and out of the middle."},
+ {id:"pb-zone-23",side:"defense",cat:"Zone",name:"2-3 zone",court:"half",phases:[
+   DP([[205,252],[295,252],[125,95],[375,95],[250,85]],[[250,310],[430,210],[70,210],[462,32],[250,192]],"1",{cap:"2-3 zone: X1 and X2 up top, X3 and X4 low on the sides, X5 in the middle. The guards split the ball."}),
+   DP([[283,212],[405,205],[175,80],[390,95],[300,75]],[[250,310],[430,210],[70,210],[462,32],[250,192]],"2",{cap:"Ball on the wing: X2 takes it. X1 drops to the high post; the back line shifts toward the ball."}),
+   DP([[282,215],[400,160],[240,80],[440,55],[345,78]],[[250,310],[430,210],[70,210],[462,32],[250,192]],"4",{cap:"Ball in the corner: X4 runs out, X5 takes the ball-side block, X2 sinks into the gap, X3 protects the rim."}),
+   DP([[283,212],[405,205],[175,80],[390,95],[300,75]],[[250,310],[430,210],[70,210],[462,32],[250,192]],"2",{cap:"Ball back to the wing: X2 steps out again and the back line slides back up."})],
+  roles:{1:"Top-left. Split the ball at the top; drop to the high post when the ball goes away.",2:"Top-right. Take the ball on your wing; sink to the gap when it goes to the corner.",3:"Left low. Corner and block on your side; protect the rim from the help side.",4:"Right low. Run out to the corner; back to the block when it leaves.",5:"Middle. Front the post on the ball side; never leave the paint."},
+  notes:"Move on the pass, hands up in the passing lanes.\nTalk on every pass: ball, corner, high post. On a shot, find a body and box out."},
+ {id:"pb-zone-131",side:"defense",cat:"Zone",name:"1-3-1 zone",court:"half",phases:[
+   DP([[250,282],[115,195],[385,195],[250,62],[250,180]],[[250,320],[430,210],[70,210],[462,32],[155,80]],"1",{cap:"1-3-1: X1 on the point, X2 and X3 on the wings, X5 at the high post, X4 on the baseline."}),
+   DP([[305,255],[180,140],[408,200],[340,70],[300,165]],[[250,320],[430,210],[70,210],[462,32],[155,80]],"2",{cap:"Ball on the wing: X3 takes it. X1 cuts off the pass back to the top, X5 slides over, X4 takes the block."}),
+   DP([[395,190],[245,78],[446,64],[432,22],[330,82]],[[250,320],[430,210],[70,210],[462,32],[155,80]],"4",{cap:"Ball in the corner: TRAP. X4 runs the baseline and X3 drops; X5 takes the block, X1 the wing, X2 the rim."}),
+   DP([[305,255],[180,140],[408,200],[340,70],[300,165]],[[250,320],[430,210],[70,210],[462,32],[155,80]],"2",{cap:"Ball out of the trap to the wing: back to your spots, X3 on the ball."})],
+  roles:{1:"Point. Pressure the ball, steer it to a side, then cut off the reversal.",2:"Left wing. Take the ball on your side; sink to the rim when it's away.",3:"Right wing. Take the ball on your side; trap the corner with X4.",4:"Baseline (rover). Cover corner to corner; trap with the wing.",5:"Middle. Own the high post; slide to the ball-side block."},
+  notes:"The 1-3-1 takes away the high post and the wings and pushes the ball to the corners, where we trap.\nThe baseline man must be quick: he covers both corners."},
+ {id:"pb-zone-32",side:"defense",cat:"Zone",name:"3-2 zone",court:"half",phases:[
+   DP([[250,282],[120,210],[380,210],[175,85],[325,85]],[[250,320],[430,210],[70,210],[462,32],[155,80]],"1",{cap:"3-2 zone: X1 at the top, X2 and X3 on the wings, X4 and X5 low."}),
+   DP([[300,240],[185,175],[408,202],[225,80],[355,85]],[[250,320],[430,210],[70,210],[462,32],[155,80]],"2",{cap:"Ball on the wing: X3 takes it. X1 drops to the elbow, X5 takes the block, X4 slides to the rim, X2 sinks."}),
+   DP([[290,195],[225,105],[405,150],[325,72],[440,52]],[[250,320],[430,210],[70,210],[462,32],[155,80]],"4",{cap:"Ball in the corner: X5 runs out, X4 slides to the block, X3 sinks into the gap, X2 protects the rim."}),
+   DP([[300,240],[185,175],[408,202],[225,80],[355,85]],[[250,320],[430,210],[70,210],[462,32],[155,80]],"2",{cap:"Ball back to the wing: X3 back out, X5 back to the block."})],
+  roles:{1:"Top. Pressure the ball; drop to the high post when it goes to a wing.",2:"Left wing. Take the ball on your side; sink to the lane when it's away.",3:"Right wing. Take the ball on your side; sink to the gap when it goes to the corner.",4:"Left low. Corner and block on your side; slide across to the rim.",5:"Right low. Run out to the corner; back to the block when it leaves."},
+  notes:"The 3-2 pressures perimeter shooters. Its weak spots are the short corner and the low post.\nThe low men talk and slide hard."},
+ {id:"pb-box-and-one",side:"defense",cat:"Special situations",name:"Box-and-one",court:"half",phases:[
+   DP([[405,224],[205,248],[295,248],[188,78],[325,85]],[[250,310],[430,210],[70,210],[462,32],[155,80]],"1",{cap:"Box-and-one: X1 chases their best player (2) and denies him. The other four play a box."}),
+   DP([[375,60],[205,248],[295,248],[188,78],[325,85]],[[250,310],[360,25],[70,210],[462,32],[155,80]],"1",{cap:"2 cuts to the baseline. X1 stays attached on his top side; the box stays home."}),
+   DP([[70,78],[205,248],[295,248],[188,78],[325,85]],[[250,310],[38,60],[70,210],[462,32],[155,80]],"1",{curve:{1:[220,20]},cap:"2 runs the baseline to the other corner. X1 chases him all the way."}),
+   DP([[62,100],[100,200],[250,215],[180,100],[250,80]],[[250,310],[38,60],[70,210],[462,32],[155,80]],"3",{cap:"Ball to the left wing: the box slides like a zone. X1 stays attached to 2, denying."})],
+  roles:{1:"Chaser. Face-guard their star everywhere; deny every catch.",2:"Top-left of the box. Take the ball on your side.",3:"Top-right of the box. Take the ball on your side; drop to the high post.",4:"Bottom-left. Block and corner on your side.",5:"Bottom-right. Block and corner on your side; slide to the rim."},
+  notes:"Use it when one player is beating us. The chaser never helps; the box helps him.\nMake them beat us with their other four."},
+ {id:"pb-press-221",side:"defense",cat:"Press",name:"2-2-1 press",court:"full",phases:[
+   DP([[240,170],[240,330],[450,110],[450,390],[760,250]],[[110,140],[110,360],[560,110],[-18,250],[580,390]],"4",{cap:"2-2-1: X1 and X2 at the top of the key, X3 and X4 near half court, X5 back. Let the inbound in."}),
+   DP([[150,180],[280,270],[450,90],[440,320],[720,215]],[[110,140],[110,360],[560,110],[-18,250],[580,390]],"1",{cap:"Ball in to 1. X1 turns him up the sideline. Nobody lets him go to the middle."}),
+   DP([[470,75],[400,200],[525,60],[585,130],[780,230]],[[495,48],[260,320],[560,110],[60,250],[580,390]],"1",{cap:"1 dribbles up the sideline. TRAP at half court: X3 stops him, X1 closes from behind."}),
+   DP([[470,75],[420,170],[525,60],[590,115],[800,260]],[[495,48],[260,320],[560,110],[60,250],[580,390]],"1",{cap:"Rotate: X2 takes the pass to the middle, X4 the sideline pass, X5 guards the basket."})],
+  roles:{1:"Front left. Let the inbound in, turn the ball up the sideline, trap from behind.",2:"Front right. Drop to the middle; pick off the pass to the middle.",3:"Second line, ball side. Stop the ball at half court and trap with X1.",4:"Second line, far side. Rotate to the ball-side sideline pass.",5:"Safety. Stay deep, protect the rim, read the long pass."},
+  notes:"Slow them down, use up their clock, and trap at half court where the lines help us.\nTrap with your feet and hands up, no reaching. If they break it, sprint back."},
+ {id:"pb-press-1211",side:"defense",cat:"Press",name:"1-2-1-1 diamond press",court:"full",phases:[
+   DP([[28,250],[180,140],[180,360],[440,250],[780,250]],[[115,130],[115,370],[500,110],[-18,250],[520,390]],"4",{cap:"1-2-1-1 diamond: X1 on the inbounder, X2 and X3 at the free-throw line extended, X4 at half court, X5 deep."}),
+   DP([[80,140],[125,90],[230,230],[330,110],[720,220]],[[95,105],[115,370],[500,110],[60,300],[520,390]],"1",{cap:"Inbound to 1: trap right away. X1 and X2 trap him; X3 takes the middle, X4 the sideline, X5 the long pass."}),
+   DP([[60,262],[210,200],[100,325],[390,250],[760,250]],[[95,105],[115,370],[500,110],[60,300],[520,390]],"4",{cap:"Ball back to 4: X3 runs at him and traps with X1. X2 drops to the middle; X4 and X5 slide over."})],
+  roles:{1:"Point. Pressure the inbound, then trap the first pass with X2.",2:"Left wing. Trap the inbound pass on your side.",3:"Right wing. Take the middle; trap when the ball comes back your way.",4:"Middle (interceptor). Read the passer's eyes; take the sideline pass.",5:"Safety. Stay deep and protect the basket."},
+  notes:"Trap the first pass in the corner, the worst spot on the floor for the offense.\nWhen the press is broken, everyone sprints back."}
+];
+DEF.plays.push(...BASIC_PLAYS);BASIC_PLAYS.forEach(x=>DEFMAP.plays[x.id]=x);
+/* defensive alignments for the template picker: step 1 of the defense library plays */
+const DEF_SETS=[["pb-zone-23","tpl-def-23","2-3 zone","Two up top, three across the back."],["pb-zone-131","tpl-def-131","1-3-1 zone","Point, three across the free-throw line, a baseline rover."],["pb-zone-32","tpl-def-32","3-2 zone","Three across the top, two low."],["pb-man-help-side","tpl-def-man","Man-to-man (help side)","Ball at the top: on the ball, deny one away, help two away."],["pb-press-221","tpl-def-221","2-2-1 press","Full court: two, two and a safety."],["pb-press-1211","tpl-def-1211","1-2-1-1 press","Full court diamond: trap the first pass."]]
+  .map(([src,id,name,desc])=>{const p=BASIC_PLAYS.find(x=>x.id===src);return{id,side:"defense",cat:p.cat,name,desc,court:p.court,phases:[JSON.parse(JSON.stringify(p.phases[0]))],roles:p.roles}});
+DEF_SETS.forEach(t=>delete t.phases[0].cap);
+const startPhases=(court,side)=>side==="defense"?[JSON.parse(JSON.stringify(DEF_SETS.find(t=>t.id===(court==="full"?"tpl-def-221":"tpl-def-man")).phases[0]))]:START[court==="full"?"full":"half"]();
 const tplAll=()=>items("templates");
-const tplGet=id=>BASE_SETS.find(t=>t.id===id)||get("templates",id);
-function miniCourt(t){const f=t.court==="full";const ph=(t.phases||[])[0];if(!ph)return"";
-  return `<svg class="mini ${f?"full":""}" viewBox="${f?"-40 0 1020 500":"0 -40 500 510"}" aria-hidden="true">${courtSVG(f).replace(/<text[\s\S]*?<\/text>/g,"")}${IDS.map(id=>{const p=ph.pos&&ph.pos[id];if(!p)return"";return `<circle cx="${p[0]}" cy="${p[1]}" r="${f?30:24}" fill="${ph.ball===id?"#e07a2f":"#c2b08a"}" stroke="#fff" stroke-width="4"/>`}).join("")}</svg>`}
+const tplGet=id=>BASE_SETS.find(t=>t.id===id)||DEF_SETS.find(t=>t.id===id)||get("templates",id);
+function miniCourt(t){const f=t.court==="full";const ph=(t.phases||[])[0];if(!ph)return"";const dv=t.side==="defense";const op=ph.opp&&typeof ph.opp==="object"?ph.opp:null;
+  return `<svg class="mini ${f?"full":""}" viewBox="${f?"-40 0 1020 500":"0 -40 500 510"}" aria-hidden="true">${courtSVG(f).replace(/<text[\s\S]*?<\/text>/g,"")}${op?IDS.map(id=>{const p=op[id];if(!okPt(p))return"";return `<circle cx="${p[0]}" cy="${p[1]}" r="${f?20:16}" fill="${ph.ballAt===id?"#e07a2f":"none"}" stroke="#e7ecf2" stroke-width="4"/>`}).join(""):""}${IDS.map(id=>{const p=ph.pos&&ph.pos[id];if(!p)return"";return `<circle cx="${p[0]}" cy="${p[1]}" r="${f?30:24}" fill="${!op&&ph.ball===id?"#e07a2f":dv?DEF_FILL:"#c2b08a"}" stroke="#fff" stroke-width="4"/>`}).join("")}</svg>`}
 /* drop data that means nothing: straight "curves", screens-for that point nowhere, empty captions */
 function cleanPhases(phs){return JSON.parse(JSON.stringify(phs)).map((ph,k)=>{
   if(ph.cap!=null){const c=String(ph.cap).trim().slice(0,140);if(c)ph.cap=c;else delete ph.cap}
+  if(ph.opp!=null){if(typeof ph.opp!=="object")delete ph.opp;else{for(const id of Object.keys(ph.opp))if(!IDS.includes(id)||!okPt(ph.opp[id]))delete ph.opp[id];else ph.opp[id]=ph.opp[id].map(Math.round);if(!Object.keys(ph.opp).length)delete ph.opp}}
+  if(ph.ballAt!=null&&!IDS.includes(String(ph.ballAt)))delete ph.ballAt;
   if(k===0){delete ph.curve;delete ph.scrFor;delete ph.scrAng;return ph}const A=phs[k-1];
   if(ph.curve){for(const id of Object.keys(ph.curve)){const a=A.pos[id],b=ph.pos[id],c=curveOf(ph,id);if(!c||!a||!b||Math.hypot(b[0]-a[0],b[1]-a[1])<6)delete ph.curve[id]}if(!Object.keys(ph.curve).length)delete ph.curve}
   if(ph.scrAng){for(const id of Object.keys(ph.scrAng)){const g=ph.scrAng[id];if(!(ph.screens||[]).includes(id)||typeof g!=="number"||!isFinite(g))delete ph.scrAng[id];else ph.scrAng[id]=Math.round(g)}if(!Object.keys(ph.scrAng).length)delete ph.scrAng}
@@ -1743,14 +1963,16 @@ function cleanPhases(phs){return JSON.parse(JSON.stringify(phs)).map((ph,k)=>{
 function builderHint(){
   const p=ed.play,ph=p.phases[ed.cur];
   if(ed.previewing)return "<b>Previewing the whole play.</b> Pause, scrub or change the speed. Tap <b>Back to editing</b> when you're done.";
-  if(ed.mode==="move")return ed.cur===0?"<b>Step 1 · Starting spots.</b> Drag each player to where they line up. Then tap <b>+ Add step</b>.":`<b>Step ${ed.cur+1}.</b> Drag players to where they end up. Faded circles show where they were. Drag a gold dot to curve a path; double-tap it to straighten.`;
+  const dv=isDefP(p),op=hasOpp(p);const oh=op?(dv?" Hollow circles are the offense: drag them too.":" Hollow X circles are the defense: drag them too."):"";
+  if(ed.mode==="move")return (ed.cur===0?`<b>Step 1 · Starting spots.</b> Drag each ${dv?"defender":"player"} to where they line up. Then tap <b>+ Add step</b>.`:`<b>Step ${ed.cur+1}.</b> Drag ${dv?"defenders":"players"} to where they end up. Faded circles show where they were. Drag a gold dot to curve a path; double-tap it to straighten.`)+oh;
+  if(ed.mode==="pass"&&oppBall(p)){const b=ballAtOf(p,ed.cur);return ed.cur===0?`<b>Who starts with the ball?</b> Tap a hollow circle (the offense).${b?" (Now: "+b+")":""}`:`<b>Pass in step ${ed.cur+1}.</b> Tap the hollow circle (offense) who catches it.${b?" Now "+b+" has the ball.":""}`}
   if(ed.mode==="pass")return ed.cur===0?`<b>Who starts with the ball?</b> Tap a player. (Now: ${ph.ball})`:`<b>Pass in step ${ed.cur+1}.</b> Tap the player who catches it. Currently ${ph.ball} has the ball.`;
   if(ed.cur===0)return "Screens happen in a later step. Add a step first.";
   const sc=ph.screens||[];
   return `<b>Screens in step ${ed.cur+1}.</b> Drag a player to where he sets the screen. Then drag the gold dot to aim it (double-tap the dot to reset). Tap a screener to remove his screen.${sc.length?" Screening now: "+sc.join(", ")+".":""}`;
 }
 function builderView(){
-  const p=ed.play;const N=p.phases.length;const cats=["Half court","Out of bounds","Press break","Transition","Defense","Special situations"];const cap=(p.phases[ed.cur]||{}).cap||"";
+  const p=ed.play;const N=p.phases.length;const sd=sideOf(p);const dv=sd==="defense";const cats=CATS[sd].slice();if(p.cat&&!cats.includes(p.cat))cats.push(p.cat);const cap=(p.phases[ed.cur]||{}).cap||"";
   const pv=ed.previewing?`<div class="pvbar" role="group" aria-label="Preview controls"><button class="btn gold icon" type="button" id="edpvplay" data-act="edPvPlay" aria-label="Play or pause">${PLAY}</button><span class="stepl" id="edstepl">Step 1 of ${N}</span><input type="range" id="edscrub" min="0" max="${N-1}" step="0.01" value="${pb.t}" aria-label="Scrub through the preview">${speedSeg()}<button class="btn sm" type="button" data-act="edPvStop">Back to editing</button></div>`:"";
   return `<div class="stage ${isFull(p)?"wide":""}"><div class="builder"><div class="courtbox">${playSVG(p,ed.mode)}</div>${pv}
    <div class="bhint" id="bhint">${builderHint()}</div>
@@ -1759,16 +1981,20 @@ function builderView(){
    <label class="f" for="pe-cap">Step ${ed.cur+1} caption (optional)<input type="text" id="pe-cap" maxlength="140" value="${esc(cap)}" autocomplete="off"></label></div>
    <div class="card"><form class="form" id="playform" onsubmit="return false">
     <div class="row"><button class="btn sm" type="button" data-act="tplOpen">Start from a template</button><button class="btn sm" type="button" data-act="tplSave">Save as template</button></div>
+    ${ed.id&&DEFMAP.plays[ed.id]?'<p class="small muted" style="margin:0">This is a Basic play from the built-in library. Saving keeps your version for the team.</p>':""}
     <label class="f" for="pe-name">Play name<input type="text" id="pe-name" value="${esc(p.name)}" required></label>
+    <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--muted)">Side<div class="seg" role="group" aria-label="Side">${["offense","defense"].map(s=>`<button type="button" data-act="edSide" data-v="${s}" class="${sd===s?"on":""}" aria-pressed="${sd===s}">${SIDE_L[s]}</button>`).join("")}</div></div>
     <div class="grid g2" style="gap:10px"><label class="f" for="pe-cat">Category<select id="pe-cat" required><option value="" disabled ${p.cat?"":"selected"}>—</option>${cats.map(c=>`<option ${p.cat===c?"selected":""}>${c}</option>`).join("")}</select></label>
      <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--muted)">Court<div class="seg" role="group" aria-label="Court"><button type="button" data-act="edCourt" data-v="half" class="${isFull(p)?"":"on"}">Half</button><button type="button" data-act="edCourt" data-v="full" class="${isFull(p)?"on":""}">Full</button></div></div></div>
-    <label class="check" for="pe-draft"><input type="checkbox" id="pe-draft" ${p.draft?"checked":""}>Draft (coaches only)</label>
+    <label class="check" for="pe-vis"><input type="checkbox" id="pe-vis" ${p.draft?"":"checked"}><span>Visible to players <span class="small muted" style="font-weight:500">Turn off to keep it coaches-only.</span></span></label>
     <details ${ed.rolesOpen?"open":""} id="roledet"><summary style="cursor:pointer;font-weight:700;color:var(--accent-text);font-size:13px">Roles & reads (optional)</summary><div class="form" style="margin-top:10px">
-     ${IDS.map(id=>`<label class="f" for="pe-r${id}">Position ${id}<input type="text" id="pe-r${id}" value="${esc(p.roles[id]||"")}" ></label>`).join("")}
+     ${IDS.map(id=>`<label class="f" for="pe-r${id}">${dv?"Defender X"+id:"Position "+id}<input type="text" id="pe-r${id}" value="${esc(p.roles[id]||"")}" ></label>`).join("")}
      <label class="f" for="pe-notes">Notes & reads<textarea id="pe-notes" >${esc(p.notes||"")}</textarea></label></div></details>
     <div class="row" style="margin-top:4px"><button class="btn gold" type="button" data-act="edSave">Save play</button><button class="btn" type="button" data-act="edCancel">Cancel</button>${ed.id&&!ed.isNew?`<button class="btn del" type="button" data-act="del" data-k="play" data-id="${esc(ed.id)}" style="margin-left:auto">${TRASH}Delete play</button>`:""}</div></form></div></div>`;
 }
-function readEd(){const p=ed.play;const f=s=>$(s);if(!f("#pe-name"))return;p.name=f("#pe-name").value;p.cat=f("#pe-cat").value;IDS.forEach(id=>p.roles[id]=f("#pe-r"+id).value);p.notes=f("#pe-notes").value;ed.rolesOpen=f("#roledet").open;p.draft=!!(f("#pe-draft")&&f("#pe-draft").checked)}
+function readEd(){const p=ed.play;const f=s=>$(s);if(!f("#pe-name"))return;p.name=f("#pe-name").value;p.cat=f("#pe-cat").value;IDS.forEach(id=>p.roles[id]=f("#pe-r"+id).value);p.notes=f("#pe-notes").value;ed.rolesOpen=f("#roledet").open;const v=f("#pe-vis");if(v)p.draft=!v.checked}
+/* keep the category select in step after code changes p.cat (edRender reads the form first) */
+function syncCat(){const cs=$("#pe-cat");if(!cs||!ed)return;const c=ed.play.cat||"";if(c&&![...cs.options].some(o=>o.value===c))cs.add(new Option(c,c));cs.value=c}
 function edRender(){readEd();$("#main").innerHTML=playbookView();bindPlaybook()}
 function endPreview(){if(ed&&ed.previewing){stopPlayback();ed.previewing=false;return true}return false}
 function edPaintPV(){const p=ed.play;const N=p.phases.length;paint(p,pb.t,null,viewerSeg(p),{editing:true});const g=$("#bends");if(g)g.innerHTML="";const r=$("#edscrub");if(r)r.value=pb.t;const st=$("#edstepl");if(st)st.textContent=`Step ${Math.min(N,Math.floor(pb.t+1e-6)+1)} of ${N}`;const b=$("#edpvplay");if(b)b.innerHTML=pb.playing?PAUSE:(pb.t>=N-1-1e-6?REPLAY:PLAY)}
@@ -1781,7 +2007,7 @@ function drawBends(){const g=$("#bends");if(!g)return;const svg=$("#court");if(!
   const m=svg.getScreenCTM();const sc=m&&m.a?Math.abs(m.a):1;const hit=Math.max(16,17/sc),vis=Math.max(6,6.5/sc);const A=ed.play.phases[ed.cur-1],B=ed.play.phases[ed.cur];
   g.innerHTML=IDS.map(id=>{const a=A.pos[id],b=B.pos[id];if(!a||!b||Math.hypot(b[0]-a[0],b[1]-a[1])<40)return"";const c=curveOf(B,id);const h=c?bez(a,c,b,.5):mid(a,b);
     return `<g class="bend" data-bend="${id}" transform="translate(${h[0]},${h[1]})" role="button" aria-label="Curve ${id}'s path"><circle r="${hit}" fill="transparent"/><circle r="${vis}" fill="${c?"#d6c299":"#ab8c59"}" stroke="#0a1420" stroke-width="${Math.max(1.5,1.5/sc)}"/></g>`}).join("")}
-function snapshot(){ed.dirty=true;ed.hist.push(JSON.stringify({phases:ed.play.phases,cur:ed.cur,court:ed.play.court}));if(ed.hist.length>40)ed.hist.shift()}
+function snapshot(){ed.dirty=true;ed.hist.push(JSON.stringify({phases:ed.play.phases,cur:ed.cur,court:ed.play.court,side:sideOf(ed.play),cat:ed.play.cat}));if(ed.hist.length>40)ed.hist.shift()}
 function svgPoint(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const m=svg.getScreenCTM();return m?pt.matrixTransform(m.inverse()):{x:0,y:0}}
 /* move a player in the current step; keep his bends (into and out of this step) shaped the same */
 function setPos(id,np){const ph=ed.play.phases;const o=ph[ed.cur].pos[id];const dx=(np[0]-o[0])/2,dy=(np[1]-o[1])/2;ph[ed.cur].pos[id]=np;
@@ -1796,6 +2022,7 @@ function bindPlaybook(){
   $$("#court .pl").forEach(g=>{
     g.onpointerdown=e=>{e.preventDefault();if(endPreview()){edRender();return}const id=g.dataset.p;const ph=ed.play.phases[ed.cur];
       if(ed.mode==="move"){snapshot();drag={id,moved:false};g.setPointerCapture(e.pointerId);ed.flash=id;edDraw();return}
+      if(ed.mode==="pass"&&oppBall(ed.play)){toast("On defense the ball is with the offense: tap a hollow circle",true);return}
       if(ed.mode==="pass"){if(ph.ball===id){toast(id+" already has the ball");return}snapshot();ph.ball=id;
         ed.flash=id;edRender();toast(ed.cur===0?id+" starts with the ball":"Pass to "+id+" in step "+(ed.cur+1));return}
       if(ed.mode==="screen"){if(ed.cur===0){toast("Add a step first, then set screens",true);return}snapshot();drag={id,moved:false,scr:true};g.setPointerCapture(e.pointerId);ed.flash=id;edDraw()}};
@@ -1826,7 +2053,15 @@ function bindPlaybook(){
     bends.ondblclick=e=>e.preventDefault()}
   $$("#playform input,#playform textarea,#playform select").forEach(el=>el.addEventListener("input",()=>{ed.dirty=true}));
   {const cp=$("#pe-cap");if(cp)cp.addEventListener("focus",()=>{if(endPreview()){edRender();const n=$("#pe-cap");if(n)n.focus()}})}
-  $("#pe-cat").onchange=e=>{const was=endPreview();const v=e.target.value;if((v==="Press break"||v==="Transition")&&!isFull(ed.play)&&ed.play.phases.length===1){readEd();ed.play.court="full";ed.play.phases=START.full();ed.cur=0;edRender();toast("Switched to full court for "+v.toLowerCase())}else if(was)edRender()};
+  $("#pe-cat").onchange=e=>{const was=endPreview();const v=e.target.value;if((v==="Press break"||v==="Transition"||(v==="Press"&&isDefP(ed.play)))&&!isFull(ed.play)&&ed.play.phases.length===1){readEd();snapshot();ed.play.court="full";ed.play.phases=startPhases("full",sideOf(ed.play));ed.cur=0;edRender();toast("Switched to full court for "+v.toLowerCase())}else if(was)edRender()};
+  /* the other team's markers: drag them in Move; in Pass (defense plays) tap the one who has the ball */
+  $$("#court .opm").forEach(g=>{const own=()=>{const ph=ed.play.phases[ed.cur];if(!ph.opp||typeof ph.opp!=="object")ph.opp=JSON.parse(JSON.stringify(oppOf(ed.play,ed.cur)||{}));return ph};
+    g.onpointerdown=e=>{e.preventDefault();if(endPreview()){edRender();return}const id=g.dataset.o;
+      if(ed.mode==="pass"){const cur=ballAtOf(ed.play,ed.cur);if(cur===id&&ed.play.phases[ed.cur].ballAt){toast(id+" already has the ball");return}snapshot();own().ballAt=id;ed.flash="o"+id;edRender();toast(ed.cur===0?"Offense "+id+" starts with the ball":"Pass to "+id+" in step "+(ed.cur+1));return}
+      if(ed.mode==="move"){snapshot();own();drag={opp:id,moved:false};try{g.setPointerCapture(e.pointerId)}catch(err){}ed.flash="o"+id;edDraw();return}
+      toast("Screens are set by your five players",true)};
+    g.onpointermove=e=>{if(!drag||drag.opp!==g.dataset.o)return;const pt=svgPoint(svg,e);const B=BOUNDS(ed.play);drag.moved=true;ed.play.phases[ed.cur].opp[drag.opp]=[Math.round(clamp(pt.x,B.x0,B.x1)),Math.round(clamp(pt.y,B.y0,B.y1))];edDraw()};
+    g.onpointerup=g.onpointercancel=()=>{if(!(drag&&drag.opp))return;const d=drag;drag=null;if(!d.moved)ed.hist.pop();edRender()}});
 }
 /* --- Template picker (coach-only sheet) --- */
 function listSheet(title,body){if(!$("#sheetroot").firstChild){lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href)}sheetCfg=null;document.removeEventListener("keydown",escClose);document.addEventListener("keydown",escClose);
@@ -1834,7 +2069,7 @@ function listSheet(title,body){if(!$("#sheetroot").firstChild){lastFocus=documen
   setTimeout(()=>{const h=$(".sheet .btn.icon");h&&h.focus()},50)}
 function tplListHTML(){const row=(t,mine)=>`<div class="tplitem"><button type="button" class="tplrow" data-act="tplPick" data-id="${esc(t.id)}">${miniCourt(t)}<span><b>${esc(t.name)}</b><span>${esc(t.desc||(t.court==="full"?"Full court":"Half court")+" · "+plural((t.phases||[]).length,"step"))}</span></span></button>${mine?`<button type="button" class="btn icon edit" data-act="tplRename" data-id="${esc(t.id)}" aria-label="Rename ${esc(t.name)}">${PEN}</button><button type="button" class="btn icon del" data-act="tplDel" data-id="${esc(t.id)}" aria-label="Delete ${esc(t.name)}">${TRASH}</button>`:""}</div>`;
   const ours=tplAll().sort((a,b)=>String(a.name).localeCompare(String(b.name)));
-  return `<p class="small muted" style="margin:0">Copies the court, steps and roles into this play. Your play name stays.</p><div class="tplgroup">Base sets</div>${BASE_SETS.map(t=>row(t,false)).join("")}<div class="tplgroup">Our templates</div>${ours.map(t=>row(t,true)).join("")||'<p class="small muted" style="margin:0">None saved yet. Build a play and tap <b>Save as template</b>.</p>'}`}
+  return `<p class="small muted" style="margin:0">Copies the court, steps and roles into this play, and sets offense or defense. Your play name stays.</p><div class="tplgroup">Offense base sets</div>${BASE_SETS.map(t=>row(t,false)).join("")}<div class="tplgroup">Defensive alignments</div>${DEF_SETS.map(t=>row(t,false)).join("")}<div class="tplgroup">Our templates</div>${ours.map(t=>row(t,true)).join("")||'<p class="small muted" style="margin:0">None saved yet. Build a play and tap <b>Save as template</b>.</p>'}`}
 
 /* ================= Actions (all edits go through Save + toast) ================= */
 const POS=["PG","SG","G","W","F","C"],YRS=["Fr","So","Jr","Sr"];
@@ -1842,7 +2077,7 @@ const oppOptions=()=>opps().map(o=>[o.id,o.name]);
 const ACT={
   sbRetry(){if(SB&&user)sbLoad()},
   sbReload(){location.reload()},
-  async signout(){stopPlayback();ed=null;closeSheet(true);if(SB){try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear()}user=null;LS.set(CONFIG.sessionKey,null);history.replaceState(null,"","#");render();toast("Signed out")},
+  async signout(){stopPlayback();ed=null;pbSide=null;curPlay=null;closeSheet(true);if(SB){try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear()}user=null;LS.set(CONFIG.sessionKey,null);history.replaceState(null,"","#");render();toast("Signed out")},
   more(){const items_=ROUTES[user.role].filter(k=>!TABS.includes(k));lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href);document.addEventListener("keydown",escClose);$("#sheetroot").innerHTML=`<div class="sheet-back" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="More"><div class="sheet-head"><h2>More</h2><button class="btn icon" data-act="closeSheet" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="sheet-body"><nav class="nav">${items_.map(k=>`<a href="#${k}">${ico(k)}${LABEL[k]}</a>`).join("")}</nav><div class="me" style="margin-top:14px"><div><div class="who">${esc(whoLabel()[0])}</div><div class="role">${esc(whoLabel()[1])}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn" data-act="logins">${pwBtnLabel()}</button>`:""}<button class="btn" data-act="signout">Sign out</button></div></div></div></div>`;paintSync()},
   logins(){if(!isCoach())return;closeSheet(true);
     if(SB)return openSheet({title:"My password",intro:"Change the password you use to sign in."+(user.email===CONFIG.supabase.coachEmail?" This is the shared coach login, so anyone still using it will need the new one.":"")+(isAdmin()?"<br>To change the player password, ask Claude.":""),fields:[{key:"cur",label:"Current password",type:"password",req:true},{key:"c1",label:"New password",type:"password",req:true,hint:`At least ${COACH_MIN} characters`},{key:"c2",label:"New password again",type:"password",req:true}],value:{},saved:"Password updated",
@@ -1900,42 +2135,51 @@ const ACT={
   editStand(d){standSheet(get("stand",d.id))},addStand(){standSheet(null)},
   addLres(){lresSheet(null)},editLres(d){lresSheet(get("lres",d.id))},
   /* playbook viewer */
-  pickPlay(d){if(ed&&ed.dirty){confirmDiscard(()=>{ed=null;ACT.pickPlay(d)},"Discard this play?","Your unsaved changes will be lost.");return}stopPlayback();curPlay=d.id;pb.t=0;pb.sel=null;render()},
+  pickPlay(d){if(ed&&ed.dirty){confirmDiscard(()=>{ed=null;ACT.pickPlay(d)},"Discard this play?","Your unsaved changes will be lost.");return}stopPlayback();curPlay=d.id;const p=get("plays",d.id);if(p)pbSide=sideOf(p);pb.t=0;pb.sel=null;render()},
+  pbSide(d){if(!SIDE_L[d.v]||pbSide===d.v)return;stopPlayback();pbSide=d.v;const f=firstOf(shownPlays(),d.v);curPlay=f?f.id:null;pb.t=0;pb.sel=null;render();const t=$(`[data-act="pbSide"][data-v="${d.v}"]`);if(t)t.focus()},
+  async pbVis(d){if(!isCoach())return;const p=get("plays",d.id);if(!p)return;const hide=!isHidden(p);const {id:_i,...obj}=JSON.parse(JSON.stringify(p));delete obj.draft;delete obj.hide;if(hide){if(isBasic(p))obj.hide=true;else obj.draft=true}
+    recording=[];let snaps;try{await saveDoc("plays",d.id,obj);snaps=recording}catch(e){toast(e.message||"Couldn't save",true);return}finally{recording=null}
+    render();toastUndo(hide?p.name+" is hidden from players":p.name+" is visible to players",snaps)},
   pbPlay(){const play=getPlay();if(!play||play.phases.length<2)return;if(pb.playing){stopPlayback();syncViewer();return}const N=play.phases.length;const from=pb.t>=N-1-1e-6?0:pb.t;animate(play,from,N-1,syncViewer,()=>{if(pendingRender)render()})},
   pbPrev(){stopPlayback();pb.t=Math.max(0,Math.ceil(pb.t-1e-6)-1);syncViewer()},
   pbNext(){const play=getPlay();const N=play.phases.length;const from=Math.floor(pb.t+1e-6);if(from>=N-1)return;animate(play,from,from+1,syncViewer)},
   pbSpeed(d){if(!SPEEDS[d.v])return;pb.speedKey=d.v;pb.speed=SPEEDS[d.v];try{localStorage.setItem(SPEED_KEY,d.v)}catch(e){}$$('[data-act="pbSpeed"]').forEach(b=>{const on=b.dataset.v===d.v;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)})},
-  pbSel(d){pb.sel=pb.sel===d.v?null:d.v;$$('[data-act="pbSel"]').forEach(b=>b.classList.toggle("on",b.dataset.v===pb.sel));const s=$('[data-panel="play-roles"] .sum');if(s)s.textContent=pb.sel?"Following "+pb.sel:"Tap one to follow it";syncViewer()},
+  pbSel(d){pb.sel=pb.sel===d.v?null:d.v;$$('[data-act="pbSel"]').forEach(b=>b.classList.toggle("on",b.dataset.v===pb.sel));const s=$('[data-panel="play-roles"] .sum');if(s){const pl=getPlay();s.textContent=pb.sel?"Following "+(pl?pLabel(pl,pb.sel):pb.sel):"Tap one to follow it"}syncViewer()},
   /* playbook builder */
-  newPlay(){stopPlayback();ed={play:{name:"",cat:"",court:"half",roles:{1:"",2:"",3:"",4:"",5:""},notes:"",phases:START.half()},cur:0,mode:"move",isNew:true,id:null,hist:[],rolesOpen:false,scrPick:null};render();window.scrollTo({top:0})},
-  editPlay(d){stopPlayback();const p=JSON.parse(JSON.stringify(get("plays",d.id)));p.roles=p.roles||{};ed={play:p,cur:0,mode:"move",isNew:false,id:d.id,hist:[],rolesOpen:false,scrPick:null};render();window.scrollTo({top:0})},
+  newPlay(){stopPlayback();ed={play:{name:"",side:"offense",cat:"",court:"half",roles:{1:"",2:"",3:"",4:"",5:""},notes:"",phases:START.half()},cur:0,mode:"move",isNew:true,id:null,hist:[],rolesOpen:false,scrPick:null};render();window.scrollTo({top:0})},
+  editPlay(d){stopPlayback();const p=JSON.parse(JSON.stringify(get("plays",d.id)));p.roles=p.roles||{};p.side=sideOf(p);p.draft=isHidden(p);delete p.hide;ed={play:p,cur:0,mode:"move",isNew:false,id:d.id,hist:[],rolesOpen:false,scrPick:null};render();window.scrollTo({top:0})},
   edTool(d){endPreview();readEd();ed.mode=d.v;ed.flash=null;ed.scrPick=null;edRender()},
   edStep(d){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}readEd();ed.cur=+d.v;ed.flash=null;ed.scrPick=null;edRender()},
   edAdd(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();snapshot();const c=JSON.parse(JSON.stringify(ed.play.phases[ed.cur]));c.screens=[];delete c.scrFor;delete c.scrAng;delete c.curve;delete c.cap;ed.scrPick=null;ed.play.phases.splice(ed.cur+1,0,c);ed.cur++;ed.mode="move";ed.flash=null;edRender();toast("Step "+(ed.cur+1)+" added")},
   edDelStep(){if(ed.previewing){stopPlayback();ed.previewing=false}readEd();ed.scrPick=null;if(ed.play.phases.length<2)return;snapshot();ed.play.phases.splice(ed.cur,1);{const nx=ed.play.phases[ed.cur];if(nx&&ed.cur>0){delete nx.curve}}ed.cur=Math.max(0,ed.cur-1);edRender();toast("Step removed")},
-  edUndo(){if(ed.previewing){stopPlayback();ed.previewing=false}if(!ed.hist.length)return;readEd();ed.scrPick=null;const s=JSON.parse(ed.hist.pop());ed.play.phases=s.phases;ed.cur=Math.min(s.cur,s.phases.length-1);ed.play.court=s.court;edRender()},
-  edCourt(d){const was=endPreview();if((ed.play.court||"half")===d.v){if(was)edRender();return}readEd();ed.scrPick=null;snapshot();ed.play.court=d.v;ed.play.phases=START[d.v]();ed.cur=0;edRender();toast(d.v==="full"?"Full court. Players reset to a press-break start.":"Half court. Players reset.")},
+  edUndo(){if(ed.previewing){stopPlayback();ed.previewing=false}if(!ed.hist.length)return;readEd();ed.scrPick=null;const s=JSON.parse(ed.hist.pop());ed.play.phases=s.phases;ed.cur=Math.min(s.cur,s.phases.length-1);ed.play.court=s.court;if(s.side&&s.side!==sideOf(ed.play)){ed.play.side=s.side;ed.play.cat=s.cat||"";syncCat()}edRender()},
+  edCourt(d){const was=endPreview();if((ed.play.court||"half")===d.v){if(was)edRender();return}readEd();ed.scrPick=null;snapshot();ed.play.court=d.v;ed.play.phases=startPhases(d.v,sideOf(ed.play));ed.cur=0;edRender();toast(isDefP(ed.play)?(d.v==="full"?"Full court. Defenders reset to a 2-2-1 press.":"Half court. Defenders reset to man-to-man."):(d.v==="full"?"Full court. Players reset to a press-break start.":"Half court. Players reset."))},
+  edSide(d){const was=endPreview();if(!ed||!SIDE_L[d.v])return;if(sideOf(ed.play)===d.v){if(was)edRender();return}readEd();ed.scrPick=null;snapshot();const p=ed.play;p.side=d.v;if(!CATS[d.v].includes(p.cat))p.cat="";
+    if(d.v==="defense"){if(p.phases.length===1&&!(p.phases[0].screens||[]).length)p.phases=startPhases(p.court,"defense");else if(!hasOpp(p)){const st=startPhases(p.court,"defense")[0];p.phases.forEach(ph=>{ph.opp=JSON.parse(JSON.stringify(st.opp));ph.ballAt=st.ballAt})}ed.cur=Math.min(ed.cur,p.phases.length-1);toast("Defense: the circles are our defenders (X), the hollow ones the offense")}
+    else{p.phases.forEach(ph=>{delete ph.opp;delete ph.ballAt});toast("Offense: the five circles are our players")}
+    syncCat();edRender()},
   edPreview(){readEd();const p=ed.play;if(p.phases.length<2)return;ed.previewing=true;ed.scrPick=null;pb.t=0;edRender();animate(p,0,p.phases.length-1,edPaintPV,edPaintPV)},
   edPvPlay(){if(!ed||!ed.previewing)return;const p=ed.play;const N=p.phases.length;if(pb.playing){stopPlayback();edPaintPV();return}const from=pb.t>=N-1-1e-6?0:pb.t;animate(p,from,N-1,edPaintPV,edPaintPV)},
   edPvStop(){endPreview();edRender()},
   tplOpen(){if(ed&&endPreview())edRender();if(!ed||!isCoach())return;endPreview();readEd();listSheet("Start from a template",tplListHTML())},
-  tplPick(d){if(!ed)return;const t=tplGet(d.id);if(!t)return;const apply=()=>{if(!ed)return;readEd();snapshot();const p=ed.play;p.court=t.court==="full"?"full":"half";p.phases=JSON.parse(JSON.stringify(t.phases));
-      if(t.roles){p.roles={...p.roles};IDS.forEach(id=>{if(t.roles[id]!=null)p.roles[id]=t.roles[id]})}if(!p.cat)p.cat=t.cat||(p.court==="full"?"Press break":"Half court");const cs=$("#pe-cat");if(cs)cs.value=p.cat;
+  tplPick(d){if(!ed)return;const t=tplGet(d.id);if(!t)return;const apply=()=>{if(!ed)return;readEd();snapshot();const p=ed.play;p.court=t.court==="full"?"full":"half";p.phases=JSON.parse(JSON.stringify(t.phases));const ns=t.side==="defense"?"defense":"offense";if(sideOf(p)!==ns){p.side=ns;if(!CATS[ns].includes(p.cat))p.cat=""}p.side=ns;
+      if(t.roles){p.roles={...p.roles};IDS.forEach(id=>{if(t.roles[id]!=null)p.roles[id]=t.roles[id]})}if(!p.cat)p.cat=t.cat&&CATS[ns].includes(t.cat)?t.cat:(ns==="defense"?(p.court==="full"?"Press":"Man-to-man"):(p.court==="full"?"Press break":"Half court"));syncCat();
       ed.cur=0;ed.mode="move";ed.flash=null;ed.scrPick=null;edRender();toast("Loaded "+t.name+(p.phases.length>1?" · "+plural(p.phases.length,"step"):""))};
     closeSheet();const has=ed.play.phases.length>1||ed.hist.length>0;if(has)confirmDiscard(apply,"Replace this diagram?","The template's court and steps replace what you've drawn. Your play name stays.");else apply()},
   tplSave(){if(ed&&endPreview())edRender();if(!ed||!isCoach())return;endPreview();readEd();const p=ed.play;
     openSheet({title:"Save as template",intro:"Saves this court, its steps and roles so any coach can start a play from it. Templates never show in the playbook.",fields:[{key:"name",label:"Template name",req:true},{key:"desc",label:"One-line description (optional)"}],value:{name:p.name||""},saved:"Template saved",
       onSave:async v=>{const name=v.name.slice(0,60);if(!name)throw new Error("Template name is required");const roles={};IDS.forEach(id=>{if((p.roles[id]||"").trim())roles[id]=p.roles[id].trim()});
-        const obj={name,desc:(v.desc||"").slice(0,120),court:p.court||"half",phases:cleanPhases(p.phases),author:user.cid,ts:Date.now()};if(Object.keys(roles).length)obj.roles=roles;await saveDoc("templates",uid("tp"),obj)}})},
+        const obj={name,desc:(v.desc||"").slice(0,120),side:sideOf(p),court:p.court||"half",phases:cleanPhases(p.phases),author:user.cid,ts:Date.now()};if(Object.keys(roles).length)obj.roles=roles;await saveDoc("templates",uid("tp"),obj)}})},
   tplRename(d){const t=get("templates",d.id);if(!t||!isCoach())return;openSheet({title:"Rename template",fields:[{key:"name",label:"Template name",req:true},{key:"desc",label:"One-line description (optional)"}],value:{name:t.name,desc:t.desc||""},saved:"Template renamed",
     onSave:v=>saveDoc("templates",t.id,{...t,name:v.name.slice(0,60),desc:(v.desc||"").slice(0,120)})})},
   tplDel(d){const t=get("templates",d.id);if(!t||!isCoach())return;confirmDelete({title:`Delete the ${t.name} template?`,body:"It's removed for every coach. Plays already built from it are not changed.",button:"Delete template",done:"Template deleted",run:()=>removeDoc("templates",t.id)})},
-  async dupPlay(d){const p=get("plays",d.id);if(!p||!isCoach())return;stopPlayback();const {id:_x,...rest}=JSON.parse(JSON.stringify(p));const base=p.name.replace(/ \(copy(?: \d+)?\)$/,"").slice(0,64);const taken=new Set(plays().map(x=>x.name.trim().toLowerCase()));let nm=base+" (copy)";for(let i=2;taken.has(nm.toLowerCase());i++)nm=base+` (copy ${i})`;const obj={...rest,name:nm,author:user.cid,ts:Date.now()};const nid=uid("pl");
+  async dupPlay(d){const p=get("plays",d.id);if(!p||!isCoach())return;stopPlayback();const {id:_x,...rest}=JSON.parse(JSON.stringify(p));const base=p.name.replace(/ \(copy(?: \d+)?\)$/,"").slice(0,64);const taken=new Set(plays().map(x=>x.name.trim().toLowerCase()));let nm=base+" (copy)";for(let i=2;taken.has(nm.toLowerCase());i++)nm=base+` (copy ${i})`;const obj={...rest,side:sideOf(p),name:nm,author:user.cid,ts:Date.now()};if(obj.hide){delete obj.hide;obj.draft=true}const nid=uid("pl");
     recording=[];let snaps;try{await saveDoc("plays",nid,obj);snaps=recording}finally{recording=null}curPlay=nid;pb.t=0;pb.sel=null;render();toastUndo("Duplicated as "+obj.name,snaps)},
-  async edSave(){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}readEd();const p=ed.play;if(!p.name.trim()){toast("Give the play a name",true);$("#pe-name").focus();return}if(!p.cat){toast("Pick a category",true);$("#pe-cat").focus();return}if(p.phases.length<2){toast("Add at least one more step so the play moves",true);return}
+  async edSave(){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}readEd();const p=ed.play;if(!p.name.trim()){toast("Give the play a name",true);$("#pe-name").focus();return}if(!p.cat){toast("Pick a category",true);$("#pe-cat").focus();return}if(!SIDE_L[sideOf(p)]){toast("Pick offense or defense",true);return}if(p.phases.length<2){toast("Add at least one more step so the play moves",true);return}
     const dupP=plays().find(x=>x.id!==ed.id&&x.name.trim().toLowerCase()===p.name.trim().toLowerCase());if(dupP){toast("There's already a play named "+dupP.name+". Pick another name.",true);$("#pe-name").focus();return}
-    const obj={name:p.name.trim().slice(0,80),cat:p.cat,court:p.court||"half",roles:p.roles,notes:(p.notes||"").slice(0,3000),phases:cleanPhases(p.phases),author:user.cid,ts:Date.now(),...(p.draft?{draft:true}:{})};
-    const id=ed.isNew?uid("pl"):ed.id;await saveDoc("plays",id,obj);curPlay=id;ed=null;pb.t=0;pb.sel=null;render();toast("Play saved: "+obj.name)},
+    const id=ed.isNew?uid("pl"):ed.id;const builtIn=!!DEFMAP.plays[id];
+    const obj={name:p.name.trim().slice(0,80),side:sideOf(p),cat:p.cat,court:p.court||"half",roles:p.roles,notes:(p.notes||"").slice(0,3000),phases:cleanPhases(p.phases),author:user.cid,ts:Date.now(),...(p.draft?(builtIn?{hide:true}:{draft:true}):{})};
+    await saveDoc("plays",id,obj);curPlay=id;pbSide=obj.side;ed=null;pb.t=0;pb.sel=null;render();toast("Play saved: "+obj.name+(obj.draft||obj.hide?" (hidden from players)":""))},
   edCancel(){if(ed&&ed.previewing){stopPlayback();ed.previewing=false}const go=()=>{ed=null;render()};if(ed&&ed.dirty)confirmDiscard(go,"Discard this play?","Your changes to the diagram, roles and notes will be lost.");else go()},
   async edDelete(d,el){if(!el.dataset.confirm){el.dataset.confirm="1";el.textContent="Tap again to delete";setTimeout(()=>{if(el.isConnected){delete el.dataset.confirm;el.textContent="Delete play"}},3000);return}
     await removeDoc("plays",ed.id);ed=null;curPlay=null;render();toast("Play deleted")}
@@ -2056,7 +2300,7 @@ function deleteFlow(kind,id,idx){
   else if(kind==="game"){const g=games().find(x=>x.id===id);if(!g)return;const o=O(g.opp);const imp=store.statgames[g.date];
     cfg={title:`Delete ${vsAt(g)} ${o.name}?`,body:`${longDate(g.d)} will be removed from the schedule.`,impacts:[g.played&&`The final score (${g.us}–${g.them}) is deleted and our record changes`,imp&&"Its imported box score is deleted"].filter(Boolean),button:"Delete game",done:"Game deleted",
       run:async()=>{if(imp)await removeDoc("statgames",g.date);await removeDoc("games",id)},after:()=>{if(location.hash.startsWith("#game-"))location.hash="schedule"}}}
-  else if(kind==="play"){const p=get("plays",id);if(!p)return;cfg={title:`Delete ${p.name}?`,body:"It's removed from the playbook for every coach and player.",impacts:[plural(p.phases.length,"step")+" of diagram work",p.notes&&"Its roles, notes and reads"].filter(Boolean),button:"Delete play",done:p.name+" deleted",run:()=>removeDoc("plays",id),after:()=>{ed=null;curPlay=null}}}
+  else if(kind==="play"){const p=get("plays",id);if(!p)return;cfg={title:`Delete ${p.name}?`,body:"It's removed from the playbook for every coach and player."+(isBasic(p)?" It's a Basic play from the built-in library; an admin can bring it back later from the change log.":"")+(isHidden(p)?"":" To keep it but take it away from players, turn off Visible to players instead."),impacts:[plural(p.phases.length,"step")+" of diagram work",p.notes&&"Its roles, notes and reads"].filter(Boolean),button:"Delete play",done:p.name+" deleted",run:()=>removeDoc("plays",id),after:()=>{ed=null;curPlay=null}}}
   else if(kind==="oppPlayer"){const o=get("opps",id);const pl=o&&o.players[+idx];if(!pl)return;cfg={title:`Remove #${pl.no} ${pl.name}?`,body:`From ${o.name}'s players to know, with his tendencies and notes.`,button:"Remove player",done:"Player removed",run:()=>{const arr=[...o.players];arr.splice(+idx,1);return saveDoc("opps",id,{...o,players:arr})}}}
   else if(kind==="meet"){const o=get("opps",id);const m=o&&(o.last||[])[+idx];if(!m)return;cfg={title:"Delete this meeting?",body:`${esc(longDate(D(m.date)))}, ${D(m.date).getFullYear()}: ${m.res} ${m.us}–${m.them} will be removed from past meetings.`,button:"Delete meeting",done:"Meeting deleted",run:()=>{const a=[...o.last];a.splice(+idx,1);return saveDoc("opps",id,{...o,last:a})}}}
   else if(kind==="badge"){const b=get("badges",id);if(!b)return;const n=players().filter(p=>{const v=metric(p,seasonStats().find(x=>x.id===p.id),b.stat);return v>=0&&v>=b_min(b)}).length;cfg={title:`Delete the ${b.name} badge?`,body:"The rule is removed. To hide it for now instead, edit it and turn it off.",impacts:[n&&`${plural(n,"player")} currently showing it will lose it`].filter(Boolean),button:"Delete badge",done:"Badge deleted",run:()=>removeDoc("badges",id)}}
@@ -2213,7 +2457,7 @@ function bindAdmin(){
   const set=(id,k)=>{const el=$("#"+id);if(el)el.onchange=()=>{if(ADM.f[k]===el.value)return;ADM.f[k]=el.value;admLoadLog(true)}};
   set("adf-actor","actor");set("adf-coll","coll");set("adf-from","from");set("adf-to","to");
 }
-const FIELD_L={name:"Name",first:"First name",last:"Last name",no:"Number",pos:"Position",yr:"Year",ht:"Height",date:"Date",time:"Tip-off",opp:"Opponent",site:"Site",home:"Home game",us:"Our score",them:"Their score",ot:"Overtime",lg:"League game",type:"Type",event:"Event",venue:"Venue",text:"Text",vis:"Who can see it",author:"Posted by",by:"By",ts:"Time",label:"What happens",t:"Timestamp",url:"Link",city:"City",status:"Report status",league:"In our league",keys:"Keys",players:"Players to know",last:"Past meetings",coach:"Their coach",cat:"Category",court:"Court",roles:"Roles",notes:"Notes",phases:"Steps",draft:"Draft",def:"Definition",msg:"Message",ref:"Reference",verse:"Verse",pinned:"Pinned",deleted:"Deleted",lines:"Box score lines",pid:"Player",desc:"Description",stat:"Based on",min:"Cutoff",on:"On",note:"Note",inactive:"Inactive",seasons:"Seasons",edited:"Edited",a:"Team A",b:"Team B",as:"Team A score",bs:"Team B score",w:"Wins",l:"Losses",lw:"League wins",ll:"League losses"};
+const FIELD_L={name:"Name",first:"First name",last:"Last name",no:"Number",pos:"Position",yr:"Year",ht:"Height",date:"Date",time:"Tip-off",opp:"Opponent",site:"Site",home:"Home game",us:"Our score",them:"Their score",ot:"Overtime",lg:"League game",type:"Type",event:"Event",venue:"Venue",text:"Text",vis:"Who can see it",author:"Posted by",by:"By",ts:"Time",label:"What happens",t:"Timestamp",url:"Link",city:"City",status:"Report status",league:"In our league",keys:"Keys",players:"Players to know",last:"Past meetings",coach:"Their coach",cat:"Category",court:"Court",roles:"Roles",notes:"Notes",phases:"Steps",draft:"Hidden from players",hide:"Hidden from players",side:"Side",def:"Definition",msg:"Message",ref:"Reference",verse:"Verse",pinned:"Pinned",deleted:"Deleted",lines:"Box score lines",pid:"Player",desc:"Description",stat:"Based on",min:"Cutoff",on:"On",note:"Note",inactive:"Inactive",seasons:"Seasons",edited:"Edited",a:"Team A",b:"Team B",as:"Team A score",bs:"Team B score",w:"Wins",l:"Losses",lw:"League wins",ll:"League losses"};
 function admVal(k,v){if(v===undefined||v===null||v==="")return'<span class="muted">(empty)</span>';
   if(typeof v==="boolean")return v?"Yes":"No";
   if((k==="opp"||k==="a"||k==="b")&&typeof v==="string")return esc(oppName(v));
@@ -2223,6 +2467,7 @@ function admVal(k,v){if(v===undefined||v===null||v==="")return'<span class="mute
   if(k==="time"&&typeof v==="string")return esc(fmtTime(v));
   if((k==="ts"||k==="setAt")&&typeof v==="number")return esc(new Date(v).toLocaleString());
   if(k==="phases"&&Array.isArray(v))return esc(plural(v.length,"step"));
+  if(k==="side"&&SIDE_L[v])return esc(SIDE_L[v]);
   if(k==="lines"&&Array.isArray(v))return esc(plural(v.length,"player line"));
   if(typeof v==="string"||typeof v==="number")return esc(String(v));
   if(Array.isArray(v)&&v.every(x=>x==null||["string","number","boolean"].includes(typeof x)))return v.length?esc(v.join("\n")):'<span class="muted">(none)</span>';
@@ -2314,10 +2559,12 @@ function bindView(r){
 /* ================= Plain website: remove any app install left from earlier versions ================= */
 if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});if(window.caches)caches.keys().then(ks=>ks.filter(k=>k.startsWith("eagles-hub")).forEach(k=>caches.delete(k))).catch(()=>{})}
 
-/* Helper for Claude to add plays for the coaches (signed in as Coach): CPC.addPlay({name,cat,court,roles,notes,phases}) */
+/* Helper for Claude to add plays for the coaches (signed in as Coach):
+   CPC.addPlay({name,side:"offense"|"defense",cat,court,roles,notes,phases,hidden?}); defense phases may carry opp:{1:[x,y],..} and ballAt:"1".."5" */
 window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a coach first");if(!o||!String(o.name||"").trim()||!o.cat||!Array.isArray(o.phases)||o.phases.length<2)throw new Error("A play needs a name, a category and at least 2 steps");
   const dup=plays().find(p=>p.name.trim().toLowerCase()===String(o.name).trim().toLowerCase());if(dup)throw new Error("A play named "+dup.name+" already exists");
-  const id=uid("pl");await saveDoc("plays",id,{name:String(o.name).trim().slice(0,80),cat:o.cat,court:o.court==="full"?"full":"half",roles:o.roles||{},notes:String(o.notes||"").slice(0,3000),phases:cleanPhases(o.phases),author:user.cid,ts:Date.now()});render();return id},
+  if(o.side!=null&&!SIDE_L[o.side])throw new Error('side must be "offense" or "defense"');
+  const id=uid("pl");await saveDoc("plays",id,{name:String(o.name).trim().slice(0,80),side:o.side||(o.cat==="Defense"?"defense":"offense"),cat:o.cat,court:o.court==="full"?"full":"half",roles:o.roles||{},notes:String(o.notes||"").slice(0,3000),phases:cleanPhases(o.phases),author:user.cid,ts:Date.now(),...(o.hidden||o.draft?{draft:true}:{})});render();return id},
   /* CPC.addGames([{date:"YYYY-MM-DD",time:"19:00"|"7:00 PM"|"TBA",opp:"Opponent name",site?:"home"|"away"|"neutral",home?:bool,lg?:bool,
        type?:"exh",event?:"Jamboree",venue?:"Name (neutral site only)",city?}]) creates missing opponents; skips dates that already have a game */
   async addGames(list){needCoach();if(!Array.isArray(list))throw new Error("addGames needs an array of games");const out={added:[],skipped:[]};
