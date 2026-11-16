@@ -161,9 +161,6 @@ a.pcard:hover{transform:translateY(-2px);border-color:var(--gold)}
 .bigstats{display:flex;gap:26px;flex-wrap:wrap;position:relative}
 .bigstats b{display:block;font-family:var(--display);font-size:38px;font-weight:600;line-height:1}
 .bigstats span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#b9c6d3}
-.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;position:relative}
-.bdg{display:inline-flex;align-items:center;gap:6px;background:rgba(194,176,138,.14);border:1px solid rgba(194,176,138,.35);color:#f2e6cf;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700}
-.bdg svg{color:var(--gold-2)}
 
 .scheme{display:grid;grid-template-columns:96px 1fr;gap:6px 14px;font-size:14px;margin:0}
 .scheme dt{color:var(--muted);font-weight:700;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em;padding-top:2px}
@@ -333,19 +330,12 @@ input:disabled{opacity:.45}
 .btn.del{background:transparent;border-color:rgba(232,131,107,.4);color:var(--bad)}
 .btn.del svg{width:13px;height:13px}
 .toast .undo{margin-left:6px;background:transparent;border:1px solid currentColor;color:inherit;border-radius:8px;padding:3px 10px;font-weight:700;cursor:pointer;font-size:13px}
-.bdg.award{background:var(--gold);border-color:var(--gold-2);color:#101a27}
-.bdg.award svg{color:#101a27}
-.bdg.off{opacity:.45}
-.rulecard{display:flex;flex-direction:column;gap:8px}
-.rulecard .bdg{align-self:flex-start;font-size:13px}
 input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239aacc1' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='6.5'/%3E%3Cpath d='M20.5 20.5L16 16'/%3E%3C/svg%3E") no-repeat 10px 50%}
 .tip{display:flex;gap:12px;align-items:flex-start;background:linear-gradient(90deg,rgba(171,140,89,.18),rgba(171,140,89,.06));border:1px solid rgba(194,176,138,.35);border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:13.5px}
 .tip b{color:var(--gold-ink)}.tip .grow{flex:1}
 .pw{position:relative}.pw input{padding-right:48px}
 .pw .eye{position:absolute;right:4px;bottom:4px;width:40px;height:34px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-radius:8px;display:grid;place-items:center}
 .pw .eye:hover{color:var(--ink)}
-button.bdg{cursor:pointer;font:inherit;font-size:12px}
-.bdg-tip{margin-top:10px;background:rgba(10,20,32,.55);border:1px solid rgba(194,176,138,.3);border-radius:10px;padding:8px 12px;font-size:13px;color:#e6edf4;position:relative}
 .empty{padding:20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
 /* Coach Talk */
 .talk{position:relative;overflow:hidden;border-radius:var(--r);padding:20px 22px;margin-bottom:14px;background:linear-gradient(135deg,#1f3650 0%,#1c3045 45%,#132539 100%);border:1px solid rgba(194,176,138,.38);box-shadow:var(--shadow),inset 4px 0 0 var(--gold)}
@@ -478,7 +468,6 @@ button.bdg{cursor:pointer;font:inherit;font-size:12px}
        templates {name, desc, court, phases, roles?}  coach-only starting points for the play builder; never shown in the playbook
        stand    {lw, ll, w, l}  id = opps id or "cpc"          lres  {date,a,as,b,bs}
        statgames {lines:[{id:<player id>,min,pts,reb,ast,stl,blk,to,fgm,fga,tpm,tpa,ftm,fta}],by,ts}  id = game date
-       badges   {name, stat, min, on, desc}                   awards {pid,name,note,by,ts}
        talk     {msg, ref, verse, ts}  id = "current" (Coach Talk on Home)
        talks    {from, msg, ref, verse, ts}  id = timestamp (past Coach Talk messages)
        history  {seasons:[{season:"2025-26", w, l, lw, ll, finish, coach, notes}]}  id = "seasons"
@@ -830,7 +819,7 @@ const slug=x=>String(x).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/
 const DEF={
  players:[],games:[],opps:[],notes:[],clips:[],posts:[],calls:[],
  terms:GLOSS.flatMap(([cat,a])=>a.map(([name,def])=>({id:"gl-"+slug(name),cat,name,def}))),
- stand:[],lres:[],plays:[],templates:[],statgames:[],badges:[],awards:[],accounts:[],talk:[],talks:[],history:[]
+ stand:[],lres:[],plays:[],templates:[],statgames:[],accounts:[],talk:[],talks:[],history:[]
 };
 /* Terms saved by older versions under ids t0..t15 duplicate the built-in list; hide those copies. */
 const DEF_TERM_NAMES=new Set(DEF.terms.map(t=>t.name.trim().toLowerCase()));
@@ -850,8 +839,7 @@ if(LOCAL_OK)(function(){const s=LS.get(CONFIG.storageKey);if(s)COLLS.forEach(c=>
 const saveLocal=()=>{if(LOCAL_OK)LS.set(CONFIG.storageKey,store)};
 const col=c=>CONFIG.dataPrefix+c;
 let DB=null,syncState="local",pendingRender=false;
-const LEGACY=new Set(["bg1","bg2","bg3","bg4","bg5","bg6","bg7","aw1","aw2"]);
-function items(c){const out=[];const seen=new Set();DEF[c].forEach(d=>{seen.add(d.id);const o=store[c][d.id];if(o&&o.deleted)return;out.push(o?{...o,id:d.id}:d)});Object.entries(store[c]).forEach(([id,o])=>{if(seen.has(id)||!o||o.deleted||((c==="badges"||c==="awards")&&LEGACY.has(id))||(c==="terms"&&/^t\d{1,2}$/.test(id)&&DEF_TERM_NAMES.has(String(o.name||"").trim().toLowerCase())))return;out.push({...o,id})});return out}
+function items(c){const out=[];const seen=new Set();DEF[c].forEach(d=>{seen.add(d.id);const o=store[c][d.id];if(o&&o.deleted)return;out.push(o?{...o,id:d.id}:d)});Object.entries(store[c]).forEach(([id,o])=>{if(seen.has(id)||!o||o.deleted||(c==="terms"&&/^t\d{1,2}$/.test(id)&&DEF_TERM_NAMES.has(String(o.name||"").trim().toLowerCase())))return;out.push({...o,id})});return out}
 const get=(c,id)=>items(c).find(x=>x.id===id);
 const shared=()=>DB&&syncState!=="local";
 let recording=null;
@@ -972,7 +960,7 @@ const oppName=id=>id==="cpc"?"CPC Eagles":O(id).name;
 const games=()=>items("games").map(g=>({...g,d:D(g.date),played:g.us!=null&&g.them!=null&&g.us!==""&&g.them!=="",res:(g.us!=null&&g.them!=null&&g.us!==""&&g.them!=="")?(+g.us>+g.them?"W":"L"):null})).sort((a,b)=>a.d-b.d);
 const played=()=>games().filter(g=>g.played);
 const isExh=g=>!!g&&g.type==="exh";
-/* Games that count: played and not exhibitions (record, standings, season stats, badges) */
+/* Games that count: played and not exhibitions (record, standings, season stats) */
 const counted=()=>played().filter(g=>!isExh(g));
 const upcoming=()=>games().filter(g=>!g.played&&g.d>=TODAY);
 const needsScore=()=>games().filter(g=>!g.played&&g.d<TODAY);
@@ -1034,7 +1022,7 @@ function winStreak(){const p=counted();if(!p.length)return"";const last=p[p.leng
 
 /* ================= Session, routing, nav ================= */
 let user=LOCAL_OK?LS.get(CONFIG.sessionKey):null;
-const ROUTES={coach:["home","schedule","roster","stats","scouting","league","playbook","glossary","badges"],admin:["home","schedule","roster","stats","scouting","league","playbook","glossary","badges","admin"],player:["home","schedule","roster","stats","scouting","league","playbook","glossary"]};
+const ROUTES={coach:["home","schedule","roster","stats","scouting","league","playbook","glossary"],admin:["home","schedule","roster","stats","scouting","league","playbook","glossary","admin"],player:["home","schedule","roster","stats","scouting","league","playbook","glossary"]};
 const TABS=["home","schedule","scouting","playbook"];
 const route=()=>location.hash.slice(1)||"home";
 function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin();return (ROUTES[user.role]||[]).includes(r)}
@@ -1050,11 +1038,10 @@ const IC={
   playbook:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.6"/><path d="M14 8l3 3m0-3l-3 3M9 15c2 0 4-1 6-3"/>',
   glossary:'<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11M9 8h6"/>',
   mynotes:'<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
-  badges:'<path d="M12 2.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 15.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
   admin:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
 };
-const LABEL={home:"Home",schedule:"Schedule",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"League",playbook:"Playbook",glossary:"Glossary & calls",badges:"Badges",admin:"Staff & changes",more:"More"};
+const LABEL={home:"Home",schedule:"Schedule",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"League",playbook:"Playbook",glossary:"Glossary & calls",admin:"Staff & changes",more:"More"};
 const ico=k=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
 const MARK=(w=36)=>`<img src="logo.png" width="${w}" height="${w}" alt="" aria-hidden="true" style="display:block;flex:none;object-fit:contain">`;
 const openSet=new Set(["keys","players-know","feed","play-roles","play-notes"]);
@@ -1092,7 +1079,7 @@ function view(r){
   if(r==="home")return homeView();if(r==="schedule")return scheduleView();if(r==="roster")return rosterView();if(r==="stats")return statsView();
   if(r==="scouting")return scoutingView();if(r.startsWith("opp-"))return oppView(r.slice(4));if(r==="league")return leagueView();
   if(r==="playbook")return playbookView();if(r==="glossary")return glossaryView();if(r.startsWith("player-"))return playerView(r.slice(7));
-if(r.startsWith("game-"))return gameView(r.slice(5));if(r==="badges")return badgesView();if(r==="admin")return adminView();return homeView();
+if(r.startsWith("game-"))return gameView(r.slice(5));if(r==="admin")return adminView();return homeView();
 }
 
 /* ================= Login (per-user passwords, stored only as salted hashes) ================= */
@@ -1224,11 +1211,11 @@ function bindSbLogin(){
 /* ================= First-time tips (coaches) ================= */
 const TIPS={
   home:"<b>Welcome.</b> Everything here can be changed. Look for <b>Edit</b> and <b>Add</b> buttons on any page. Posts in the Team feed go to every player.",
-  roster:"<b>Building the roster:</b> tap <b>Add player</b>. Tap a player to edit him or award a badge.",
+  roster:"<b>Building the roster:</b> tap <b>Add player</b>. Tap a player to see his stats or edit him.",
   schedule:"<b>Schedule:</b> tap <b>Add game</b>, or the pencil on any game. Enter the final score after the game to update the record.",
   scouting:"<b>Scouting:</b> add an opponent, then open it to fill in keys, players to know, their coach, film timestamps and notes. Notes can stay coaches-only or be shared with players.",
   playbook:"<b>Playbook:</b> tap <b>New play</b> and pick Offense or Defense. Drag players to where they start, tap <b>Add step</b> for each action, then use Pass and Screen. Preview before you save.",
-  stats:"<b>Stats:</b> import a box score from a spreadsheet under <b>Import</b>. Season stats, leaders and badges update on their own."
+  stats:"<b>Stats:</b> import a box score from a spreadsheet under <b>Import</b>. Season stats and leaders update on their own."
 };
 function tipFor(r){if(!isCoach())return"";const t=TIPS[r];const seen=LS.get("cpc_tips_seen")||{};if(!t||seen[r])return"";return `<div class="tip" role="note"><span class="grow">${t}</span><button class="btn sm" data-act="tipOk" data-v="${r}">Got it</button></div>`}
 
@@ -1385,51 +1372,23 @@ function gameView(date){
 function rosterView(){
   const ss=seasonStats();const out=players().filter(p=>p.inactive);
   const card=p=>{const s=ss.find(x=>x.id===p.id)||{};return `<a class="card pcard" data-no="${esc(p.no)}" href="#player-${p.id}"><div class="jersey">${esc(p.no)}</div><div><div class="pname">${esc(pName(p))}${p.inactive?' <span class="chip warn">Inactive</span>':""}</div><div class="pline">${parts(p.pos,p.yr,p.ht)}</div><div class="pline num">${s.gp?`${fmt1(s.ppg)} pts · ${fmt1(s.rpg)} reb · ${fmt1(s.apg)} ast`:"No games yet"}</div></div></a>`};
-  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · ${esc(CONFIG.level)}</div><h1>Roster</h1>${isCoach()?"<p>Tap a player for stats, badges and editing.</p>":""}</div><div class="row">${isCoach()?`<a class="btn sm" href="#badges">${BADGE_IC}Badges</a>`:""}${abtn("addPlayer","","Add player")}</div></div>
+  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · ${esc(CONFIG.level)}</div><h1>Roster</h1>${isCoach()?"<p>Tap a player for stats and editing.</p>":""}</div><div class="row">${abtn("addPlayer","","Add player")}</div></div>
   ${players().length?"":`<div class="empty">No players yet.${isCoach()?" Tap Add player to build the roster.":""}</div>`}<div class="grid g3">${players().filter(p=>!p.inactive).map(card).join("")}</div>
   ${out.length?`<div class="section">${panel("inactive","Inactive / injured",plural(out.length,"player"),`<div class="grid g3">${out.map(card).join("")}</div>`)}</div>`:""}`;
 }
-const BADGE_IC='<svg width="12" height="12" viewBox="0 0 12 12"><path d="M6 .8l1.6 3.3 3.6.5-2.6 2.5.6 3.6L6 9l-3.2 1.7.6-3.6L.8 4.6l3.6-.5z" fill="currentColor"/></svg>';
-const BSTATS=[["ppg","Points per game",""],["rpg","Rebounds per game",""],["apg","Assists per game",""],["spg","Steals per game",""],["bpg","Blocks per game",""],["tpp","3-point % (10+ attempts)","%"],["ftp","Free throw % (10+ attempts)","%"],["ts","True shooting % (20+ shots)","%"],["dd","Double-doubles (games)",""],["hi","Season-high points in a game",""]];
-const bstat=k=>BSTATS.find(b=>b[0]===k)||BSTATS[0];
-function metric(p,s,k){if(!s||!s.gp)return -1;
-  if(k==="tpp")return s.tpa>=10?s.tpm/s.tpa*100:-1;if(k==="ftp")return s.fta>=10?s.ftm/s.fta*100:-1;if(k==="ts")return s.fga>=20?s.ts*100:-1;
-  if(k==="dd"||k==="hi"){const logs=counted().map(g=>box(g).find(l=>l.id===p.id)).filter(l=>l&&l.min>0);return k==="dd"?logs.filter(l=>[l.pts,l.reb,l.ast].filter(v=>v>=10).length>=2).length:Math.max(0,...logs.map(l=>l.pts))}
-  return s[k]??-1}
-const fmtM=(k,v)=>k==="dd"||k==="hi"?String(Math.round(v)):(bstat(k)[2]?v.toFixed(1)+"%":fmt1(v));
-const ruleText=b=>`${bstat(b.stat)[1]} at least ${b.min}${bstat(b.stat)[2]}`;
-function earned(p,s){return items("badges").filter(b=>b.on!==false).map(b=>({b,v:metric(p,s,b.stat)})).filter(x=>x.v>=0&&x.v>=+b_min(x.b)).map(({b,v})=>({b,v,label:b.stat==="dd"&&v>1?v+"× "+b.name:b.stat==="hi"?b.name+" · "+v+" pts":b.name}))}
-const b_min=b=>+b.min||0;
-function badgeChips(p,s){const auto=earned(p,s);const aw=items("awards").filter(a=>a.pid===p.id);
-  return auto.map(x=>`<button type="button" class="bdg" data-act="bdgTip" data-tip="${esc(x.b.name+": "+ruleText(x.b)+". "+(x.b.desc?x.b.desc+" ":"")+"His: "+fmtM(x.b.stat,x.v)+".")}" aria-expanded="false">${BADGE_IC}${esc(x.label)}</button>`).join("")+aw.map(a=>`<button type="button" class="bdg award" data-act="bdgTip" data-tip="${esc(a.name+": awarded by "+coachName(a.by)+(a.note?". "+a.note:"."))}" aria-expanded="false">${TROPHY}${esc(a.name)}</button>`).join("")}
-const TROPHY='<svg width="12" height="12" viewBox="0 0 12 12"><path d="M3 1h6v3a3 3 0 0 1-6 0zM3 2H1a2 2 0 0 0 2 2.5M9 2h2a2 2 0 0 1-2 2.5M6 7v2M4 11h4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
 function playerView(pid){
   const p=P(pid);if(!p)return `<div class="empty">Player not found.</div>`;
-  const s=seasonStats().find(x=>x.id===pid);const coach=isCoach();const chips=badgeChips(p,s);
+  const s=seasonStats().find(x=>x.id===pid);const coach=isCoach();
   const log=played().filter(hasBox).slice().reverse().map(g=>({g,l:box(g).find(l=>l.id===pid)||{min:0}}));
-  const hero=`<div class="phero"><div class="pnum">${esc(p.no)}</div>${coach?`<div class="tools row"><button class="btn sm ghost" data-act="addAward" data-pid="${esc(p.id)}">${TROPHY}Award badge</button><button class="btn sm ghost" data-act="editPlayer" data-id="${esc(p.id)}">${PEN.replace('viewBox','width="13" height="13" viewBox')}Edit</button><button class="btn sm del" data-act="del" data-k="player" data-id="${esc(p.id)}">${TRASH}Delete</button></div>`:""}<div class="eyebrow">#${esc(p.no)} · ${parts(p.pos,p.yr,p.ht)}${p.inactive?" · Inactive / injured":""}</div><h1>${esc(pName(p))}</h1>
+  const hero=`<div class="phero"><div class="pnum">${esc(p.no)}</div>${coach?`<div class="tools row"><button class="btn sm ghost" data-act="editPlayer" data-id="${esc(p.id)}">${PEN.replace('viewBox','width="13" height="13" viewBox')}Edit</button><button class="btn sm del" data-act="del" data-k="player" data-id="${esc(p.id)}">${TRASH}Delete</button></div>`:""}<div class="eyebrow">#${esc(p.no)} · ${parts(p.pos,p.yr,p.ht)}${p.inactive?" · Inactive / injured":""}</div><h1>${esc(pName(p))}</h1>
    ${s.gp?`<div class="bigstats"><div><b class="num">${fmt1(s.ppg)}</b><span>PPG</span></div><div><b class="num">${fmt1(s.rpg)}</b><span>RPG</span></div><div><b class="num">${fmt1(s.apg)}</b><span>APG</span></div><div><b class="num">${s.fga?(s.ts*100).toFixed(1):"–"}</b><span>TS%</span></div><div><b class="num">${s.gp}</b><span>Games</span></div></div>`:`<p style="margin:0;color:#c9d4df;position:relative">Season stats show up after his first imported box score.</p>`}
-   ${chips?`<div class="badges">${chips}</div>`:""}${coach?`<div class="small" style="margin-top:10px;position:relative"><a href="#badges" style="color:var(--gold-2)">How badges work</a></div>`:""}</div>`;
+   </div>`;
   const logBody=`<div class="tablewrap"><table><thead><tr><th class="l nosort">Game</th><th class="nosort">MIN</th><th class="nosort">PTS</th><th class="nosort">REB</th><th class="nosort">AST</th><th class="nosort">FG</th><th class="nosort">3PT</th></tr></thead><tbody>
    ${log.map(({g,l})=>`<tr><td class="l"><span class="res ${g.res}" style="font-size:14px;width:16px">${g.res}</span> ${mon(g.d)} ${g.d.getDate()} ${gTitle(g)}${isExh(g)?' <span class="chip gold">Exh</span>':""}</td><td class="num">${l.min||"DNP"}</td><td class="num us">${l.min?l.pts:"–"}</td><td class="num">${l.min?l.reb:"–"}</td><td class="num">${l.min?l.ast:"–"}</td><td class="num">${l.min?l.fgm+"-"+l.fga:"–"}</td><td class="num">${l.min?l.tpm+"-"+l.tpa:"–"}</td></tr>`).join("")}</tbody></table></div>`;
   return `<div class="row" style="margin-bottom:12px"><a class="btn sm" href="#roster">← Roster</a></div>${hero}
   <div class="section">${panel("plog","Game log",`${log.length} games`,logBody)}</div>`;
 }
 
-/* ================= Badges ================= */
-function badgesView(){
-  const ss=seasonStats();const PL=players();const B=items("badges");const A=items("awards").sort((a,b)=>b.ts-a.ts);
-  return `<div class="head"><div><div class="eyebrow">Coaches only · Roster</div><h1>Badges</h1><p>Players earn these automatically when their season stats reach a cutoff. Change the cutoffs, turn badges off, add your own, or award one by hand.</p></div><div class="row">${abtn("addAward","","Award a badge")}${abtn("addBadge","","New badge rule")}</div></div>
-  <h2 style="margin:4px 0 10px">Earned from stats</h2>
-  <div class="grid g3">${B.map(b=>{const who=PL.filter(p=>{const s=ss.find(x=>x.id===p.id);const v=metric(p,s,b.stat);return v>=0&&v>=b_min(b)});
-    return `<div class="card rulecard"><div class="spread"><span class="bdg ${b.on===false?"off":""}">${BADGE_IC}${esc(b.name)}</span>${b.on===false?'<span class="chip">Off</span>':'<span class="chip good">On</span>'}</div>
-    <div class="small"><b>Rule:</b> ${esc(ruleText(b))}</div>${b.desc?`<div class="small muted">${esc(b.desc)}</div>`:""}
-    <div class="small muted">${b.on===false?"Turned off.":who.length?`Earned by ${who.map(p=>esc(p.first[0]+". "+p.last)).join(", ")}`:"Nobody yet."}</div>
-    <div class="row" style="margin-top:auto">${ebtn("editBadge",`data-id="${esc(b.id)}"`)}${isCoach()?`<button class="btn sm del" data-act="del" data-k="badge" data-id="${esc(b.id)}">${TRASH}Delete</button>`:""}</div></div>`}).join("")||'<div class="empty">No badge rules. Add one.</div>'}</div>
-  <h2 style="margin:22px 0 10px">Awarded by coaches</h2>
-  <div class="card">${A.length?A.map(a=>{const p=P(a.pid);return `<div class="note"><div class="by"><span class="bdg award">${TROPHY}${esc(a.name)}</span><b>${esc(p?pName(p):"Former player")}</b><span>by ${esc(coachName(a.by))} · ${ago(a.ts)}</span>${ebtn("editAward",`data-id="${esc(a.id)}"`)}</div>${a.note?`<p class="muted">${esc(a.note)}</p>`:""}</div>`}).join(""):'<p class="muted" style="margin:0">No hand-picked awards yet.</p>'}</div>
-  <p class="small muted section">Badges only count players with imported games. Percentage badges need a minimum number of attempts so one lucky shot doesn't count.</p>`;
-}
 
 /* ================= Stats ================= */
 let statSort={k:"ppg",d:-1},statTab="players",importMsg="";
@@ -2090,7 +2049,6 @@ const ACT={
       if(v.pl&&v.pl.length<CONFIG.minPassword.player)throw new Error(`Player password needs at least ${CONFIG.minPassword.player} characters`);if(v.pl&&v.pl===(v.c1||v.cur))throw new Error("Use a different password for players");
       if(v.c1)await setPassword("coach",v.c1);if(v.pl)await setPassword("player",v.pl)}})},
   closeSheet(){requestClose()},
-  bdgTip(d,el){const box=el.closest(".phero");if(!box)return;let tip=box.querySelector(".bdg-tip");const same=tip&&tip.dataset.for===d.tip;box.querySelectorAll("button.bdg").forEach(b=>b.setAttribute("aria-expanded","false"));if(tip)tip.remove();if(same)return;tip=document.createElement("div");tip.className="bdg-tip";tip.dataset.for=d.tip;tip.setAttribute("role","status");tip.textContent=d.tip;el.closest(".badges").after(tip);el.setAttribute("aria-expanded","true")},
   printReport(d){const go=forPlayers=>ACT.doPrint(d,forPlayers);if(!isCoach())return go(true);
     openSheet({title:"Print scouting report",intro:"The players' copy leaves out coaches-only notes.",fields:[{key:"who",label:"Print for",type:"seg",options:[["players","Players"],["coaches","Coaches"]],req:true}],value:{who:"players"},button:"Print",saved:"Opening print",onSave:v=>{setTimeout(()=>go(v.who==="players"),400)}})},
   async doPrint(d,forPlayers){
@@ -2101,8 +2059,6 @@ const ACT={
   tipOk(d,el){const seen=LS.get("cpc_tips_seen")||{};seen[d.v]=true;LS.set("cpc_tips_seen",seen);const t=el.closest(".tip");if(t)t.remove()},
   sheetDelete(){if(!sheetCfg||!sheetCfg.del)return;const [k,id,idx]=sheetCfg.del;deleteFlow(k,id,idx)},
   del(d){deleteFlow(d.k,d.id,d.idx)},
-  addBadge(){badgeSheet(null)},editBadge(d){badgeSheet(get("badges",d.id))},
-  addAward(d){awardSheet(null,d.pid)},editAward(d){awardSheet(get("awards",d.id))},
   /* players */
   addPlayer(){playerSheet(null)},editPlayer(d){playerSheet(P(d.id))},
   /* games */
@@ -2290,9 +2246,9 @@ const excerpt=t=>{t=String(t||"");return t.length>90?t.slice(0,88)+"…":t};
 function deleteFlow(kind,id,idx){
   if(!isCoach())return;let cfg;
   const simple=(c,label,what)=>{const x=get(c,id);if(!x)return null;return{title:"Delete this "+label+"?",body:what(x),button:"Delete "+label,done:label[0].toUpperCase()+label.slice(1)+" deleted",run:()=>removeDoc(c,id)}};
-  if(kind==="player"){const p=P(id);if(!p)return;const a=items("awards").filter(x=>x.pid===id);const imp=Object.values(store.statgames).filter(g=>g&&Array.isArray(g.lines)&&g.lines.some(l=>l.id===id)).length;
-    cfg={title:`Delete ${pName(p)}?`,body:`#${p.no} will be removed from the roster, stats and team totals.`,impacts:[a.length&&plural(a.length,"awarded badge")+" will be removed",imp&&`His lines in ${plural(imp,"imported box score")} will be hidden`].filter(Boolean),type:p.last,button:"Delete player",done:pName(p)+" deleted",
-      run:async()=>{for(const x of a)await removeDoc("awards",x.id);await removeDoc("players",id)},after:()=>{if(/^#player-/.test(location.hash))location.hash="roster"}}}
+  if(kind==="player"){const p=P(id);if(!p)return;const imp=Object.values(store.statgames).filter(g=>g&&Array.isArray(g.lines)&&g.lines.some(l=>l.id===id)).length;
+    cfg={title:`Delete ${pName(p)}?`,body:`#${p.no} will be removed from the roster, stats and team totals.`,impacts:[imp&&`His lines in ${plural(imp,"imported box score")} will be hidden`].filter(Boolean),type:p.last,button:"Delete player",done:pName(p)+" deleted",
+      run:async()=>{await removeDoc("players",id)},after:()=>{if(/^#player-/.test(location.hash))location.hash="roster"}}}
   else if(kind==="opp"){const o=get("opps",id);if(!o)return;const gs=games().filter(g=>g.opp===id),ns=items("notes").filter(x=>x.opp===id),cs=items("clips").filter(x=>x.opp===id),st=get("stand",id),lr=items("lres").filter(r=>r.a===id||r.b===id);
     cfg={title:`Delete ${o.name}?`,body:"Their whole scouting report is removed for every coach and player.",impacts:[ns.length&&plural(ns.length,"scouting note"),cs.length&&plural(cs.length,"film clip"),(o.players||[]).length&&plural(o.players.length,"player to know"),st&&"Their row in the standings",lr.length&&plural(lr.length,"league result")].filter(Boolean),
       check:gs.length?`Also delete ${plural(gs.length,"game")} against ${esc(o.name)} from our schedule${gs.some(g=>g.played)?", including results that count toward our record":""}. Games can't point to an opponent that no longer exists.`:null,type:o.name,button:"Delete opponent",done:o.name+" deleted",
@@ -2303,9 +2259,8 @@ function deleteFlow(kind,id,idx){
   else if(kind==="play"){const p=get("plays",id);if(!p)return;cfg={title:`Delete ${p.name}?`,body:"It's removed from the playbook for every coach and player."+(isBasic(p)?" It's a Basic play from the built-in library; an admin can bring it back later from the change log.":"")+(isHidden(p)?"":" To keep it but take it away from players, turn off Visible to players instead."),impacts:[plural(p.phases.length,"step")+" of diagram work",p.notes&&"Its roles, notes and reads"].filter(Boolean),button:"Delete play",done:p.name+" deleted",run:()=>removeDoc("plays",id),after:()=>{ed=null;curPlay=null}}}
   else if(kind==="oppPlayer"){const o=get("opps",id);const pl=o&&o.players[+idx];if(!pl)return;cfg={title:`Remove #${pl.no} ${pl.name}?`,body:`From ${o.name}'s players to know, with his tendencies and notes.`,button:"Remove player",done:"Player removed",run:()=>{const arr=[...o.players];arr.splice(+idx,1);return saveDoc("opps",id,{...o,players:arr})}}}
   else if(kind==="meet"){const o=get("opps",id);const m=o&&(o.last||[])[+idx];if(!m)return;cfg={title:"Delete this meeting?",body:`${esc(longDate(D(m.date)))}, ${D(m.date).getFullYear()}: ${m.res} ${m.us}–${m.them} will be removed from past meetings.`,button:"Delete meeting",done:"Meeting deleted",run:()=>{const a=[...o.last];a.splice(+idx,1);return saveDoc("opps",id,{...o,last:a})}}}
-  else if(kind==="badge"){const b=get("badges",id);if(!b)return;const n=players().filter(p=>{const v=metric(p,seasonStats().find(x=>x.id===p.id),b.stat);return v>=0&&v>=b_min(b)}).length;cfg={title:`Delete the ${b.name} badge?`,body:"The rule is removed. To hide it for now instead, edit it and turn it off.",impacts:[n&&`${plural(n,"player")} currently showing it will lose it`].filter(Boolean),button:"Delete badge",done:"Badge deleted",run:()=>removeDoc("badges",id)}}
   else cfg=({note:()=>simple("notes","note",x=>"“"+esc(excerpt(x.text))+"”"),clip:()=>simple("clips","clip",x=>esc(x.label)+" · "+esc(x.t)),post:()=>simple("posts","post",x=>"“"+esc(excerpt(x.text))+"” will disappear from every player's feed."),
-    call:()=>simple("calls","call",x=>esc(x.name.toUpperCase())+": "+esc(x.def)),term:()=>simple("terms","term",x=>esc(x.name)),stand:()=>simple("stand","standings row",x=>esc(oppName(id))+" will be removed from the standings."),lres:()=>simple("lres","result",x=>esc(oppName(x.a))+" "+x.as+", "+esc(oppName(x.b))+" "+x.bs),award:()=>simple("awards","award",x=>esc(x.name)+" for "+esc(pName(P(x.pid))||"a former player"))}[kind]||(()=>null))();
+    call:()=>simple("calls","call",x=>esc(x.name.toUpperCase())+": "+esc(x.def)),term:()=>simple("terms","term",x=>esc(x.name)),stand:()=>simple("stand","standings row",x=>esc(oppName(id))+" will be removed from the standings."),lres:()=>simple("lres","result",x=>esc(oppName(x.a))+" "+x.as+", "+esc(oppName(x.b))+" "+x.bs)}[kind]||(()=>null))();
   if(cfg)confirmDelete(cfg);
 }
 function confirmDelete(cfg){
@@ -2329,13 +2284,6 @@ function confirmDelete(cfg){
   go.onclick=async()=>{if(!ok())return;go.disabled=true;recording=[];let snaps;try{await cfg.run();snaps=recording}catch(e){recording=null;go.disabled=false;toast(e.message||"Couldn't delete",true);return}recording=null;
     close();closeSheet(true);if(ed&&cfg.after)ed=null;if(cfg.after)cfg.after();render();toastUndo(cfg.done||"Deleted",cfg.undo||snaps)};
 }
-function badgeSheet(b){openSheet({title:b?"Edit badge":"New badge rule",intro:"Players get this badge automatically when their season number reaches the cutoff.",fields:[{key:"name",label:"Badge name",req:true},{key:"stat",label:"Based on",type:"select",options:BSTATS.map(x=>[x[0],x[1]]),req:true},{key:"min",label:"Cutoff (at least)",type:"number",req:true,hint:"Enter percentages as whole numbers, 0 to 100"},{key:"desc",label:"Description"},{key:"hide",label:"Turn this badge off",type:"check"}],
-  value:b?{...b,hide:b.on===false}:{},saved:b?"Badge saved":"Badge created",onSave:v=>{const fail=(k,m)=>{$("#sf-"+k).focus();throw new Error(m)};
-    if(v.min<0)fail("min","Cutoff can't be negative");if(bstat(v.stat)[2]&&v.min>100)fail("min","Percent cutoffs go from 0 to 100");if((v.stat==="dd"||v.stat==="hi")&&!Number.isInteger(v.min))fail("min","Use a whole number for this cutoff");
-    const dup=items("badges").find(x=>(!b||x.id!==b.id)&&String(x.name).trim().toLowerCase()===v.name.trim().toLowerCase());if(dup)fail("name","There's already a badge named "+dup.name);
-    const {hide,...rest}=v;return saveDoc("badges",b?b.id:uid("bg"),{...rest,on:!hide})},del:b?["badge",b.id]:null})}
-function awardSheet(a,pid){openSheet({title:a?"Edit award":"Award a badge",intro:"Hand-picked badges show in gold on the player's card.",fields:[{key:"pid",label:"Player",type:"select",options:players().map(p=>[p.id,"#"+p.no+" "+pName(p)]),req:true},{key:"name",label:"Badge name",req:true},{key:"note",label:"Why (optional)",type:"textarea"}],
-  value:a?{...a,by:authorOf(a.by)}:{...(pid?{pid}:{}),by:lastAuthor()},saved:a?"Award saved":"Badge awarded",onSave:v=>{rememberAuthor(v.by);return saveDoc("awards",a?a.id:uid("aw"),{...(a||{}),...v,by:v.by||(a&&a.by)||user.cid,ts:a?a.ts:Date.now()})},del:a?["award",a.id]:null})}
 
 document.addEventListener("click",e=>{const a=e.target.closest('a[href^="#"]');if(a&&ed&&ed.dirty&&a.getAttribute("href")!=="#playbook"){e.preventDefault();e.stopPropagation();const h=a.getAttribute("href");confirmDiscard(()=>{ed=null;location.hash=h},"Leave without saving?","Your unsaved play will be lost.")}},true);
 window.addEventListener("beforeunload",e=>{if((ed&&ed.dirty)||sheetDirty()){e.preventDefault();e.returnValue=""}});
@@ -2354,8 +2302,8 @@ document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if
 
 /* ================= Admin: Staff & changes (live site only; staff names appear only here) ================= */
 let ADM;function admReset(){ADM={tab:"staff",staff:null,staffBusy:false,staffErr:"",reqs:null,reqsBusy:false,log:[],logDone:false,logBusy:false,logErr:"",logLoaded:false,logGen:ADM?ADM.logGen+1:0,f:{actor:"",coll:"",from:"",to:""},exact:new Set()}}admReset();
-const SECT={games:"Schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"League standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Glossary",calls:"Calls",badges:"Badges",awards:"Badge awards",posts:"Team feed",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",accounts:"Passwords"};
-const sectName=c=>SECT[c]||c;
+const SECT={games:"Schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"League standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Glossary",calls:"Calls",posts:"Team feed",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",accounts:"Passwords"};
+const sectName=c=>SECT[c]||(c==="badges"||c==="awards"?"Removed feature":c);
 const AUD_PAGE=50;
 function admRender(){if((route()!=="admin"&&route()!=="home")||!user)return;if($("#sheetroot").firstChild||$("#cfmroot")){pendingRender=true;return}const a=document.activeElement;const id=a&&a.id;render();if(id){const el=document.getElementById(id);if(el)try{el.focus({preventScroll:true})}catch(e){}}}
 async function admLoadReqs(){if(!SB||!isAdmin()||ADM.reqsBusy)return;ADM.reqsBusy=true;
@@ -2400,7 +2348,7 @@ function admLabel(a){a=admEff(a);const o=a.old||{},n=a.new||{};let d=a.action===
     case"talk":case"talks":s=d.msg?"Coach Talk: “"+snip(d.msg)+"”":"";break;
     case"stand":s="Standings: "+oppName(id);break;
     case"lres":s=d.a&&d.b?`${oppName(d.a)} ${d.as??""}, ${oppName(d.b)} ${d.bs??""}`:"";break;
-    case"awards":s=d.name?d.name+(d.pid&&P(d.pid)?" for "+pName(P(d.pid)):""):"";break;
+    case"badges":case"awards":return"Badge (removed feature)";
     case"history":s="Season-by-season history";break;
     case"accounts":s="Password";break;
     default:s=d.name||d.title||"";
