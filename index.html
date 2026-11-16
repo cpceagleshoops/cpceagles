@@ -196,7 +196,7 @@ a.pcard:hover{transform:translateY(-2px);border-color:var(--gold)}
 label.f{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--muted)}
 label.check{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:600;color:var(--ink);cursor:pointer}
 label.check input{width:20px;height:20px;accent-color:var(--gold)}
-input[type=text],input[type=search],input[type=url],input[type=password],input[type=number],input[type=date],input[type=time],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:14px;width:100%;color:var(--ink)}
+input[type=text],input[type=search],input[type=url],input[type=email],input[type=password],input[type=number],input[type=date],input[type=time],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:14px;width:100%;color:var(--ink)}
 textarea{min-height:84px;resize:vertical}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(171,140,89,.2)}
 .hint{font-size:11.5px;color:var(--muted);font-weight:500}
@@ -240,6 +240,23 @@ input:disabled{opacity:.45}
 .loginform label.f{color:#c3cfdb}
 .loginerr{color:#f2b7a8;font-size:13px;min-height:1em}
 .fine{margin-top:16px;font-size:12px;color:#9fb0c2}
+.loginform .lgseg{display:flex;background:rgba(0,0,0,.28);border-color:rgba(194,176,138,.3)}.loginform .lgseg button{flex:1;min-height:40px;font-size:14px;color:#c3cfdb}.loginform .lgseg button.on{background:rgba(194,176,138,.28);color:#fff}
+.loginform .lgh{font-size:22px;color:#fff;text-transform:none}.loginform .lgp{margin:0;color:#c3cfdb}
+.lglinks{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px}.lglinks .linkbtn{font-size:13px;min-height:40px;text-align:left}
+/* Admin: staff & change log */
+.staffrow,.logrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 4px;border-top:1px solid var(--line)}
+.staffrow:first-child,.logrow:first-child{border-top:none}
+.staffrow .who2,.logrow .what{flex:1 1 220px;min-width:0}
+.staffrow .em{overflow-wrap:anywhere}
+.logrow .when{flex:0 0 92px;font-size:12.5px;color:var(--muted)}
+.logrow .when button{background:none;border:none;padding:4px 0;color:inherit;font:inherit;cursor:pointer;text-align:left;min-height:32px;text-decoration:underline dotted;text-underline-offset:3px}
+.logrow .what b{overflow-wrap:anywhere}.logrow .what .lbl{display:block;margin-top:4px}
+.adfilters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:10px;align-items:end;margin-bottom:12px}.adfilters .f{min-width:0}.adfilters select,.adfilters input{width:100%;min-width:0;box-sizing:border-box}
+.diff{display:grid;gap:10px}.diff .k{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.diff .v{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:start;font-size:13.5px}
+.diff .v>div{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 8px;overflow-wrap:anywhere;white-space:pre-wrap;min-width:0}
+.diff .v .was{color:var(--muted)}.diff pre,.rawjson pre{margin:0;font-size:12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto}
+@media (max-width:820px){.adfilters{grid-template-columns:1fr 1fr}.adfilters .clr{grid-column:1/-1}.logrow .when{flex-basis:100%}.diff .v{grid-template-columns:1fr}.diff .v .arr{display:none}}
 
 /* Playbook */
 .pbwrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:14px;align-items:start}
@@ -402,7 +419,7 @@ button.bdg{cursor:pointer;font:inherit;font-size:12px}
   .bigstats{gap:18px}.bigstats b{font-size:30px}
   .g2,.g3,.split,.pbwrap{grid-template-columns:1fr}
   .kv{grid-template-columns:repeat(3,minmax(0,1fr))}
-  input[type=text],input[type=search],input[type=url],input[type=password],input[type=number],input[type=date],select,textarea{font-size:16px}
+  input[type=text],input[type=search],input[type=url],input[type=email],input[type=password],input[type=number],input[type=date],select,textarea{font-size:16px}
   .sheet{left:0;right:0;top:auto;bottom:0;transform:none;width:100%;max-height:92vh;border-radius:20px 20px 0 0;animation:slideup .22s ease}
   @keyframes slideup{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
   .plist{display:flex;gap:6px;overflow-x:auto;padding:8px}
@@ -413,6 +430,7 @@ button.bdg{cursor:pointer;font:inherit;font-size:12px}
   .hero h2{font-size:28px}
 }
 @media (max-width:440px){.g4{grid-template-columns:1fr 1fr}.kv{grid-template-columns:repeat(2,minmax(0,1fr))}.scheme{grid-template-columns:1fr}.scheme dt{padding-top:6px}}
+.nextcell{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 </style>
 </head>
 <body>
@@ -483,8 +501,8 @@ const ago=ts=>{const m=Math.max(0,Math.round((Date.now()-ts)/60000));if(m<1)retu
 const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 const lines=s=>String(s||"").split(/\n/).map(x=>x.trim()).filter(Boolean);
 function toast(msg,err){const t=$("#toast");t.style.pointerEvents="none";t.className="toast"+(err?" err":"");t.innerHTML=`<span class="tick">${err?"!":'<svg width="12" height="12" viewBox="0 0 12 12"><path d="M2 6.5l2.5 2.5L10 3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'}</span><span>${esc(msg)}</span>`;requestAnimationFrame(()=>t.classList.add("show"));clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600)}
-function toastUndo(msg,snaps){toast(msg);if(!snaps||!snaps.length)return;const t=$("#toast");const b=document.createElement("button");b.className="undo";b.textContent="Undo";
-  b.onclick=async()=>{t.classList.remove("show");t.style.pointerEvents="none";await restoreAll(snaps);render();toast("Restored")};t.appendChild(b);t.style.pointerEvents="auto";clearTimeout(toast._t);toast._t=setTimeout(()=>{t.classList.remove("show");t.style.pointerEvents="none"},CONFIG.undoSeconds*1000)}
+function toastUndo(msg,snaps){toast(msg);if(!snaps||(typeof snaps!=="function"&&!snaps.length))return;const t=$("#toast");const b=document.createElement("button");b.className="undo";b.textContent="Undo";
+  b.onclick=async()=>{t.classList.remove("show");t.style.pointerEvents="none";try{if(typeof snaps==="function")await snaps();else await restoreAll(snaps)}catch(e){toast(e.message||"Couldn't undo",true);return}render();toast("Restored")};t.appendChild(b);t.style.pointerEvents="auto";clearTimeout(toast._t);toast._t=setTimeout(()=>{t.classList.remove("show");t.style.pointerEvents="none"},CONFIG.undoSeconds*1000)}
 const TRASH='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 4h9M5.5 4V2.5h3V4M3.5 4l.6 8h5.8l.6-8"/></svg>';
 const CHEV='<svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3.5L10.5 8 6 12.5"/></svg>';
 const PEN='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5l2 2L5 11H3V9z"/></svg>';
@@ -809,6 +827,9 @@ const DEFMAP={};COLLS.forEach(c=>{DEFMAP[c]={};DEF[c].forEach(x=>DEFMAP[c][x.id]
 /* ================= Store: shared db when available, else this device ================= */
 const inFrame=(()=>{try{return window.top!==window}catch(e){return true}})();
 const LOCAL_OK=inFrame||/^(localhost|127\.0\.0\.1)$/.test(location.hostname);/* device-only mode (and first-time setup) only ever runs framed or on localhost */
+/* Links from Supabase emails (signup confirmation, password reset) land here with type=… / error=… in the hash or query. Read them before the client consumes them. */
+const AUTH_URL=(()=>{try{const q=new URLSearchParams((location.hash.slice(1)+"&"+location.search.slice(1)).replace(/^&+|&+$/g,""));
+  return{type:q.get("type")||"",err:q.get("error_description")||q.get("error")||"",errCode:q.get("error_code")||"",has:["access_token","refresh_token","code","error","error_code","token_hash","type"].some(k=>q.has(k))}}catch(e){return{type:"",err:"",errCode:"",has:false}}})();
 const SB=(()=>{if(LOCAL_OK)return null;try{if(!window.supabase||!CONFIG.supabase.url)return null;return window.supabase.createClient(CONFIG.supabase.url,CONFIG.supabase.key,{auth:{persistSession:true,autoRefreshToken:true}})}catch(e){return null}})();
 const SB_FATAL=!LOCAL_OK&&!SB;
 const store={};COLLS.forEach(c=>store[c]={});
@@ -825,12 +846,12 @@ const snapOf=(c,id)=>store[c][id]===undefined?undefined:JSON.parse(JSON.stringif
 async function saveDoc(c,id,data){
   if(recording)recording.push([c,id,snapOf(c,id)]);
   const clean=JSON.parse(JSON.stringify(data));delete clean.id;
-  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error}=await SB.from("docs").upsert({coll:c,id,data:clean,updated_at:new Date().toISOString()});if(error){toast("Couldn't save: "+error.message,true);throw new Error("Couldn't save. Check your connection and try again.")}store[c][id]=clean;return true}
+  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error}=await SB.from("docs").upsert({coll:c,id,data:clean,updated_at:new Date().toISOString()});if(isRls(error))throw sbAccessLost();if(error){toast("Couldn't save: "+error.message,true);throw new Error("Couldn't save. Check your connection and try again.")}store[c][id]=clean;return true}
   if(shared()){try{await DB.collection(col(c)).doc(id).set(clean);store[c][id]=clean;return true}catch(e){toast("Couldn't save to the shared hub. Saved on this device.",true)}}
   store[c][id]=clean;saveLocal();return true;
 }
 async function dropDoc(c,id){
-  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error,count}=await SB.from("docs").delete({count:"exact"}).eq("coll",c).eq("id",id);if(error||count===0){toast("Couldn't delete: "+(error?error.message:"nothing was removed"),true);throw new Error("Couldn't delete")}delete store[c][id];return}
+  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error,count}=await SB.from("docs").delete({count:"exact"}).eq("coll",c).eq("id",id);if(isRls(error))throw sbAccessLost();if(error||count===0){toast("Couldn't delete: "+(error?error.message:"nothing was removed"),true);throw new Error("Couldn't delete")}delete store[c][id];return}
   if(shared()){try{await DB.collection(col(c)).doc(id).delete()}catch(e){}}
   delete store[c][id];saveLocal();
 }
@@ -838,14 +859,25 @@ async function restoreAll(snaps){for(const [c,id,raw] of snaps.slice().reverse()
 async function removeDoc(c,id){
   if(recording)recording.push([c,id,snapOf(c,id)]);
   if(DEFMAP[c][id])return saveDoc(c,id,{deleted:true});
-  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error,count}=await SB.from("docs").delete({count:"exact"}).eq("coll",c).eq("id",id);if(error||count===0){toast("Couldn't delete: "+(error?error.message:"nothing was removed"),true);throw new Error("Couldn't delete. Check your connection and try again.")}delete store[c][id];return true}
+  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error,count}=await SB.from("docs").delete({count:"exact"}).eq("coll",c).eq("id",id);if(isRls(error))throw sbAccessLost();if(error||count===0){toast("Couldn't delete: "+(error?error.message:"nothing was removed"),true);throw new Error("Couldn't delete. Check your connection and try again.")}delete store[c][id];return true}
   if(shared()){try{await DB.collection(col(c)).doc(id).delete();delete store[c][id];return true}catch(e){toast("Couldn't delete. Try again.",true);return false}}
   delete store[c][id];saveLocal();return true;
 }
 /* ---------- Supabase (live site) ---------- */
 let sbLoaded=false,sbChannel=null,sbGen=0,sbFailed=false,sbBooting=!!SB,sbChanOk=false,sbLastFetch=0;
-function sbUserFromSession(sess){const em=sess&&sess.user&&sess.user.email;if(!em)return null;return em.toLowerCase()===CONFIG.supabase.coachEmail?{role:"coach",cid:"coach"}:{role:"player"}}
-function sbClear(){sbGen++;COLLS.forEach(c=>store[c]={});sbLoaded=false;sbFailed=false;sbChanOk=false;const ch=sbChannel;sbChannel=null;if(ch){try{SB.removeChannel(ch)}catch(e){}}}
+/* Who is signed in: the shared player account, or a staff member (role from public.my_role(); null = not on the staff list or deactivated) */
+let sbRecovery=false;
+const NOT_STAFF="This email doesn't have coach access. Ask the site admin to add you or turn your access back on.";
+/* Docs write refused by row-level security (code 42501): coach access was removed or turned off. Sign out locally. */
+const ACCESS_LOST="You no longer have coach access. Sign in again.";
+function sbAccessLost(){toast(ACCESS_LOST,true);loginStage={step:"signin",u:"coach",msg:ACCESS_LOST};setTimeout(async()=>{try{await SB.auth.signOut({scope:"local"})}catch(e){}if(user){user=null;sbClear();closeSheet(true);render()}toast(ACCESS_LOST,true)},0);return new Error(ACCESS_LOST)}
+const isRls=e=>!!e&&(e.code==="42501"||/row-level security/i.test(String(e.message||"")));
+async function sbResolve(sess){const em=sess&&sess.user&&sess.user.email;if(!em)return null;const e=em.toLowerCase();
+  if(e===CONFIG.supabase.playerEmail)return{role:"player",email:e};
+  const {data,error}=await SB.rpc("my_role");if(error)throw error;
+  const r=Array.isArray(data)?data[0]:data;const role=r&&typeof r==="object"?Object.values(r)[0]:r;
+  return role==="admin"||role==="coach"?{role,email:e,cid:"coach"}:{role:"none",email:e}}
+function sbClear(){sbGen++;admReset();COLLS.forEach(c=>store[c]={});sbLoaded=false;sbFailed=false;sbChanOk=false;const ch=sbChannel;sbChannel=null;if(ch){try{SB.removeChannel(ch)}catch(e){}}}
 function sbSubscribe(){if(sbChannel)return;const ch=SB.channel("docs-live").on("postgres_changes",{event:"*",schema:"public",table:"docs"},p=>{
     if(ch!==sbChannel)return;
     if(p.eventType==="DELETE"){const o=p.old||{};if(store[o.coll])delete store[o.coll][o.id]}
@@ -868,12 +900,28 @@ async function sbLoad(silent){
     sbFailed=true;syncState="sbfail"}
   if(silent){paintSync();requestRender()}else render();
 }
-function sbRefetchSoon(){if(!SB||!user||!sbLoaded||sbFailed||Date.now()-sbLastFetch<60000)return;sbLastFetch=Date.now();sbLoad(true)}
+function sbRefetchSoon(){if(!SB||!user||!sbLoaded||sbFailed||Date.now()-sbLastFetch<60000)return;sbLastFetch=Date.now();sbLoad(true);if(isCoach())sbRecheckRole()}
+/* Coach sessions: re-check the role on refocus. Off the staff list → sign out; promoted/demoted → update the menu. Network errors are ignored. */
+async function sbRecheckRole(){const u0=user;let r;try{const {data,error}=await SB.rpc("my_role");if(error)return;r=Array.isArray(data)?data[0]:data;if(r&&typeof r==="object")r=Object.values(r)[0]}catch(e){return}
+  if(user!==u0||!user)return;
+  if(r!=="admin"&&r!=="coach"){loginStage={step:"signin",u:"coach",email:user.email,msg:NOT_STAFF};user=null;try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear();closeSheet(true);render();toast(NOT_STAFF,true);return}
+  if(r!==user.role){user={...user,role:r};requestRender()}}
 if(SB){window.addEventListener("focus",sbRefetchSoon);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")sbRefetchSoon()})}
 async function sbBoot(){
   user=null;
-  try{const {data}=await SB.auth.getSession();user=sbUserFromSession(data&&data.session)}catch(e){user=null}
-  SB.auth.onAuthStateChange((ev,sess)=>{if(ev==="SIGNED_OUT"){user=null;sbClear();closeSheet(true);render()}});
+  SB.auth.onAuthStateChange((ev,sess)=>{
+    if(ev==="SIGNED_OUT"){user=null;sbClear();closeSheet(true);render()}
+    else if(ev==="PASSWORD_RECOVERY"&&!sbRecovery){sbRecovery=true;user=null;sbClear();loginStage={step:"newpw"};closeSheet(true);if(!sbBooting)render()}});
+  let sess=null;try{const {data}=await SB.auth.getSession();sess=data&&data.session}catch(e){sess=null}
+  const t=AUTH_URL.type;
+  if(AUTH_URL.has){try{history.replaceState(null,"",location.pathname+"#home")}catch(e){}}
+  if(AUTH_URL.err&&!sess)loginStage={step:"signin",u:"coach",msg:/expired|invalid/i.test(AUTH_URL.err+AUTH_URL.errCode)?"That email link has expired or was already used. Request a new one below.":"That email link didn't work. Try again below."};
+  else if(t==="recovery"&&sess){sbRecovery=true;loginStage={step:"newpw"}}
+  if(sbRecovery){sbBooting=false;render();return}
+  if(sess){try{const u=await sbResolve(sess);
+      if(u&&u.role==="none"){loginStage={step:"signin",u:"coach",msg:NOT_STAFF};try{await SB.auth.signOut({scope:"local"})}catch(e){}}
+      else{user=u;if(user&&/^(signup|email|invite|magiclink)$/.test(t))setTimeout(()=>toast("Email confirmed. You're signed in."),300)}}
+    catch(e){user=null;loginStage={step:"signin",u:"coach",msg:"Couldn't check your coach access right now. Sign in again in a minute."}}}
   sbBooting=false;if(user)sbLoad();else render();
 }
 async function initDb(){
@@ -945,7 +993,8 @@ const rememberAuthor=id=>{try{if(id)localStorage.setItem(AUTH_KEY,id)}catch(e){}
 const authorOf=id=>COACHES.some(c=>c.id===id)?id:"";
 const authorField=(isNew,key="author",label="Posted by")=>({key,label,type:"select",options:COACHES.map(c=>[c.id,c.name]),req:isNew});
 const oppDup=(name,except)=>opps().find(o=>o.id!==except&&o.name.trim().toLowerCase()===String(name||"").trim().toLowerCase());
-const isCoach=()=>user&&user.role==="coach";
+const isCoach=()=>!!user&&(user.role==="coach"||user.role==="admin");
+const isAdmin=()=>!!SB&&!!user&&user.role==="admin";
 
 /* ================= Stats engine (from imported box scores only) ================= */
 const KEYS=["min","pts","reb","ast","stl","blk","to","fgm","fga","tpm","tpa","ftm","fta"];
@@ -963,10 +1012,10 @@ function winStreak(){const p=counted();if(!p.length)return"";const last=p[p.leng
 
 /* ================= Session, routing, nav ================= */
 let user=LOCAL_OK?LS.get(CONFIG.sessionKey):null;
-const ROUTES={coach:["home","schedule","roster","stats","scouting","league","playbook","glossary","badges"],player:["home","schedule","roster","stats","scouting","league","playbook","glossary"]};
+const ROUTES={coach:["home","schedule","roster","stats","scouting","league","playbook","glossary","badges"],admin:["home","schedule","roster","stats","scouting","league","playbook","glossary","badges","admin"],player:["home","schedule","roster","stats","scouting","league","playbook","glossary"]};
 const TABS=["home","schedule","scouting","playbook"];
 const route=()=>location.hash.slice(1)||"home";
-function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(r.startsWith("player-"))return true;return ROUTES[user.role].includes(r)}
+function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin();return (ROUTES[user.role]||[]).includes(r)}
 window.addEventListener("popstate",()=>{if(suppressPop>0){suppressPop--;return}if($("#cfmroot")){$("#cfmroot").remove()}if($("#sheetroot").firstChild){if(sheetDirty()){history.pushState({sheet:1},"",location.href);confirmDiscard(()=>closeSheet())}else closeSheet(false,true)}});
 window.addEventListener("hashchange",()=>{stopPlayback();ed=null;closeSheet(true);render()});
 const IC={
@@ -980,9 +1029,10 @@ const IC={
   glossary:'<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11M9 8h6"/>',
   mynotes:'<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
   badges:'<path d="M12 2.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 15.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>',
+  admin:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
 };
-const LABEL={home:"Home",schedule:"Schedule",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"League",playbook:"Playbook",glossary:"Glossary & calls",badges:"Badges",more:"More"};
+const LABEL={home:"Home",schedule:"Schedule",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"League",playbook:"Playbook",glossary:"Glossary & calls",badges:"Badges",admin:"Staff & changes",more:"More"};
 const ico=k=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
 const MARK=(w=36)=>`<img src="logo.png" width="${w}" height="${w}" alt="" aria-hidden="true" style="display:block;flex:none;object-fit:contain">`;
 const openSet=new Set(["keys","players-know","feed","play-roles","play-notes"]);
@@ -991,13 +1041,15 @@ const ebtn=(act,attrs="",label="Edit")=>isCoach()?`<button class="btn sm edit" d
 const abtn=(act,attrs="",label="Add")=>isCoach()?`<button class="btn sm edit" data-act="${act}" ${attrs}>${PLUS}${label}</button>`:"";
 
 /* ================= Shell ================= */
-function whoLabel(){return isCoach()?["Coach","Signed in with the coach login"]:["Eagles player","Signed in with the player login"]}
+function whoLabel(){if(SB&&user&&user.role==="admin")return["Admin","Signed in with your admin account"];if(SB&&isCoach())return["Coach",user.email===CONFIG.supabase.coachEmail?"Signed in with the shared coach login":"Signed in with your coach account"];return isCoach()?["Coach","Signed in with the coach login"]:["Eagles player","Signed in with the player login"]}
+const pwBtnLabel=()=>SB?"My password":"Passwords";
 function render(){
   pendingRender=false;const app=$("#app");
   const msgScreen=(msg,btns)=>`<div class="login"><div class="loginbox" style="text-align:center">${MARK(84)}<p class="lead" style="margin-top:16px" role="status">${msg}</p>${btns?`<div class="row" style="justify-content:center;gap:10px;margin-top:16px">${btns}</div>`:""}</div></div>`;
   if(SB_FATAL){app.innerHTML=msgScreen("Couldn't load the team site. Check your connection and refresh.",`<button class="btn gold" data-act="sbReload">Refresh</button>`);return}
   if(SB&&sbBooting){app.innerHTML=msgScreen("Loading the team hub…");return}
-  if(!user||!["coach","player"].includes(user.role)){user=null;app.innerHTML=loginView();bindLogin();return}
+  if(SB&&sbRecovery){app.innerHTML=loginView();bindLogin();return}
+  if(!user||!["coach","admin","player"].includes(user.role)){user=null;app.innerHTML=loginView();bindLogin();return}
   if(SB&&sbFailed){app.innerHTML=msgScreen("Couldn't load the team data. Check your connection and try again.",`<button class="btn gold" data-act="sbRetry">Retry</button><button class="btn" data-act="signout">Sign out</button>`);return}
   if(SB&&!sbLoaded){app.innerHTML=msgScreen("Loading the team hub…");return}
   let r=route();if(!allowed(r)){r="home";if(location.hash&&location.hash!=="#home")history.replaceState(null,"","#home")}
@@ -1007,7 +1059,7 @@ function render(){
   app.innerHTML=`  <header class="topbar">${MARK(26)}<span class="t1">CPC EAGLES</span><span class="sp"></span><span class="sync small"></span></header>
   <div class="shell"><aside class="rail"><a class="brand" href="#home">${MARK()}<div><div class="t1">CPC EAGLES</div><div class="t2">${esc(CONFIG.level)} · ${esc(CONFIG.season)}</div></div></a>
   <nav class="nav" aria-label="Main">${ROUTES[user.role].map(k=>`<a href="#${k}" class="${on(k)?"on":""}">${ico(k)}${LABEL[k]}</a>`).join("")}</nav>
-  <div class="me"><div><div class="who">${esc(nm)}</div><div class="role">${esc(rl)}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn sm" data-act="logins">Passwords</button>`:""}<button class="btn sm" data-act="signout">Sign out</button></div></div></aside>
+  <div class="me"><div><div class="who">${esc(nm)}</div><div class="role">${esc(rl)}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn sm" data-act="logins">${pwBtnLabel()}</button>`:""}<button class="btn sm" data-act="signout">Sign out</button></div></div></aside>
   <main id="main" class="fade">${tipFor(r)}${view(r)}</main></div>
   <nav class="tabbar" aria-label="Main">${TABS.map(k=>`<a href="#${k}" class="${on(k)?"on":""}">${ico(k)}${LABEL[k]}</a>`).join("")}<button class="${moreOn?"on":""}" data-act="more">${ico("more")}More</button></nav>`;
   paintSync();
@@ -1018,7 +1070,7 @@ function view(r){
   if(r==="home")return homeView();if(r==="schedule")return scheduleView();if(r==="roster")return rosterView();if(r==="stats")return statsView();
   if(r==="scouting")return scoutingView();if(r.startsWith("opp-"))return oppView(r.slice(4));if(r==="league")return leagueView();
   if(r==="playbook")return playbookView();if(r==="glossary")return glossaryView();if(r.startsWith("player-"))return playerView(r.slice(7));
-if(r.startsWith("game-"))return gameView(r.slice(5));if(r==="badges")return badgesView();return homeView();
+if(r.startsWith("game-"))return gameView(r.slice(5));if(r==="badges")return badgesView();if(r==="admin")return adminView();return homeView();
 }
 
 /* ================= Login (per-user passwords, stored only as salted hashes) ================= */
@@ -1032,6 +1084,7 @@ const findAccount=u=>u==="coach"?{kind:"coach"}:u==="player"?{kind:"player"}:nul
 const liveAcct=u=>store.accounts[u]&&!store.accounts[u].deleted?store.accounts[u]:null;
 let loginStage={step:"signin"},fails=0,lockUntil=0;
 function loginView(){
+  if(SB)return sbLoginView();
   const st=loginStage;
   const body=st.step==="create"?`<p class="small" style="margin:0;color:#c3cfdb"><b style="color:#fff">First-time setup.</b> Create the two team passwords. Coaches use the coach password; every player uses the player password.</p>${pwField("lg-new","Coach password (at least "+CONFIG.minPassword.coach+" characters)","new-password")}${pwField("lg-new2","Coach password again","new-password")}${pwField("lg-pl","Player password (at least "+CONFIG.minPassword.player+" characters)","new-password")}<div class="loginerr" id="lg-err" aria-live="polite"></div><button class="btn gold" type="submit">Save passwords and sign in</button><button class="btn" type="button" id="lg-back">Back</button>`
    :`<label class="f" for="lg-user">Login<select id="lg-user" autocomplete="username"><option value="player" ${st.u==="coach"?"":"selected"}>Player</option><option value="coach" ${st.u==="coach"?"selected":""}>Coach</option></select></label>${pwField("lg-pass","Password","current-password")}<div class="loginerr" id="lg-err" aria-live="polite"></div><button class="btn gold" type="submit">Sign in</button>`;
@@ -1040,17 +1093,11 @@ function loginView(){
   <p class="fine">Players: get the team password from your coach.${SB?"":" Coaches can change both passwords anytime."}</p></div></div>`;
 }
 function bindLogin(){
+  if(SB)return bindSbLogin();
   const err=m=>{const e=$("#lg-err");if(e)e.textContent=m};
   const finish=a=>{fails=0;user=a.kind==="coach"?{role:"coach",cid:"coach"}:{role:"player"};LS.set(CONFIG.sessionKey,user);loginStage={step:"signin"};location.hash="home";render();toast(a.kind==="coach"?"Signed in as a coach":"Signed in. Go Eagles!")};
   const back=$("#lg-back");if(back)back.onclick=()=>{loginStage={step:"signin",u:loginStage.u};render()};
   $("#loginform").onsubmit=async e=>{e.preventDefault();
-    if(SB){if(Date.now()<lockUntil)return err(`Too many tries. Wait ${Math.ceil((lockUntil-Date.now())/1000)} seconds.`);
-      const u=$("#lg-user").value,pw=$("#lg-pass").value;if(!pw)return err("Enter your password.");
-      const btn=$("#loginform button[type=submit]");btn.disabled=true;err("");
-      let res;try{res=await SB.auth.signInWithPassword({email:u==="coach"?CONFIG.supabase.coachEmail:CONFIG.supabase.playerEmail,password:pw})}catch(x){res={error:x}}
-      btn.disabled=false;
-      if(res.error){const bad=res.error.status===400;if(bad){fails++;if(fails>=5){lockUntil=Date.now()+30000;fails=0}}err(bad?"That password isn't right.":"Couldn't sign in right now. Try again in a minute.");$("#lg-pass").value="";$("#lg-pass").focus();return}
-      fails=0;user=sbUserFromSession(res.data.session)||(u==="coach"?{role:"coach",cid:"coach"}:{role:"player"});loginStage={step:"signin"};location.hash="home";render();toast(user.role==="coach"?"Signed in as a coach":"Signed in. Go Eagles!");sbLoad();return}
     if(loginStage.step==="create"){const p1=$("#lg-new").value,p2=$("#lg-new2").value,pl=$("#lg-pl").value;
       if(p1.length<CONFIG.minPassword.coach)return err(`The coach password needs at least ${CONFIG.minPassword.coach} characters.`);if(p1!==p2)return err("The two coach passwords don't match.");
       if(pl.length<CONFIG.minPassword.player)return err(`The player password needs at least ${CONFIG.minPassword.player} characters.`);if(pl===p1)return err("Use a different password for players.");
@@ -1067,10 +1114,87 @@ function bindLogin(){
     err("That password isn't right.");$("#lg-pass").value="";$("#lg-pass").focus()};
 }
 
+/* ---------- Live-site login: shared player password, personal coach accounts ---------- */
+const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const COACH_MIN=Math.max(8,CONFIG.minPassword.coach);
+const emailField=(v)=>`<label class="f" for="lg-email">Email<input type="email" id="lg-email" autocomplete="email" inputmode="email" autocapitalize="none" spellcheck="false" required value="${esc(v||"")}"></label>`;
+function sbLoginView(){
+  const st=loginStage;const errBox=`<div class="loginerr" id="lg-err" aria-live="polite">${esc(st.msg||"")}</div>`;
+  const back=`<button class="btn" type="button" id="lg-back">Back to sign in</button>`;
+  let body,fine="Players: get the team password from your coach.";
+  if(st.step==="newpw"){body=`<h2 class="lgh">Set a new password</h2><p class="small lgp">Pick a new password for your coach account.</p>${pwField("lg-new",`New password (at least ${COACH_MIN} characters)`,"new-password")}${pwField("lg-new2","New password again","new-password")}${errBox}<button class="btn gold" type="submit">Save password</button><button class="btn" type="button" id="lg-cancel">Cancel</button>`;fine=""}
+  else if(st.step==="signup"){body=`<h2 class="lgh">Create your coach account</h2><p class="small lgp">Use the email the site admin added to the coaching staff list.</p>${emailField(st.email)}${pwField("lg-new",`Password (at least ${COACH_MIN} characters)`,"new-password")}${pwField("lg-new2","Password again","new-password")}${errBox}<button class="btn gold" type="submit">Create account</button>${back}`;fine=""}
+  else if(st.step==="forgot"){body=`<h2 class="lgh">Reset your password</h2><p class="small lgp">Enter your coach email. We'll send a link to set a new password.</p>${emailField(st.email)}${errBox}<button class="btn gold" type="submit">Send reset link</button>${back}`;fine=""}
+  else if(st.step==="sent"){body=`<h2 class="lgh">${esc(st.head||"Check your email")}</h2><p class="lgp" role="status">${esc(st.note)}</p><button class="btn gold" type="button" id="lg-back">Back to sign in</button>`;fine=""}
+  else{const coach=st.u==="coach";
+    body=`<div class="seg lgseg" role="group" aria-label="Sign in as"><button type="button" data-lgu="player" class="${coach?"":"on"}" aria-pressed="${!coach}">Player</button><button type="button" data-lgu="coach" class="${coach?"on":""}" aria-pressed="${coach}">Coach</button></div>
+    ${coach?emailField(st.email):""}${pwField("lg-pass","Password","current-password")}${errBox}<button class="btn gold" type="submit">Sign in</button>
+    ${coach?`<div class="lglinks"><button type="button" class="linkbtn" id="lg-signup">First time? Create your coach account</button><button type="button" class="linkbtn" id="lg-forgot">Forgot password?</button></div>`:""}`;
+    if(coach)fine="Coaches: the site admin adds your email to the staff list first."}
+  return `<div class="login"><div class="loginbox">${MARK(84)}<h1>Eagles Basketball Hub</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${esc(CONFIG.level)}</p>
+  <form class="loginform" id="loginform" autocomplete="on" novalidate>${body}</form>${fine?`<p class="fine">${fine}</p>`:""}</div></div>`;
+}
+function sbAuthErr(e,coach){const st=e&&e.status,c=(e&&e.code)||"",m=String((e&&e.message)||"");
+  if(c==="email_not_confirmed"||/not confirmed/i.test(m))return"Confirm your email first. Open the link we emailed you, then sign in.";
+  if(st===429||c==="over_email_send_rate_limit"||c==="over_request_rate_limit"||/rate limit|too many/i.test(m))return"Too many tries. Wait a few minutes and try again.";
+  if(c==="invalid_credentials"||st===400||/invalid login/i.test(m))return coach?"That email or password isn't right.":"That password isn't right.";
+  return"Couldn't sign in right now. Try again in a minute."}
+const badCreds=e=>!!e&&(e.code==="invalid_credentials"||(e.status===400&&!/not confirmed/i.test(String(e.message||""))&&e.code!=="email_not_confirmed"));
+function sbEnter(u){fails=0;sbRecovery=false;user=u;loginStage={step:"signin"};location.hash="home";render();toast(u.role==="admin"?"Signed in as admin":u.role==="coach"?"Signed in as a coach":"Signed in. Go Eagles!");sbLoad()}
+/* After any sign-in: staff check. Not on the list (or deactivated) → sign out and say so. */
+async function sbAfterSignIn(sess,email,err){let u;
+  try{u=await sbResolve(sess)}catch(x){try{await SB.auth.signOut({scope:"local"})}catch(e){}loginStage={step:"signin",u:"coach",email,msg:"Couldn't check your coach access. Try again in a minute."};render();return false}
+  if(!u||u.role==="none"){loginStage={step:"signin",u:"coach",email,msg:NOT_STAFF};try{await SB.auth.signOut({scope:"local"})}catch(e){}render();return false}
+  sbEnter(u);return true}
+function bindSbLogin(){
+  const err=m=>{const e=$("#lg-err");if(e)e.textContent=m};
+  const em=()=>{const i=$("#lg-email");return i?i.value.trim().toLowerCase():""};
+  const go=(st)=>{loginStage=st;render();setTimeout(()=>{const f=$("#loginform input:not([type=hidden])");if(f&&window.innerWidth>820)f.focus()},30)};
+  $$("[data-lgu]").forEach(b=>b.onclick=()=>{if(loginStage.u===b.dataset.lgu||(!loginStage.u&&b.dataset.lgu==="player"))return;go({step:"signin",u:b.dataset.lgu,email:em()||loginStage.email})});
+  const on=(id,f)=>{const b=$("#"+id);if(b)b.onclick=f};
+  on("lg-signup",()=>go({step:"signup",u:"coach",email:em()}));
+  on("lg-forgot",()=>go({step:"forgot",u:"coach",email:em()}));
+  on("lg-back",()=>go({step:"signin",u:"coach",email:em()||loginStage.email}));
+  on("lg-cancel",async()=>{sbRecovery=false;loginStage={step:"signin",u:"coach"};try{await SB.auth.signOut({scope:"local"})}catch(e){}render()});
+  $("#loginform").onsubmit=async e=>{e.preventDefault();const st=loginStage;const btn=$("#loginform button[type=submit]");if(!btn||btn.disabled)return;
+    const busy=async f=>{btn.disabled=true;err("");try{await f()}finally{if(btn.isConnected)btn.disabled=false}};
+    if(st.step==="newpw"){const p1=$("#lg-new").value,p2=$("#lg-new2").value;
+      if(p1.length<COACH_MIN)return err(`Use at least ${COACH_MIN} characters.`);if(p1!==p2)return err("The two passwords don't match.");
+      return busy(async()=>{let r;try{r=await SB.auth.updateUser({password:p1})}catch(x){r={error:x}}
+        if(r.error){const m=String(r.error.message||"");if(/session|expired|jwt/i.test(m)){sbRecovery=false;return go({step:"forgot",u:"coach",msg:"That reset link has expired. Send yourself a new one."})}
+          return err(/different from the old/i.test(m)?"Pick a password you haven't used before.":/weak|short|characters/i.test(m)?"That password is too weak. Try a longer one.":"Couldn't save the password: "+m)}
+        let sess=null;try{const {data}=await SB.auth.getSession();sess=data&&data.session}catch(x){}
+        sbRecovery=false;if(await sbAfterSignIn(sess,"",null))toast("Password updated. You're signed in.")})}
+    if(st.step==="signup"){const e1=em(),p1=$("#lg-new").value,p2=$("#lg-new2").value;
+      if(!EMAIL_RE.test(e1))return err("Enter a valid email address.");if(p1.length<COACH_MIN)return err(`The password needs at least ${COACH_MIN} characters.`);if(p1!==p2)return err("The two passwords don't match.");
+      return busy(async()=>{let r;try{r=await SB.auth.signUp({email:e1,password:p1,options:{emailRedirectTo:location.origin+location.pathname}})}catch(x){r={error:x}}
+        if(r.error){const m=String(r.error.message||""),c=r.error.code||"";
+          if(c==="user_already_exists"||/already registered|already exists/i.test(m))return err("That email already has an account. Go back to sign in, or use Forgot password.");
+          if(c==="weak_password"||/password/i.test(m)&&/weak|short|characters/i.test(m))return err("That password is too weak. Try a longer one.");
+          if(r.error.status===429||/rate limit/i.test(m))return err("Too many tries. Wait a few minutes and try again.");
+          return err("Couldn't create the account: "+m)}
+        const d=r.data||{};
+        if(d.session)return sbAfterSignIn(d.session,e1,null);
+        if(d.user&&Array.isArray(d.user.identities)&&d.user.identities.length===0)return err("That email already has an account. Go back to sign in, or use Forgot password.");
+        go({step:"sent",u:"coach",email:e1,head:"Check your email",note:"Check your email to confirm, then sign in."})})}
+    if(st.step==="forgot"){const e1=em();if(!EMAIL_RE.test(e1))return err("Enter a valid email address.");
+      return busy(async()=>{let r;try{r=await SB.auth.resetPasswordForEmail(e1,{redirectTo:location.origin+location.pathname})}catch(x){r={error:x}}
+        if(r.error){const m=String(r.error.message||"");return err(r.error.status===429||/rate limit/i.test(m)?"Too many tries. Wait a few minutes and try again.":"Couldn't send the link right now. Try again in a minute.")}
+        go({step:"sent",u:"coach",email:e1,head:"Check your email",note:"If that email has a coach account, a link to set a new password is on its way. Open it on this device."})})}
+    if(st.step==="sent")return;
+    if(Date.now()<lockUntil)return err(`Too many tries. Wait ${Math.ceil((lockUntil-Date.now())/1000)} seconds.`);
+    const coach=st.u==="coach",pw=$("#lg-pass").value,e1=coach?em():CONFIG.supabase.playerEmail;
+    if(coach&&!EMAIL_RE.test(e1))return err("Enter your email address.");if(!pw)return err("Enter your password.");
+    return busy(async()=>{let res;try{res=await SB.auth.signInWithPassword({email:e1,password:pw})}catch(x){res={error:x}}
+      if(res.error||!res.data||!res.data.session){const er=res.error||{};if(badCreds(er)){fails++;if(fails>=5){lockUntil=Date.now()+30000;fails=0}}err(sbAuthErr(er,coach));const p=$("#lg-pass");if(p){p.value="";p.focus()}return}
+      fails=0;if(!coach&&String(res.data.session.user.email||"").toLowerCase()===CONFIG.supabase.playerEmail)return sbEnter({role:"player",email:e1});
+      return sbAfterSignIn(res.data.session,e1,null)})};
+}
+
 /* ================= First-time tips (coaches) ================= */
 const TIPS={
   home:"<b>Welcome.</b> Everything here can be changed. Look for <b>Edit</b> and <b>Add</b> buttons on any page. Posts in the Team feed go to every player.",
-  roster:"<b>Building the roster:</b> tap <b>Add player</b>. Tap a player to edit him or award a badge. Set the team passwords anytime under <b>Passwords</b>.",
+  roster:"<b>Building the roster:</b> tap <b>Add player</b>. Tap a player to edit him or award a badge.",
   schedule:"<b>Schedule:</b> tap <b>Add game</b>, or the pencil on any game. Enter the final score after the game to update the record.",
   scouting:"<b>Scouting:</b> add an opponent, then open it to fill in keys, players to know, their coach, film timestamps and notes. Notes can stay coaches-only or be shared with players.",
   playbook:"<b>Playbook:</b> tap <b>New play</b>. Drag players to where they start, tap <b>Add step</b> for each action, then use Pass and Screen. Preview before you save.",
@@ -1125,7 +1249,7 @@ function closeSheet(silent,viaPop){if(!$("#sheetroot").firstChild)return;if(ed&&
 /* ================= Shared view bits ================= */
 function gameRow(g){
   const o=O(g.opp);const isNext=g===nextGame()||(nextGame()&&g.id===nextGame().id);
-  const right=g.played?`<span class="num"><span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b></span>`:g.d<TODAY?`<span class="chip warn">Needs final score</span>`:(isNext?`<span class="chip gold">Up next</span>`:`<span class="muted small num">${esc(fmtTime(g.time))}</span>`);
+  const right=g.played?`<span class="num"><span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b></span>`:g.d<TODAY?`<span class="chip warn">Needs final score</span>`:(isNext?`<span class="nextcell"><span class="chip gold">Up next</span>${fmtTime(g.time)?`<span class="muted small num">${esc(fmtTime(g.time))}</span>`:""}</span>`:`<span class="muted small num">${esc(fmtTime(g.time))}</span>`);
   return `<div class="li ${isNext?"upnext":""}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${gTitle(g,o)}</a><div class="small muted">${dow(g.d)} · ${esc(siteText(g,o))} · ${isExh(g)?EXH_CHIP:g.lg?"League":"Non-league"} · ${g.played?(hasBox(g)?`<a href="#game-${g.date}">Box score</a>`:"Final"):`<a href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch</a>`}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
 }
 function nextHero(){
@@ -1699,11 +1823,11 @@ const ACT={
   sbRetry(){if(SB&&user)sbLoad()},
   sbReload(){location.reload()},
   async signout(){stopPlayback();ed=null;closeSheet(true);if(SB){try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear()}user=null;LS.set(CONFIG.sessionKey,null);history.replaceState(null,"","#");render();toast("Signed out")},
-  more(){const items_=ROUTES[user.role].filter(k=>!TABS.includes(k));lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href);document.addEventListener("keydown",escClose);$("#sheetroot").innerHTML=`<div class="sheet-back" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="More"><div class="sheet-head"><h2>More</h2><button class="btn icon" data-act="closeSheet" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="sheet-body"><nav class="nav">${items_.map(k=>`<a href="#${k}">${ico(k)}${LABEL[k]}</a>`).join("")}</nav><div class="me" style="margin-top:14px"><div><div class="who">${esc(whoLabel()[0])}</div><div class="role">${esc(whoLabel()[1])}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn" data-act="logins">Passwords</button>`:""}<button class="btn" data-act="signout">Sign out</button></div></div></div></div>`;paintSync()},
+  more(){const items_=ROUTES[user.role].filter(k=>!TABS.includes(k));lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href);document.addEventListener("keydown",escClose);$("#sheetroot").innerHTML=`<div class="sheet-back" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="More"><div class="sheet-head"><h2>More</h2><button class="btn icon" data-act="closeSheet" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="sheet-body"><nav class="nav">${items_.map(k=>`<a href="#${k}">${ico(k)}${LABEL[k]}</a>`).join("")}</nav><div class="me" style="margin-top:14px"><div><div class="who">${esc(whoLabel()[0])}</div><div class="role">${esc(whoLabel()[1])}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn" data-act="logins">${pwBtnLabel()}</button>`:""}<button class="btn" data-act="signout">Sign out</button></div></div></div></div>`;paintSync()},
   logins(){if(!isCoach())return;closeSheet(true);
-    if(SB)return openSheet({title:"Coach password",intro:"Change the coach password. Every coach will need the new one next time they sign in.<br>To change the player password, ask the coach who manages the site.",fields:[{key:"cur",label:"Current coach password",type:"password",req:true},{key:"c1",label:"New coach password",type:"password",req:true,hint:`At least ${CONFIG.minPassword.coach} characters`},{key:"c2",label:"New coach password again",type:"password",req:true}],value:{},saved:"Coach password updated",
-      onSave:async v=>{if(v.c1.length<CONFIG.minPassword.coach)throw new Error(`Use at least ${CONFIG.minPassword.coach} characters`);if(v.c1!==v.c2)throw new Error("The new passwords don't match");
-        const chk=await SB.auth.signInWithPassword({email:CONFIG.supabase.coachEmail,password:v.cur});if(chk.error)throw new Error("The current coach password is wrong");
+    if(SB)return openSheet({title:"My password",intro:"Change the password you use to sign in."+(user.email===CONFIG.supabase.coachEmail?" This is the shared coach login, so anyone still using it will need the new one.":"")+(isAdmin()?"<br>To change the player password, ask Claude.":""),fields:[{key:"cur",label:"Current password",type:"password",req:true},{key:"c1",label:"New password",type:"password",req:true,hint:`At least ${COACH_MIN} characters`},{key:"c2",label:"New password again",type:"password",req:true}],value:{},saved:"Password updated",
+      onSave:async v=>{if(v.c1.length<COACH_MIN)throw new Error(`Use at least ${COACH_MIN} characters`);if(v.c1!==v.c2)throw new Error("The new passwords don't match");if(v.c1===v.cur)throw new Error("Pick a new password, not the current one");
+        const chk=await SB.auth.signInWithPassword({email:user.email,password:v.cur});if(chk.error)throw new Error(badCreds(chk.error)?"The current password is wrong":sbAuthErr(chk.error,true));
         const up=await SB.auth.updateUser({password:v.c1});if(up.error)throw new Error("Couldn't change it: "+up.error.message)}});
     openSheet({title:"Team passwords",intro:"Change either password. Leave a box blank to keep that password. Everyone using the old password will need the new one next time they sign in.",fields:[{key:"cur",label:"Current coach password",type:"password",req:true},{key:"c1",label:"New coach password",type:"password",hint:`At least ${CONFIG.minPassword.coach} characters`},{key:"c2",label:"New coach password again",type:"password"},{key:"pl",label:"New player password",type:"password",hint:`At least ${CONFIG.minPassword.player} characters`}],value:{},saved:"Passwords updated",
     onSave:async v=>{const a=liveAcct("coach");if(!a||await hashPw(v.cur,a.salt)!==a.hash)throw new Error("The current coach password is wrong");if(!v.c1&&!v.pl)throw new Error("Enter a new coach or player password");
@@ -1928,7 +2052,7 @@ function confirmDelete(cfg){
    ${cfg.impacts&&cfg.impacts.length?`<ul class="impacts" aria-label="What else will be deleted">${cfg.impacts.map(i=>`<li>${i}</li>`).join("")}</ul>`:""}
    ${cfg.check?`<label class="check" for="cfm-chk"><input type="checkbox" id="cfm-chk"><span>${cfg.check}</span></label>`:""}
    ${cfg.type?`<label class="f" for="cfm-in">Type <b style="color:#fff">${esc(cfg.type)}</b> to confirm<input type="text" id="cfm-in" autocomplete="off" autocapitalize="none" spellcheck="false"></label>`:""}
-   <p class="small muted" style="margin-top:12px">You'll have a few seconds to undo.</p>
+   ${cfg.noUndo?"":`<p class="small muted" style="margin-top:12px">You'll have a few seconds to undo.</p>`}
    <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn" data-cfm>Cancel</button><button class="btn dangerfill" id="cfm-go">${esc(cfg.button||"Delete")}</button></div></div>`;
   document.body.appendChild(root);
   const prevF=document.activeElement;const close=()=>{root.remove();document.removeEventListener("keydown",k,true);if(prevF&&prevF.isConnected)try{prevF.focus()}catch(e){}};const k=e=>{if(e.key==="Escape"){e.stopPropagation();close()}};document.addEventListener("keydown",k,true);
@@ -1939,7 +2063,7 @@ function confirmDelete(cfg){
   setTimeout(()=>(inp||chk||root.querySelector("[data-cfm].btn")).focus(),60);
   if(inp)inp.onkeydown=e=>{if(e.key==="Enter"&&ok())go.click()};
   go.onclick=async()=>{if(!ok())return;go.disabled=true;recording=[];let snaps;try{await cfg.run();snaps=recording}catch(e){recording=null;go.disabled=false;toast(e.message||"Couldn't delete",true);return}recording=null;
-    close();closeSheet(true);if(ed&&cfg.after)ed=null;if(cfg.after)cfg.after();render();toastUndo(cfg.done||"Deleted",snaps)};
+    close();closeSheet(true);if(ed&&cfg.after)ed=null;if(cfg.after)cfg.after();render();toastUndo(cfg.done||"Deleted",cfg.undo||snaps)};
 }
 function badgeSheet(b){openSheet({title:b?"Edit badge":"New badge rule",intro:"Players get this badge automatically when their season number reaches the cutoff.",fields:[{key:"name",label:"Badge name",req:true},{key:"stat",label:"Based on",type:"select",options:BSTATS.map(x=>[x[0],x[1]]),req:true},{key:"min",label:"Cutoff (at least)",type:"number",req:true,hint:"Enter percentages as whole numbers, 0 to 100"},{key:"desc",label:"Description"},{key:"hide",label:"Turn this badge off",type:"check"}],
   value:b?{...b,hide:b.on===false}:{},saved:b?"Badge saved":"Badge created",onSave:v=>{const fail=(k,m)=>{$("#sf-"+k).focus();throw new Error(m)};
@@ -1964,6 +2088,168 @@ document.addEventListener("keydown",e=>{if(e.key!=="Tab")return;const box=$("#cf
 
 document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el)return;const fn=ACT[el.dataset.act];if(!fn)return;e.preventDefault();try{const r=fn(el.dataset,el);if(r&&r.catch)r.catch(err=>toast(err.message||"Something went wrong",true))}catch(err){if(err&&err.message)toast(err.message,true)}});
 
+/* ================= Admin: Staff & changes (live site only; staff names appear only here) ================= */
+let ADM;function admReset(){ADM={tab:"staff",staff:null,staffBusy:false,staffErr:"",log:[],logDone:false,logBusy:false,logErr:"",logLoaded:false,logGen:ADM?ADM.logGen+1:0,f:{actor:"",coll:"",from:"",to:""},exact:new Set()}}admReset();
+const SECT={games:"Schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"League standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Glossary",calls:"Calls",badges:"Badges",awards:"Badge awards",posts:"Team feed",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",accounts:"Passwords"};
+const sectName=c=>SECT[c]||c;
+const AUD_PAGE=50;
+function admRender(){if(route()!=="admin"||!user)return;if($("#sheetroot").firstChild||$("#cfmroot")){pendingRender=true;return}const a=document.activeElement;const id=a&&a.id;render();if(id){const el=document.getElementById(id);if(el)try{el.focus({preventScroll:true})}catch(e){}}}
+async function admLoadStaff(){if(!SB||!isAdmin())return;ADM.staffBusy=true;
+  try{const {data,error}=await SB.from("staff").select("*").order("name");if(error)throw error;ADM.staff=data||[];ADM.staffErr=""}
+  catch(e){ADM.staffErr="Couldn't load the staff list. "+(e.message||"");if(!ADM.staff)ADM.staff=null}
+  ADM.staffBusy=false;admRender()}
+async function admLoadLog(reset){if(!SB||!isAdmin())return;const f=ADM.f;
+  if(f.from&&f.to&&f.from>f.to){ADM.log=[];ADM.logDone=true;ADM.logLoaded=true;ADM.logErr="The From date is after the To date.";admRender();return}
+  const g=++ADM.logGen;const start=reset?0:ADM.log.length;ADM.logBusy=true;if(reset){ADM.log=[];ADM.logDone=false;ADM.logErr=""}admRender();
+  try{let q=SB.from("audit").select("*");
+    if(f.actor)q=q.eq("actor",f.actor);if(f.coll)q=q.eq("coll",f.coll);
+    if(f.from)q=q.gte("at",new Date(f.from+"T00:00:00").toISOString());
+    if(f.to){const d=new Date(f.to+"T00:00:00");d.setDate(d.getDate()+1);q=q.lt("at",d.toISOString())}
+    const {data,error}=await q.order("at",{ascending:false}).order("id",{ascending:false}).range(start,start+AUD_PAGE-1);
+    if(g!==ADM.logGen)return;if(error)throw error;
+    const seen=new Set(ADM.log.map(x=>String(x.id)));(data||[]).forEach(r=>{if(!seen.has(String(r.id)))ADM.log.push(r)});
+    ADM.logDone=!data||data.length<AUD_PAGE;ADM.logErr=""}
+  catch(e){if(g!==ADM.logGen)return;ADM.logErr="Couldn't load the change log. "+(e.message||"")}
+  ADM.logBusy=false;ADM.logLoaded=true;admRender()}
+const staffRow=email=>(ADM.staff||[]).find(s=>s.email===email);
+const admWho=email=>{const s=staffRow(String(email||"").toLowerCase());return s&&s.name?s.name:(email||"Unknown")};
+const snip=(t,n=48)=>{t=String(t??"").replace(/\s+/g," ").trim();return t.length>n?t.slice(0,n-1)+"…":t};
+const shortDate=x=>realDate(x)?mon(D(x))+" "+D(x).getDate():String(x||"");
+/* Built-in items (DEF, e.g. glossary terms) live in code; the db only holds overrides. So the first saved override of a built-in is a change
+   (or a delete, if it says deleted:true), and removing the override brings the built-in back. Restoring the built-in = drop the override. */
+function admEff(a){const def=DEFMAP[a.coll]&&DEFMAP[a.coll][a.doc_id];if(!def||a._eff)return a;const {id:_i,...base}=def;
+  if(a.action==="insert")return{...a,_eff:1,builtin:base,action:"update",old:base,drop:true};
+  if(a.action==="delete")return{...a,_eff:1,builtin:base,action:"update",new:base};
+  return{...a,_eff:1,builtin:base}}
+function admLabel(a){a=admEff(a);const o=a.old||{},n=a.new||{};let d=a.action==="delete"||(n.deleted&&Object.keys(n).length<=2)?o:(Object.keys(n).length?n:o);const id=a.doc_id;let s="";if(a.builtin)d={...a.builtin,...(d.deleted&&Object.keys(d).length<=2?{}:d)};
+  try{switch(a.coll){
+    case"games":s=(d.opp?`${vsAt(d)} ${oppName(d.opp)}`:"Game")+(d.date?" · "+shortDate(d.date):"");break;
+    case"players":s=d.first||d.last?`${d.no!=null&&d.no!==""?"#"+d.no+" ":""}${[d.first,d.last].filter(Boolean).join(" ")}`:"";break;
+    case"statgames":s="Box score · "+shortDate(id);break;
+    case"opps":s=d.name;break;
+    case"notes":s=d.text?(d.opp?"Note on "+oppName(d.opp)+": ":"Note: ")+"“"+snip(d.text)+"”":"";break;
+    case"clips":s=d.label?"Clip: "+snip(d.label)+(d.opp?" ("+oppName(d.opp)+")":""):"";break;
+    case"posts":s=d.text?"Post: “"+snip(d.text)+"”":"";break;
+    case"talk":case"talks":s=d.msg?"Coach Talk: “"+snip(d.msg)+"”":"";break;
+    case"stand":s="Standings: "+oppName(id);break;
+    case"lres":s=d.a&&d.b?`${oppName(d.a)} ${d.as??""}, ${oppName(d.b)} ${d.bs??""}`:"";break;
+    case"awards":s=d.name?d.name+(d.pid&&P(d.pid)?" for "+pName(P(d.pid)):""):"";break;
+    case"history":s="Season-by-season history";break;
+    case"accounts":s="Password";break;
+    default:s=d.name||d.title||"";
+  }}catch(e){s=""}
+  return String(s||"").trim()||String(id)}
+function admAction(a){a=admEff(a);const o=a.old||{},n=a.new||{};if(a.action==="insert")return["Added","good"];if(a.action==="delete")return["Deleted","bad"];if(n.deleted&&!o.deleted)return["Deleted","bad"];if(o.deleted&&!n.deleted)return["Brought back","good"];return["Changed","gold"]}
+const exactTime=at=>new Date(at).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+function canRestore(a){a=admEff(a);if(!COLLS.includes(a.coll)||a.coll==="accounts")return null;if(a.drop)return store[a.coll]&&store[a.coll][a.doc_id]!==undefined?"Restore this version":null;if(a.action==="insert")return store[a.coll]&&store[a.coll][a.doc_id]!==undefined?"Remove it":null;return a.old&&typeof a.old==="object"?"Restore this version":null}
+function adminView(){
+  const head=`<div class="head"><div><div class="eyebrow">Admin only</div><h1>Staff &amp; changes</h1><p>Who can edit the site, and every change they've made.</p></div></div>`;
+  if(!SB)return head+`<div class="empty">Available on the live site.</div>`;
+  if(ADM.staff===null&&!ADM.staffBusy&&!ADM.staffErr)setTimeout(admLoadStaff,0);
+  if(ADM.tab==="log"&&!ADM.logLoaded&&!ADM.logBusy)setTimeout(()=>admLoadLog(true),0);
+  const tabs=`<div class="seg" role="tablist" style="margin-bottom:14px">${[["staff","Staff"],["log","Change log"]].map(([k,l])=>`<button type="button" role="tab" data-adtab="${k}" class="${ADM.tab===k?"on":""}" aria-selected="${ADM.tab===k}">${l}</button>`).join("")}</div>`;
+  return head+tabs+(ADM.tab==="log"?admLogHTML():admStaffHTML());
+}
+function admStaffHTML(){
+  const intro=`<div class="spread" style="flex-wrap:wrap;margin-bottom:6px"><p class="small muted" style="margin:0;flex:1 1 260px">Add a coach's email here, then send them the site link. They tap ‘Create your coach account’ with that email.</p><button class="btn sm edit" data-act="admAdd">${PLUS}Add coach</button></div>`;
+  let list;
+  if(ADM.staffErr&&!ADM.staff)list=`<div class="empty">${esc(ADM.staffErr)} <button class="btn sm" data-act="admReloadStaff">Try again</button></div>`;
+  else if(!ADM.staff)list=`<p class="muted" role="status">Loading the staff list…</p>`;
+  else{const rows=[...ADM.staff].sort((a,b)=>((a.active===false)-(b.active===false))||String(a.name||a.email).localeCompare(String(b.name||b.email)));
+    list=rows.length?rows.map(s=>{const me=s.email===user.email,off=s.active===false,e=esc(s.email);
+      return `<div class="staffrow"><div class="who2"><div class="row" style="gap:6px"><b>${esc(s.name||s.email)}</b><span class="chip ${s.role==="admin"?"gold":""}">${s.role==="admin"?"Admin":"Coach"}</span>${off?'<span class="chip warn">Inactive</span>':""}${me?'<span class="chip good">You</span>':""}</div><div class="small muted em">${e}</div></div>
+      <div class="row" style="gap:6px"><button class="btn sm edit" data-act="admEdit" data-id="${e}">${PEN}Edit</button>${me?"":`<button class="btn sm" data-act="admToggle" data-id="${e}">${off?"Reactivate":"Deactivate"}</button><button class="btn sm del" data-act="admRemove" data-id="${e}">${TRASH}Remove</button>`}</div></div>`}).join(""):`<div class="empty">Nobody on the staff list yet.</div>`;
+    if(ADM.staffErr)list=`<p class="small" style="color:var(--bad)">${esc(ADM.staffErr)}</p>`+list}
+  return `<div class="card">${intro}<div>${list}</div></div>`;
+}
+function admLogHTML(){const f=ADM.f;
+  const actors=new Map();(ADM.staff||[]).forEach(s=>actors.set(s.email,s.name||s.email));ADM.log.forEach(a=>{if(a.actor&&!actors.has(a.actor))actors.set(a.actor,a.actor)});if(f.actor&&!actors.has(f.actor))actors.set(f.actor,f.actor);
+  const opt=(v,l,sel)=>`<option value="${esc(v)}" ${sel?"selected":""}>${esc(l)}</option>`;
+  const any=f.actor||f.coll||f.from||f.to;
+  const filters=`<div class="adfilters">
+    <label class="f" for="adf-actor">Coach<select id="adf-actor">${opt("","All coaches",!f.actor)}${[...actors].sort((a,b)=>a[1].localeCompare(b[1])).map(([v,l])=>opt(v,l,f.actor===v)).join("")}</select></label>
+    <label class="f" for="adf-coll">Section<select id="adf-coll">${opt("","All sections",!f.coll)}${Object.entries(SECT).filter(([k])=>k!=="accounts"||f.coll===k).sort((a,b)=>a[1].localeCompare(b[1])).map(([v,l])=>opt(v,l,f.coll===v)).join("")}</select></label>
+    <label class="f" for="adf-from">From<input type="date" id="adf-from" value="${esc(f.from)}"></label>
+    <label class="f" for="adf-to">To<input type="date" id="adf-to" value="${esc(f.to)}"></label>
+    <div class="row clr" style="gap:6px"><button class="btn sm" data-act="admClear" ${any?"":"disabled"}>Clear</button><button class="btn sm" data-act="admRefresh">Refresh</button></div></div>`;
+  let rows;
+  if(ADM.logErr&&!ADM.log.length)rows=`<div class="empty">${esc(ADM.logErr)}</div>`;
+  else if(!ADM.log.length)rows=ADM.logBusy||!ADM.logLoaded?`<p class="muted" role="status">Loading changes…</p>`:`<div class="empty">${any?"No changes match these filters.":"No changes yet."}</div>`;
+  else rows=ADM.log.map(a=>{const id=esc(String(a.id));const [al,ac]=admAction(a);const rs=canRestore(a);const ex=ADM.exact.has(String(a.id));
+    return `<div class="logrow"><div class="when"><button type="button" data-act="admWhen" data-id="${id}" title="${esc(exactTime(a.at))}" aria-label="${esc(exactTime(a.at))}"><time datetime="${esc(a.at)}">${esc(ex?exactTime(a.at):ago(new Date(a.at).getTime()))}</time></button></div>
+    <div class="what"><span class="chip ${ac}">${al}</span><b class="lbl">${esc(admLabel(a))}</b><div class="small muted">${esc(admWho(a.actor))} · ${esc(sectName(a.coll))}</div></div>
+    <div class="row" style="gap:6px"><button class="btn sm" data-act="admView" data-id="${id}">View</button>${rs?`<button class="btn sm" data-act="admRestore" data-id="${id}">${rs}</button>`:""}</div></div>`}).join("")
+    +(ADM.logErr?`<p class="small" style="color:var(--bad)">${esc(ADM.logErr)}</p>`:"")
+    +(!ADM.logDone?`<div class="morep" style="text-align:center;margin-top:10px"><button class="btn sm" data-act="admMore" ${ADM.logBusy?"disabled":""}>${ADM.logBusy?"Loading…":"Load more"}</button></div>`:"");
+  return `<div class="card">${filters}<div aria-live="polite">${rows}</div></div>`;
+}
+function bindAdmin(){
+  $$("[data-adtab]").forEach(b=>b.onclick=()=>{if(ADM.tab===b.dataset.adtab)return;ADM.tab=b.dataset.adtab;render()});
+  const set=(id,k)=>{const el=$("#"+id);if(el)el.onchange=()=>{if(ADM.f[k]===el.value)return;ADM.f[k]=el.value;admLoadLog(true)}};
+  set("adf-actor","actor");set("adf-coll","coll");set("adf-from","from");set("adf-to","to");
+}
+const FIELD_L={name:"Name",first:"First name",last:"Last name",no:"Number",pos:"Position",yr:"Year",ht:"Height",date:"Date",time:"Tip-off",opp:"Opponent",site:"Site",home:"Home game",us:"Our score",them:"Their score",ot:"Overtime",lg:"League game",type:"Type",event:"Event",venue:"Venue",text:"Text",vis:"Who can see it",author:"Posted by",by:"By",ts:"Time",label:"What happens",t:"Timestamp",url:"Link",city:"City",status:"Report status",league:"In our league",keys:"Keys",players:"Players to know",last:"Past meetings",coach:"Their coach",cat:"Category",court:"Court",roles:"Roles",notes:"Notes",phases:"Steps",draft:"Draft",def:"Definition",msg:"Message",ref:"Reference",verse:"Verse",pinned:"Pinned",deleted:"Deleted",lines:"Box score lines",pid:"Player",desc:"Description",stat:"Based on",min:"Cutoff",on:"On",note:"Note",inactive:"Inactive",seasons:"Seasons",edited:"Edited",a:"Team A",b:"Team B",as:"Team A score",bs:"Team B score",w:"Wins",l:"Losses",lw:"League wins",ll:"League losses"};
+function admVal(k,v){if(v===undefined||v===null||v==="")return'<span class="muted">(empty)</span>';
+  if(typeof v==="boolean")return v?"Yes":"No";
+  if((k==="opp"||k==="a"||k==="b")&&typeof v==="string")return esc(oppName(v));
+  if(k==="pid"&&typeof v==="string")return esc(pName(P(v))||v);
+  if(k==="date"&&realDate(v))return esc(longDate(D(v))+", "+D(v).getFullYear());
+  if(k==="site"&&SITE_L[v])return esc(SITE_L[v]);
+  if(k==="time"&&typeof v==="string")return esc(fmtTime(v));
+  if((k==="ts"||k==="setAt")&&typeof v==="number")return esc(new Date(v).toLocaleString());
+  if(k==="phases"&&Array.isArray(v))return esc(plural(v.length,"step"));
+  if(k==="lines"&&Array.isArray(v))return esc(plural(v.length,"player line"));
+  if(typeof v==="string"||typeof v==="number")return esc(String(v));
+  if(Array.isArray(v)&&v.every(x=>x==null||["string","number","boolean"].includes(typeof x)))return v.length?esc(v.join("\n")):'<span class="muted">(none)</span>';
+  const j=JSON.stringify(v,null,1);return `<pre>${esc(j.length>2000?j.slice(0,2000)+"…":j)}</pre>`}
+function openInfo(title,body,foot){if(!$("#sheetroot").firstChild){lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href)}sheetCfg=null;
+  $("#sheetroot").innerHTML=`<div class="sheet-back" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-title"><div class="sheet-head"><h2 id="sh-title">${esc(title)}</h2><button class="btn icon" data-act="closeSheet" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="sheet-body">${body}</div>${foot?`<div class="sheet-foot">${foot}</div>`:""}</div>`;
+  document.removeEventListener("keydown",escClose);document.addEventListener("keydown",escClose);setTimeout(()=>{const h=$(".sheet .btn.icon");h&&h.focus()},50)}
+const audById=id=>ADM.log.find(a=>String(a.id)===String(id));
+Object.assign(ACT,{
+  admReloadStaff(){ADM.staffErr="";ADM.staff=null;render()},
+  admAdd(){if(!isAdmin())return;openSheet({title:"Add a coach",intro:"They get coach rights once they create an account with this email.",fields:[{key:"email",label:"Email",type:"email",im:"email",req:true,max:120},{key:"name",label:"Name",req:true,max:60},{key:"role",label:"Role",type:"select",options:[["coach","Coach"],["admin","Admin (can see this page)"]],req:true}],value:{role:"coach"},saved:"Added. Send them the site link.",
+    onSave:async v=>{const bad=(k,m)=>{const el=$("#sf-"+k);el&&el.focus();throw new Error(m)};const email=v.email.trim().toLowerCase();
+      if(!EMAIL_RE.test(email))bad("email","Enter a valid email address");if(staffRow(email))bad("email","That email is already on the staff list");
+      const name=v.name.replace(/\s+/g," ").trim();if(!name)bad("name","Name is required");if(!["coach","admin"].includes(v.role))bad("role","Pick a role");
+      const {data,error}=await SB.from("staff").insert({email,name,role:v.role,active:true}).select();
+      if(error)throw new Error(error.code==="23505"?"That email is already on the staff list":"Couldn't add: "+error.message);
+      if(!data||!data.length)throw new Error("Couldn't add. Check you're signed in as the admin.");await admLoadStaff()}})},
+  admEdit(d){if(!isAdmin())return;const s=staffRow(d.id);if(!s)return;const me=s.email===user.email;
+    openSheet({title:"Edit "+(s.name||s.email),intro:esc(s.email)+(me?"<br>You can't change your own role.":""),fields:[{key:"name",label:"Name",req:true,max:60}].concat(me?[]:[{key:"role",label:"Role",type:"select",options:[["coach","Coach"],["admin","Admin (can see this page)"]],req:true}]),value:{name:s.name||"",role:s.role},saved:"Saved",
+      onSave:async v=>{const name=v.name.replace(/\s+/g," ").trim();if(!name)throw new Error("Name is required");const patch={name};if(!me){if(!["coach","admin"].includes(v.role))throw new Error("Pick a role");patch.role=v.role}
+        const {data,error}=await SB.from("staff").update(patch).eq("email",s.email).select();if(error)throw new Error("Couldn't save: "+error.message);if(!data||!data.length)throw new Error("Couldn't save. Check you're signed in as the admin.");await admLoadStaff()}})},
+  admToggle(d){if(!isAdmin())return;const s=staffRow(d.id);if(!s)return;if(s.email===user.email)return toast("You can't deactivate your own account",true);const off=s.active===false,nm=esc(s.name||s.email);
+    confirmDelete({title:(off?"Reactivate ":"Deactivate ")+(s.name||s.email)+"?",body:off?`${nm} gets coach rights back next time they sign in.`:`${nm} can't edit anything until you reactivate them. Their past changes stay in the change log.`,button:off?"Reactivate":"Deactivate",noUndo:true,done:off?"Reactivated":"Deactivated",
+      run:async()=>{const {data,error}=await SB.from("staff").update({active:off}).eq("email",s.email).select();if(error)throw new Error("Couldn't save: "+error.message);if(!data||!data.length)throw new Error("Couldn't save. Check you're signed in as the admin.");await admLoadStaff()}})},
+  admRemove(d){if(!isAdmin())return;const s=staffRow(d.id);if(!s)return;if(s.email===user.email)return toast("You can't remove your own account",true);const row=JSON.parse(JSON.stringify(s));
+    confirmDelete({title:"Remove "+(s.name||s.email)+"?",body:`${esc(s.name||s.email)} loses coach rights right away. Their past changes stay in the change log.`,button:"Remove",done:"Removed from the staff list",
+      run:async()=>{const {data,error}=await SB.from("staff").delete().eq("email",s.email).select();if(error)throw new Error("Couldn't remove: "+error.message);if(!data||!data.length)throw new Error("Couldn't remove. Check you're signed in as the admin.");await admLoadStaff()},
+      undo:async()=>{const {error}=await SB.from("staff").insert(row);if(error)throw new Error("Couldn't undo: "+error.message);await admLoadStaff()}})},
+  admWhen(d){const k=String(d.id);ADM.exact.has(k)?ADM.exact.delete(k):ADM.exact.add(k);render();const b=$(`[data-act="admWhen"][data-id="${CSS.escape(k)}"]`);b&&b.focus()},
+  admMore(){if(!ADM.logBusy&&!ADM.logDone)admLoadLog(false)},
+  admRefresh(){admLoadStaff();admLoadLog(true)},
+  admClear(){ADM.f={actor:"",coll:"",from:"",to:""};admLoadLog(true)},
+  admView(d){const a=admEff(audById(d.id)||{});if(!a.id)return;const [al]=admAction(a);const o=a.old||{},n=a.new||{};
+    const keys=[...new Set([...Object.keys(o),...Object.keys(n)])].filter(k=>JSON.stringify(o[k])!==JSON.stringify(n[k]));
+    const lab=k=>FIELD_L[k]||k;
+    const blank=v=>v==null||v===""||(Array.isArray(v)&&!v.length)||(typeof v==="object"&&!Array.isArray(v)&&!Object.keys(v).length);
+    const one=(k,v)=>blank(v)?"":`<div><div class="k">${esc(lab(k))}</div><div class="v" style="grid-template-columns:1fr"><div>${admVal(k,v)}</div></div></div>`;
+    const diff=a.action==="insert"?keys.map(k=>one(k,n[k])):a.action==="delete"?keys.map(k=>one(k,o[k])):
+      keys.map(k=>`<div><div class="k">${esc(lab(k))}</div><div class="v"><div class="was"><span class="small muted" style="display:block">Before</span>${admVal(k,o[k])}</div><span class="arr muted" aria-hidden="true">→</span><div><span class="small muted" style="display:block">After</span>${admVal(k,n[k])}</div></div></div>`);
+    const body=`<p class="small muted" style="margin:0">${esc(al)} by <b>${esc(admWho(a.actor))}</b> · ${esc(sectName(a.coll))} · ${esc(exactTime(a.at))}</p>
+      ${a.action==="delete"?'<p class="small muted" style="margin:0">What it held when it was deleted:</p>':""}<div class="diff">${diff.join("")||'<p class="muted" style="margin:0">No fields changed.</p>'}</div>
+      <details class="rawjson"><summary class="small">Raw data</summary>${a.action!=="insert"?`<p class="small muted" style="margin:8px 0 4px">Before</p><pre>${esc(JSON.stringify(a.old,null,1))}</pre>`:""}${a.action!=="delete"?`<p class="small muted" style="margin:8px 0 4px">After</p><pre>${esc(JSON.stringify(a.new,null,1))}</pre>`:""}</details>`;
+    const rs=canRestore(a);
+    openInfo(admLabel(a),body,`<span class="grow"></span><button class="btn" data-act="closeSheet">Close</button>${rs?`<button class="btn gold" data-act="admRestore" data-id="${esc(String(a.id))}">${rs}</button>`:""}`)},
+  admRestore(d){if(!isAdmin())return;const a=admEff(audById(d.id)||{});if(!a.id)return;const rs=canRestore(a);const lab=esc(admLabel(a));
+    if(!rs)return toast(a.action==="insert"?"That item is already gone":"This change can't be restored",true);
+    if(a.action==="insert")return confirmDelete({title:"Remove it?",body:`This removes <b>${lab}</b> (${esc(sectName(a.coll))}), which ${esc(admWho(a.actor))} added ${esc(ago(new Date(a.at).getTime()))}.`,button:"Remove it",done:"Removed",
+      run:async()=>{await removeDoc(a.coll,a.doc_id)},after:()=>{admLoadLog(true)}});
+    confirmDelete({title:"Restore this version?",body:`<b>${lab}</b> (${esc(sectName(a.coll))}) goes back to how it was before this change ${esc(ago(new Date(a.at).getTime()))}. Anything changed since then is replaced.`,button:"Restore",done:"Restored",
+      run:async()=>{if(a.drop){if(recording)recording.push([a.coll,a.doc_id,snapOf(a.coll,a.doc_id)]);await dropDoc(a.coll,a.doc_id)}else await saveDoc(a.coll,a.doc_id,a.old)},after:()=>{admLoadLog(true)}})}
+});
+
 /* ================= Page bindings ================= */
 function bindView(r){
   if(r==="stats"){
@@ -1981,6 +2267,7 @@ function bindView(r){
     }
   }
   if(r==="playbook")bindPlaybook();
+  if(r==="admin")bindAdmin();
   if(r==="glossary"){$$("[data-gtab]").forEach(b=>b.onclick=()=>{glossTab=b.dataset.gtab;render()});
     $$("[data-ggrp]").forEach(b=>b.onclick=()=>{glossGrp=glossGrp===b.dataset.ggrp?"":b.dataset.ggrp;render();const n=$(`[data-ggrp="${CSS.escape(glossGrp)}"]`);if(n){n.focus({preventScroll:true});n.scrollIntoView({block:"nearest",inline:"center"})}});
     $$("[data-gall]").forEach(b=>b.onclick=()=>{const open=b.dataset.gall==="open";$$("details.ggroup").forEach(d=>{open?glossOpen.add(d.dataset.grp):glossOpen.delete(d.dataset.grp)});render()});
@@ -2044,7 +2331,37 @@ window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a 
     clean.sort((a,b)=>a.date.localeCompare(b.date));const oid=await cpcOpp(name,{});const o=get("opps",oid);await saveDoc("opps",oid,{...o,last:clean});render();return oid},
   /* CPC.setTeamHistory([{season:"2025-26",w,l,lw,ll,finish?,coach?,notes?}]) -> number of seasons stored (whole numbers 0-40) */
   async setTeamHistory(seasons){needCoach();if(!Array.isArray(seasons))throw new Error("seasons must be an array");const out=[];for(const x of seasons)out.push(cleanSeasonRow(x,out));
-    out.sort((a,b)=>b.season.localeCompare(a.season));await saveDoc("history","seasons",{seasons:out});render();return out.length}};
+    out.sort((a,b)=>b.season.localeCompare(a.season));await saveDoc("history","seasons",{seasons:out});render();return out.length},
+  /* CPC.setStandings(["Team", ...]) -> {added:[names], kept:[names]}. Makes sure each team is a league opponent with a standings row
+     (new rows start at 0-0). Skips our own name. Existing rows are left alone. */
+  async setStandings(names){needCoach();if(!Array.isArray(names))throw new Error("setStandings needs an array of team names");const out={added:[],kept:[]};const seen=new Set();
+    for(const raw of names){const nm=String(raw||"").replace(/\s+/g," ").trim();if(!nm)continue;const k=nm.toLowerCase();
+      if(/^(cpc|cpc eagles|cedar park christian|cedar park christian eagles|cedar park christian \(bothell\))$/.test(k)||seen.has(k))continue;seen.add(k);
+      const oid=await cpcOpp(nm,{league:true});const o=get("opps",oid);if(o&&!o.league)await saveDoc("opps",oid,{...o,league:true});
+      if(get("stand",oid)){out.kept.push(o?o.name:nm);continue}
+      await saveDoc("stand",oid,{lw:0,ll:0,w:0,l:0});out.added.push(o?o.name:nm)}
+    render();return out},
+  /* CPC.setOppScout("Opponent name",{coach?:{name,tenure,record,offense,defense,press,sets},players?:[{name,no,pos,yr,ht,info}],replacePlayers?:bool,source?:"text" (accepted, not stored)})
+     -> {coachFields:n, playersAdded:n, playersSkipped:[...]}. Coach: only non-empty fields are merged. Players: skips duplicates by jersey or name. */
+  async setOppScout(name,o){needCoach();const opp=cpcFindOpp(name);if(!opp)throw new Error("No opponent named "+name);o=o||{};
+    const extra=Object.keys(o).filter(k=>!["coach","players","replacePlayers","source"].includes(k));if(extra.length)throw new Error("setOppScout can't change: "+extra.join(", "));
+    const CK=["name","tenure","record","offense","defense","press","sets"];const coach={...(opp.coach||{})};let coachFields=0;
+    if(o.coach!=null){if(typeof o.coach!=="object"||Array.isArray(o.coach))throw new Error("coach must be an object");const bad=Object.keys(o.coach).filter(k=>!CK.includes(k));if(bad.length)throw new Error("Unknown coach fields: "+bad.join(", "));
+      CK.forEach(k=>{const v=o.coach[k];if(v==null)return;const t=String(v).trim();if(!t)return;if(t.length>(["name","tenure","record"].includes(k)?80:2000))throw new Error("coach."+k+" is too long");if(coach[k]!==t){coach[k]=t;coachFields++}})}
+    let list=o.replacePlayers?[]:[...(opp.players||[])];const added=[],skipped=[];
+    if(o.players!=null){if(!Array.isArray(o.players))throw new Error("players must be an array");
+      o.players.forEach((x,i)=>{const at="Player "+(i+1);if(!x||typeof x!=="object")throw new Error(at+" is not an object");
+        const nm=String(x.name||"").replace(/\s+/g," ").trim();if(!nm||nm.length>60)throw new Error(at+": name needs 1 to 60 characters");
+        const no=x.no==null?"":String(x.no).trim();if(no&&!/^\d{1,2}$/.test(no))throw new Error(at+": jersey must be 1 or 2 digits");
+        const pos=String(x.pos||"").trim().toUpperCase();if(pos&&!POS.includes(pos))throw new Error(at+": pos must be one of "+POS.join(", "));
+        const yr=String(x.yr||"").trim();const yrOk=YRS.find(y=>y.toLowerCase()===yr.toLowerCase());if(yr&&!yrOk)throw new Error(at+": yr must be one of "+YRS.join(", "));
+        let ht=String(x.ht||"").trim();if(ht){const h=parseHt(ht);if(!h)throw new Error(at+": height must look like 6'2\"");ht=`${h[0]}'${h[1]}"`}
+        const info=String(x.info||"").trim().slice(0,1000);
+        if(list.some(p=>(no&&String(p.no??"")===no)||String(p.name||"").trim().toLowerCase()===nm.toLowerCase())){skipped.push(nm);return}
+        const p={name:nm,no,pos,yr:yrOk||"",ht};if(info)p.info=info;list.push(p);added.push(nm)})}
+    const obj={...opp,coach,players:list};
+    const {id:_id,...clean}=obj;if(coachFields||added.length||o.replacePlayers)await saveDoc("opps",opp.id,clean);
+    render();return{coachFields,playersAdded:added.length,playersSkipped:skipped,players:list.length}}};
 function needCoach(){if(!user||!isCoach())throw new Error("Sign in as a coach first")}
 const cpcFindOpp=name=>{const nm=String(name||"").replace(/\s+/g," ").trim().toLowerCase();return nm?opps().find(o=>o.name.trim().toLowerCase()===nm):null};
 async function cpcOpp(name,{city,league}){const nm=String(name||"").replace(/\s+/g," ").trim();if(!nm||nm.length>60||!/[a-z]/i.test(nm))throw new Error("Opponent name needs 1 to 60 characters with a letter");
