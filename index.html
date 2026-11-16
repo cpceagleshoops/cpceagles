@@ -232,7 +232,7 @@ input:disabled{opacity:.45}
 .toast.err .tick{background:var(--bad)}
 
 /* Login */
-.login{min-height:100%;display:grid;place-items:center;padding:calc(32px + var(--safe-t)) 18px calc(32px + var(--safe-b));background:radial-gradient(900px 520px at 85% -10%,rgba(171,140,89,.22),transparent 60%),linear-gradient(160deg,#0d1a2c,#1c3045 55%,#22405c)}
+.login{min-height:100%;min-height:100vh;min-height:100dvh;display:grid;place-items:center;padding:calc(32px + var(--safe-t)) 18px calc(32px + var(--safe-b));background:radial-gradient(900px 520px at 85% -10%,rgba(171,140,89,.22),transparent 60%),linear-gradient(160deg,#0d1a2c,#1c3045 55%,#22405c)}
 .loginbox{width:min(400px,100%);color:#fff}
 .loginbox h1{font-size:42px;margin:16px 0 4px;color:#fff}
 .loginbox p.lead{color:#c3cfdb;margin:0 0 22px}
@@ -868,6 +868,15 @@ let sbLoaded=false,sbChannel=null,sbGen=0,sbFailed=false,sbBooting=!!SB,sbChanOk
 /* Who is signed in: the shared player account, or a staff member (role from public.my_role(); null = not on the staff list or deactivated) */
 let sbRecovery=false;
 const NOT_STAFF="This email doesn't have coach access. Ask the site admin to add you or turn your access back on.";
+/* Signed in but not (active) staff: file an access request for the admin, sign out, and show a friendly "request sent" screen. */
+const RATE_MSG="Too many attempts from this device in a short time. Wait a few minutes and try again.";
+async function sbNoRole(sess,email,typedName){const um=(sess&&sess.user&&sess.user.user_metadata)||{};const name=String(typedName||um.name||um.full_name||"").replace(/\s+/g," ").trim().slice(0,60);
+  const em=String(email||(sess&&sess.user&&sess.user.email)||"").toLowerCase();let res=null;
+  try{const {data,error}=await SB.rpc("request_access",{p_name:name});if(!error)res=Array.isArray(data)?data[0]:data;if(res&&typeof res==="object")res=Object.values(res)[0]}catch(e){res=null}
+  if(res==="staff"){try{const u=await sbResolve(sess);if(u&&u.role!=="none")return u}catch(e){}}
+  try{await SB.auth.signOut({scope:"local"})}catch(e){}
+  loginStage=res==="requested"||res==="staff"?{step:"requested",u:"coach",email:em,first:name.split(" ")[0]}:{step:"signin",u:"coach",email:em,msg:NOT_STAFF};
+  return null}
 /* Docs write refused by row-level security (code 42501): coach access was removed or turned off. Sign out locally. */
 const ACCESS_LOST="You no longer have coach access. Sign in again.";
 function sbAccessLost(){toast(ACCESS_LOST,true);loginStage={step:"signin",u:"coach",msg:ACCESS_LOST};setTimeout(async()=>{try{await SB.auth.signOut({scope:"local"})}catch(e){}if(user){user=null;sbClear();closeSheet(true);render()}toast(ACCESS_LOST,true)},0);return new Error(ACCESS_LOST)}
@@ -904,7 +913,7 @@ function sbRefetchSoon(){if(!SB||!user||!sbLoaded||sbFailed||Date.now()-sbLastFe
 /* Coach sessions: re-check the role on refocus. Off the staff list → sign out; promoted/demoted → update the menu. Network errors are ignored. */
 async function sbRecheckRole(){const u0=user;let r;try{const {data,error}=await SB.rpc("my_role");if(error)return;r=Array.isArray(data)?data[0]:data;if(r&&typeof r==="object")r=Object.values(r)[0]}catch(e){return}
   if(user!==u0||!user)return;
-  if(r!=="admin"&&r!=="coach"){loginStage={step:"signin",u:"coach",email:user.email,msg:NOT_STAFF};user=null;try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear();closeSheet(true);render();toast(NOT_STAFF,true);return}
+  if(r!=="admin"&&r!=="coach"){let sess=null;try{const {data}=await SB.auth.getSession();sess=data&&data.session}catch(e){}const em=user.email;user=null;sbClear();closeSheet(true);await sbNoRole(sess,em,"");user=null;render();return}
   if(r!==user.role){user={...user,role:r};requestRender()}}
 if(SB){window.addEventListener("focus",sbRefetchSoon);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")sbRefetchSoon()})}
 async function sbBoot(){
@@ -919,7 +928,7 @@ async function sbBoot(){
   else if(t==="recovery"&&sess){sbRecovery=true;loginStage={step:"newpw"}}
   if(sbRecovery){sbBooting=false;render();return}
   if(sess){try{const u=await sbResolve(sess);
-      if(u&&u.role==="none"){loginStage={step:"signin",u:"coach",msg:NOT_STAFF};try{await SB.auth.signOut({scope:"local"})}catch(e){}}
+      if(u&&u.role==="none")user=await sbNoRole(sess,u.email,"");
       else{user=u;if(user&&/^(signup|email|invite|magiclink)$/.test(t))setTimeout(()=>toast("Email confirmed. You're signed in."),300)}}
     catch(e){user=null;loginStage={step:"signin",u:"coach",msg:"Couldn't check your coach access right now. Sign in again in a minute."}}}
   sbBooting=false;if(user)sbLoad();else render();
@@ -1123,28 +1132,37 @@ function sbLoginView(){
   const back=`<button class="btn" type="button" id="lg-back">Back to sign in</button>`;
   let body,fine="Players: get the team password from your coach.";
   if(st.step==="newpw"){body=`<h2 class="lgh">Set a new password</h2><p class="small lgp">Pick a new password for your coach account.</p>${pwField("lg-new",`New password (at least ${COACH_MIN} characters)`,"new-password")}${pwField("lg-new2","New password again","new-password")}${errBox}<button class="btn gold" type="submit">Save password</button><button class="btn" type="button" id="lg-cancel">Cancel</button>`;fine=""}
-  else if(st.step==="signup"){body=`<h2 class="lgh">Create your coach account</h2><p class="small lgp">Use the email the site admin added to the coaching staff list.</p>${emailField(st.email)}${pwField("lg-new",`Password (at least ${COACH_MIN} characters)`,"new-password")}${pwField("lg-new2","Password again","new-password")}${errBox}<button class="btn gold" type="submit">Create account</button>${back}`;fine=""}
+  else if(st.step==="signup"){body=`<h2 class="lgh">Create your coach account</h2><p class="small lgp">The site admin approves new coach accounts.</p><label class="f" for="lg-name">Your name<input type="text" id="lg-name" autocomplete="name" maxlength="60" required value="${esc(st.name||"")}"></label>${emailField(st.email)}${pwField("lg-new",`Password (at least ${COACH_MIN} characters)`,"new-password")}${pwField("lg-new2","Password again","new-password")}${errBox}${st.existing?`<button class="btn gold" type="button" id="lg-instead">Sign in instead</button>`:""}<button class="btn ${st.existing?"":"gold"}" type="submit">Create account</button>${back}`;fine=""}
   else if(st.step==="forgot"){body=`<h2 class="lgh">Reset your password</h2><p class="small lgp">Enter your coach email. We'll send a link to set a new password.</p>${emailField(st.email)}${errBox}<button class="btn gold" type="submit">Send reset link</button>${back}`;fine=""}
+  else if(st.step==="requested"){body=`<h2 class="lgh">Request sent</h2><p class="lgp" role="status">Thanks${st.first?", "+esc(st.first):""}! Your request is with the site admin. Once they approve it, sign in here with the same email and password.</p><button class="btn gold" type="button" id="lg-back">Back to sign in</button>`;fine=""}
   else if(st.step==="sent"){body=`<h2 class="lgh">${esc(st.head||"Check your email")}</h2><p class="lgp" role="status">${esc(st.note)}</p><button class="btn gold" type="button" id="lg-back">Back to sign in</button>`;fine=""}
   else{const coach=st.u==="coach";
     body=`<div class="seg lgseg" role="group" aria-label="Sign in as"><button type="button" data-lgu="player" class="${coach?"":"on"}" aria-pressed="${!coach}">Player</button><button type="button" data-lgu="coach" class="${coach?"on":""}" aria-pressed="${coach}">Coach</button></div>
     ${coach?emailField(st.email):""}${pwField("lg-pass","Password","current-password")}${errBox}<button class="btn gold" type="submit">Sign in</button>
     ${coach?`<div class="lglinks"><button type="button" class="linkbtn" id="lg-signup">First time? Create your coach account</button><button type="button" class="linkbtn" id="lg-forgot">Forgot password?</button></div>`:""}`;
-    if(coach)fine="Coaches: the site admin adds your email to the staff list first."}
+    if(coach)fine="Coaches: create your account once. The site admin approves it."}
   return `<div class="login"><div class="loginbox">${MARK(84)}<h1>Eagles Basketball Hub</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${esc(CONFIG.level)}</p>
   <form class="loginform" id="loginform" autocomplete="on" novalidate>${body}</form>${fine?`<p class="fine">${fine}</p>`:""}</div></div>`;
 }
 function sbAuthErr(e,coach){const st=e&&e.status,c=(e&&e.code)||"",m=String((e&&e.message)||"");
   if(c==="email_not_confirmed"||/not confirmed/i.test(m))return"Confirm your email first. Open the link we emailed you, then sign in.";
-  if(st===429||c==="over_email_send_rate_limit"||c==="over_request_rate_limit"||/rate limit|too many/i.test(m))return"Too many tries. Wait a few minutes and try again.";
-  if(c==="invalid_credentials"||st===400||/invalid login/i.test(m))return coach?"That email or password isn't right.":"That password isn't right.";
+  if(st===429||/^over_.*rate_limit$/.test(c)||/rate limit|too many/i.test(m))return RATE_MSG;
+  if(c==="invalid_credentials"||/invalid login/i.test(m))return coach?"That email or password isn't right.":"That password isn't right.";
   return"Couldn't sign in right now. Try again in a minute."}
-const badCreds=e=>!!e&&(e.code==="invalid_credentials"||(e.status===400&&!/not confirmed/i.test(String(e.message||""))&&e.code!=="email_not_confirmed"));
+const badCreds=e=>!!e&&(e.code==="invalid_credentials"||/invalid login credentials/i.test(String(e.message||"")));
+function sbSignupErr(e){const m=String((e&&e.message)||""),c=(e&&e.code)||"";
+  if(c==="user_already_exists"||c==="email_exists"||/already registered|already exists|user exists/i.test(m))return["This email already has an account. Tap Sign in instead.",true];
+  if(e&&e.status===429||/^over_.*rate_limit$/.test(c)||/rate limit/i.test(m))return[RATE_MSG];
+  if(c==="signup_disabled"||/signups? (are )?(not allowed|disabled)/i.test(m))return["New accounts are turned off right now. Ask the site admin."];
+  if(c==="weak_password"||/password/i.test(m)&&/weak|short|at least|characters/i.test(m))return[`That password is too weak. Use at least ${COACH_MIN} characters, mixing letters and numbers.`];
+  if(c==="email_address_invalid"||c==="validation_failed"&&/email/i.test(m)||/invalid email|unable to validate email|email address .* invalid/i.test(m))return["That email address doesn't look right. Check it and try again."];
+  if(c==="email_not_confirmed"||/not confirmed/i.test(m))return["This email already has an account. Confirm it from the link we emailed, then sign in.",true];
+  return["Couldn't create the account right now. Try again in a minute."]}
 function sbEnter(u){fails=0;sbRecovery=false;user=u;loginStage={step:"signin"};location.hash="home";render();toast(u.role==="admin"?"Signed in as admin":u.role==="coach"?"Signed in as a coach":"Signed in. Go Eagles!");sbLoad()}
 /* After any sign-in: staff check. Not on the list (or deactivated) → sign out and say so. */
-async function sbAfterSignIn(sess,email,err){let u;
+async function sbAfterSignIn(sess,email,typedName){let u;
   try{u=await sbResolve(sess)}catch(x){try{await SB.auth.signOut({scope:"local"})}catch(e){}loginStage={step:"signin",u:"coach",email,msg:"Couldn't check your coach access. Try again in a minute."};render();return false}
-  if(!u||u.role==="none"){loginStage={step:"signin",u:"coach",email,msg:NOT_STAFF};try{await SB.auth.signOut({scope:"local"})}catch(e){}render();return false}
+  if(!u||u.role==="none"){const ok=u?await sbNoRole(sess,email||u.email,typedName):null;if(ok){sbEnter(ok);return true}if(!u){loginStage={step:"signin",u:"coach",email,msg:NOT_STAFF};try{await SB.auth.signOut({scope:"local"})}catch(e){}}render();return false}
   sbEnter(u);return true}
 function bindSbLogin(){
   const err=m=>{const e=$("#lg-err");if(e)e.textContent=m};
@@ -1154,6 +1172,7 @@ function bindSbLogin(){
   const on=(id,f)=>{const b=$("#"+id);if(b)b.onclick=f};
   on("lg-signup",()=>go({step:"signup",u:"coach",email:em()}));
   on("lg-forgot",()=>go({step:"forgot",u:"coach",email:em()}));
+  on("lg-instead",()=>go({step:"signin",u:"coach",email:em()||loginStage.email}));
   on("lg-back",()=>go({step:"signin",u:"coach",email:em()||loginStage.email}));
   on("lg-cancel",async()=>{sbRecovery=false;loginStage={step:"signin",u:"coach"};try{await SB.auth.signOut({scope:"local"})}catch(e){}render()});
   $("#loginform").onsubmit=async e=>{e.preventDefault();const st=loginStage;const btn=$("#loginform button[type=submit]");if(!btn||btn.disabled)return;
@@ -1165,21 +1184,19 @@ function bindSbLogin(){
           return err(/different from the old/i.test(m)?"Pick a password you haven't used before.":/weak|short|characters/i.test(m)?"That password is too weak. Try a longer one.":"Couldn't save the password: "+m)}
         let sess=null;try{const {data}=await SB.auth.getSession();sess=data&&data.session}catch(x){}
         sbRecovery=false;if(await sbAfterSignIn(sess,"",null))toast("Password updated. You're signed in.")})}
-    if(st.step==="signup"){const e1=em(),p1=$("#lg-new").value,p2=$("#lg-new2").value;
+    if(st.step==="signup"){const nm=($("#lg-name").value||"").replace(/\s+/g," ").trim(),e1=em(),p1=$("#lg-new").value,p2=$("#lg-new2").value;
+      if(!nm)return err("Enter your name.");if(nm.length>60)return err("Use 60 characters or fewer for your name.");
       if(!EMAIL_RE.test(e1))return err("Enter a valid email address.");if(p1.length<COACH_MIN)return err(`The password needs at least ${COACH_MIN} characters.`);if(p1!==p2)return err("The two passwords don't match.");
-      return busy(async()=>{let r;try{r=await SB.auth.signUp({email:e1,password:p1,options:{emailRedirectTo:location.origin+location.pathname}})}catch(x){r={error:x}}
-        if(r.error){const m=String(r.error.message||""),c=r.error.code||"";
-          if(c==="user_already_exists"||/already registered|already exists/i.test(m))return err("That email already has an account. Go back to sign in, or use Forgot password.");
-          if(c==="weak_password"||/password/i.test(m)&&/weak|short|characters/i.test(m))return err("That password is too weak. Try a longer one.");
-          if(r.error.status===429||/rate limit/i.test(m))return err("Too many tries. Wait a few minutes and try again.");
-          return err("Couldn't create the account: "+m)}
+      const exists=m=>{loginStage={step:"signup",u:"coach",email:e1,name:nm,existing:true,msg:m};render()};
+      return busy(async()=>{let r;try{r=await SB.auth.signUp({email:e1,password:p1,options:{emailRedirectTo:location.origin+location.pathname,data:{name:nm}}})}catch(x){r={error:x}}
+        if(r.error){const [m,ex]=sbSignupErr(r.error);return ex?exists(m):err(m)}
         const d=r.data||{};
-        if(d.session)return sbAfterSignIn(d.session,e1,null);
-        if(d.user&&Array.isArray(d.user.identities)&&d.user.identities.length===0)return err("That email already has an account. Go back to sign in, or use Forgot password.");
+        if(d.session)return sbAfterSignIn(d.session,e1,nm);
+        if(d.user&&Array.isArray(d.user.identities)&&d.user.identities.length===0)return exists("This email already has an account. Tap Sign in instead.");
         go({step:"sent",u:"coach",email:e1,head:"Check your email",note:"Check your email to confirm, then sign in."})})}
     if(st.step==="forgot"){const e1=em();if(!EMAIL_RE.test(e1))return err("Enter a valid email address.");
       return busy(async()=>{let r;try{r=await SB.auth.resetPasswordForEmail(e1,{redirectTo:location.origin+location.pathname})}catch(x){r={error:x}}
-        if(r.error){const m=String(r.error.message||"");return err(r.error.status===429||/rate limit/i.test(m)?"Too many tries. Wait a few minutes and try again.":"Couldn't send the link right now. Try again in a minute.")}
+        if(r.error){const m=String(r.error.message||"");return err(r.error.status===429||/rate limit/i.test(m)?RATE_MSG:"Couldn't send the link right now. Try again in a minute.")}
         go({step:"sent",u:"coach",email:e1,head:"Check your email",note:"If that email has a coach account, a link to set a new password is on its way. Open it on this device."})})}
     if(st.step==="sent")return;
     if(Date.now()<lockUntil)return err(`Too many tries. Wait ${Math.ceil((lockUntil-Date.now())/1000)} seconds.`);
@@ -1315,7 +1332,10 @@ function pastTalksHTML(){const L=pastTalks();if(!L.length)return '<p class="mute
   return L.map(t=>{return `<div class="pasttalk"><div class="spread"><span class="small muted">${esc(dShort(t.ts||+t.id||Date.now()))}</span>${isCoach()?`<button type="button" class="btn icon del" data-act="delTalk" data-id="${esc(t.id)}" aria-label="Delete this past message">${TRASH}</button>`:""}</div><p class="talk-msg sm">${esc(t.msg)}</p>${t.verse||t.ref?`<figure class="verse sm"><blockquote>“${esc(t.verse)}”</blockquote><figcaption>${esc(t.ref)}</figcaption></figure>`:""}</div>`}).join("")}
 
 /* ================= Home ================= */
-function homeView(){
+function admReqNotice(){if(!isAdmin())return"";if(ADM.reqs===null){if(!ADM.reqsBusy)setTimeout(admLoadReqs,0);return""}const n=ADM.reqs.length;if(!n)return"";
+  return `<div class="tip" role="note"><span class="grow"><b>${n===1?"1 coach is":n+" coaches are"} waiting for approval.</b></span><button class="btn sm" data-act="admGoReqs">Review</button></div>`}
+function homeView(){return admReqNotice()+homeView0()}
+function homeView0(){
   const rec=record();const ws=winStreak();
   const chips=`<div class="row">${ws?`<span class="chip ${ws[0]==="W"?"good":"bad"} num">${ws} streak</span>`:""}<span class="chip gold num">${rec.w}–${rec.l} overall</span><span class="chip num">League ${rec.lw}–${rec.ll}</span></div>`;
   if(isCoach()){
@@ -2089,12 +2109,15 @@ document.addEventListener("keydown",e=>{if(e.key!=="Tab")return;const box=$("#cf
 document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if(!el)return;const fn=ACT[el.dataset.act];if(!fn)return;e.preventDefault();try{const r=fn(el.dataset,el);if(r&&r.catch)r.catch(err=>toast(err.message||"Something went wrong",true))}catch(err){if(err&&err.message)toast(err.message,true)}});
 
 /* ================= Admin: Staff & changes (live site only; staff names appear only here) ================= */
-let ADM;function admReset(){ADM={tab:"staff",staff:null,staffBusy:false,staffErr:"",log:[],logDone:false,logBusy:false,logErr:"",logLoaded:false,logGen:ADM?ADM.logGen+1:0,f:{actor:"",coll:"",from:"",to:""},exact:new Set()}}admReset();
+let ADM;function admReset(){ADM={tab:"staff",staff:null,staffBusy:false,staffErr:"",reqs:null,reqsBusy:false,log:[],logDone:false,logBusy:false,logErr:"",logLoaded:false,logGen:ADM?ADM.logGen+1:0,f:{actor:"",coll:"",from:"",to:""},exact:new Set()}}admReset();
 const SECT={games:"Schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"League standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Glossary",calls:"Calls",badges:"Badges",awards:"Badge awards",posts:"Team feed",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",accounts:"Passwords"};
 const sectName=c=>SECT[c]||c;
 const AUD_PAGE=50;
-function admRender(){if(route()!=="admin"||!user)return;if($("#sheetroot").firstChild||$("#cfmroot")){pendingRender=true;return}const a=document.activeElement;const id=a&&a.id;render();if(id){const el=document.getElementById(id);if(el)try{el.focus({preventScroll:true})}catch(e){}}}
-async function admLoadStaff(){if(!SB||!isAdmin())return;ADM.staffBusy=true;
+function admRender(){if((route()!=="admin"&&route()!=="home")||!user)return;if($("#sheetroot").firstChild||$("#cfmroot")){pendingRender=true;return}const a=document.activeElement;const id=a&&a.id;render();if(id){const el=document.getElementById(id);if(el)try{el.focus({preventScroll:true})}catch(e){}}}
+async function admLoadReqs(){if(!SB||!isAdmin()||ADM.reqsBusy)return;ADM.reqsBusy=true;
+  try{const {data,error}=await SB.from("staff_requests").select("*").order("requested_at",{ascending:false});if(error)throw error;ADM.reqs=data||[]}catch(e){if(!ADM.reqs)ADM.reqs=[]}
+  ADM.reqsBusy=false;admRender()}
+async function admLoadStaff(){if(!SB||!isAdmin())return;ADM.staffBusy=true;admLoadReqs();
   try{const {data,error}=await SB.from("staff").select("*").order("name");if(error)throw error;ADM.staff=data||[];ADM.staffErr=""}
   catch(e){ADM.staffErr="Couldn't load the staff list. "+(e.message||"");if(!ADM.staff)ADM.staff=null}
   ADM.staffBusy=false;admRender()}
@@ -2147,11 +2170,11 @@ function adminView(){
   if(!SB)return head+`<div class="empty">Available on the live site.</div>`;
   if(ADM.staff===null&&!ADM.staffBusy&&!ADM.staffErr)setTimeout(admLoadStaff,0);
   if(ADM.tab==="log"&&!ADM.logLoaded&&!ADM.logBusy)setTimeout(()=>admLoadLog(true),0);
-  const tabs=`<div class="seg" role="tablist" style="margin-bottom:14px">${[["staff","Staff"],["log","Change log"]].map(([k,l])=>`<button type="button" role="tab" data-adtab="${k}" class="${ADM.tab===k?"on":""}" aria-selected="${ADM.tab===k}">${l}</button>`).join("")}</div>`;
+  const tabs=`<div class="seg" role="tablist" style="margin-bottom:14px">${[["staff","Staff"],["log","Change log"]].map(([k,l])=>`<button type="button" role="tab" data-adtab="${k}" class="${ADM.tab===k?"on":""}" aria-selected="${ADM.tab===k}">${l}${k==="staff"&&ADM.reqs&&ADM.reqs.length?` <span class="chip warn num" aria-label="${ADM.reqs.length} waiting">${ADM.reqs.length}</span>`:""}</button>`).join("")}</div>`;
   return head+tabs+(ADM.tab==="log"?admLogHTML():admStaffHTML());
 }
 function admStaffHTML(){
-  const intro=`<div class="spread" style="flex-wrap:wrap;margin-bottom:6px"><p class="small muted" style="margin:0;flex:1 1 260px">Add a coach's email here, then send them the site link. They tap ‘Create your coach account’ with that email.</p><button class="btn sm edit" data-act="admAdd">${PLUS}Add coach</button></div>`;
+  const intro=`<div class="spread" style="flex-wrap:wrap;margin-bottom:6px"><p class="small muted" style="margin:0;flex:1 1 260px">Coaches can create their account anytime. You'll see them here to approve. You can also add a coach's email ahead of time with Add coach.</p><button class="btn sm edit" data-act="admAdd">${PLUS}Add coach</button></div>`;
   let list;
   if(ADM.staffErr&&!ADM.staff)list=`<div class="empty">${esc(ADM.staffErr)} <button class="btn sm" data-act="admReloadStaff">Try again</button></div>`;
   else if(!ADM.staff)list=`<p class="muted" role="status">Loading the staff list…</p>`;
@@ -2160,7 +2183,9 @@ function admStaffHTML(){
       return `<div class="staffrow"><div class="who2"><div class="row" style="gap:6px"><b>${esc(s.name||s.email)}</b><span class="chip ${s.role==="admin"?"gold":""}">${s.role==="admin"?"Admin":"Coach"}</span>${off?'<span class="chip warn">Inactive</span>':""}${me?'<span class="chip good">You</span>':""}</div><div class="small muted em">${e}</div></div>
       <div class="row" style="gap:6px"><button class="btn sm edit" data-act="admEdit" data-id="${e}">${PEN}Edit</button>${me?"":`<button class="btn sm" data-act="admToggle" data-id="${e}">${off?"Reactivate":"Deactivate"}</button><button class="btn sm del" data-act="admRemove" data-id="${e}">${TRASH}Remove</button>`}</div></div>`}).join(""):`<div class="empty">Nobody on the staff list yet.</div>`;
     if(ADM.staffErr)list=`<p class="small" style="color:var(--bad)">${esc(ADM.staffErr)}</p>`+list}
-  return `<div class="card">${intro}<div>${list}</div></div>`;
+  const rq=ADM.reqs&&ADM.reqs.length?`<div class="card" style="margin-bottom:14px;border-color:rgba(194,176,138,.45)"><h2 style="margin:0 0 4px;font-size:20px">Waiting for approval <span class="chip warn num">${ADM.reqs.length}</span></h2><div>${ADM.reqs.map(r=>{const e=esc(r.email);
+    return `<div class="staffrow"><div class="who2"><b>${esc(r.name||(staffRow(r.email)||{}).name||r.email)}</b>${staffRow(r.email)?'<span class="chip warn" style="margin-left:6px">Inactive</span>':""}<div class="small muted em">${e}${r.requested_at?` · <span title="${esc(exactTime(r.requested_at))}">asked ${esc(ago(new Date(r.requested_at).getTime()))}</span>`:""}</div></div><div class="row" style="gap:6px"><button class="btn sm gold" data-act="admApprove" data-id="${e}">Approve</button><button class="btn sm del" data-act="admDecline" data-id="${e}">Decline</button></div></div>`}).join("")}</div></div>`:"";
+  return `${rq}<div class="card">${intro}<div>${list}</div></div>`;
 }
 function admLogHTML(){const f=ADM.f;
   const actors=new Map();(ADM.staff||[]).forEach(s=>actors.set(s.email,s.name||s.email));ADM.log.forEach(a=>{if(a.actor&&!actors.has(a.actor))actors.set(a.actor,a.actor)});if(f.actor&&!actors.has(f.actor))actors.set(f.actor,f.actor);
@@ -2207,6 +2232,17 @@ function openInfo(title,body,foot){if(!$("#sheetroot").firstChild){lastFocus=doc
   document.removeEventListener("keydown",escClose);document.addEventListener("keydown",escClose);setTimeout(()=>{const h=$(".sheet .btn.icon");h&&h.focus()},50)}
 const audById=id=>ADM.log.find(a=>String(a.id)===String(id));
 Object.assign(ACT,{
+  admGoReqs(){ADM.tab="staff";if(location.hash==="#admin")render();else location.hash="admin"},
+  admApprove(d){if(!isAdmin())return;const r=(ADM.reqs||[]).find(x=>x.email===d.id);if(!r)return;
+    openSheet({title:"Approve "+(r.name||r.email),intro:esc(r.email),fields:[{key:"name",label:"Name",req:true,max:60},{key:"role",label:"Role",type:"select",options:[["coach","Coach"],["admin","Admin (can see this page)"]],req:true}],value:{name:r.name||(staffRow(r.email)||{}).name||"",role:(staffRow(r.email)||{}).role||"coach"},button:"Approve",saved:"Approved. They can sign in now.",
+      onSave:async v=>{const name=v.name.replace(/\s+/g," ").trim();if(!name)throw new Error("Name is required");if(!["coach","admin"].includes(v.role))throw new Error("Pick a role");
+        let {data,error}=await SB.from("staff").insert({email:r.email,name,role:v.role,active:true}).select();
+        if(error&&error.code==="23505")({data,error}=await SB.from("staff").update({name,role:v.role,active:true}).eq("email",r.email).select());
+        if(error)throw new Error("Couldn't approve: "+error.message);if(!data||!data.length)throw new Error("Couldn't approve. Check you're signed in as the admin.");
+        await SB.from("staff_requests").delete().eq("email",r.email);await admLoadStaff()}})},
+  admDecline(d){if(!isAdmin())return;const r=(ADM.reqs||[]).find(x=>x.email===d.id);if(!r)return;
+    confirmDelete({title:"Decline "+(r.name||r.email)+"?",body:`${esc(r.email)} won't get coach access. If they sign in again, they'll show up here again.`,button:"Decline",noUndo:true,done:"Request declined",
+      run:async()=>{const {error}=await SB.from("staff_requests").delete().eq("email",r.email);if(error)throw new Error("Couldn't decline: "+error.message);await admLoadReqs()}})},
   admReloadStaff(){ADM.staffErr="";ADM.staff=null;render()},
   admAdd(){if(!isAdmin())return;openSheet({title:"Add a coach",intro:"They get coach rights once they create an account with this email.",fields:[{key:"email",label:"Email",type:"email",im:"email",req:true,max:120},{key:"name",label:"Name",req:true,max:60},{key:"role",label:"Role",type:"select",options:[["coach","Coach"],["admin","Admin (can see this page)"]],req:true}],value:{role:"coach"},saved:"Added. Send them the site link.",
     onSave:async v=>{const bad=(k,m)=>{const el=$("#sf-"+k);el&&el.focus();throw new Error(m)};const email=v.email.trim().toLowerCase();
