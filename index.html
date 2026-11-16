@@ -11,7 +11,7 @@
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
 <style>
 /* One committed dark world: deep school navy surfaces, gold accents. Desktop: left rail. Phone: top bar + bottom tab bar, sheets slide up. */
 :root{
@@ -321,6 +321,49 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 button.bdg{cursor:pointer;font:inherit;font-size:12px}
 .bdg-tip{margin-top:10px;background:rgba(10,20,32,.55);border:1px solid rgba(194,176,138,.3);border-radius:10px;padding:8px 12px;font-size:13px;color:#e6edf4;position:relative}
 .empty{padding:20px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:12px}
+/* Coach Talk */
+.talk{position:relative;overflow:hidden;border-radius:var(--r);padding:20px 22px;margin-bottom:14px;background:linear-gradient(135deg,#1f3650 0%,#1c3045 45%,#132539 100%);border:1px solid rgba(194,176,138,.38);box-shadow:var(--shadow),inset 4px 0 0 var(--gold)}
+.talk::before{content:"";position:absolute;right:-60px;top:-70px;width:240px;height:240px;border-radius:50%;background:radial-gradient(circle,rgba(194,176,138,.20),transparent 68%);pointer-events:none}
+.talk>*{position:relative}
+.talk .eyebrow{color:var(--gold-2)}
+.talk-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.talk-date{font-size:12px;color:#b4c2d2}
+.talk-msg{font-size:16px;line-height:1.6;margin:10px 0 8px;color:#fff;white-space:pre-line;overflow-wrap:anywhere}
+.talk-msg.sm{font-size:14px;margin:6px 0}
+.talk-from{font-weight:700;color:var(--gold-ink);font-size:13.5px}.talk-from::before{content:"— "}
+.talk-from span{font-weight:500;color:#b4c2d2;margin-left:8px;font-size:12.5px}
+.verse{margin:16px 0 0;padding:14px 18px 14px 20px;border-left:2px solid var(--gold);background:rgba(171,140,89,.09);border-radius:0 12px 12px 0}
+.verse blockquote{margin:0;font-family:"Cormorant Garamond","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;font-style:italic;font-weight:500;font-size:21px;line-height:1.42;color:#f4ecdb;white-space:pre-line;overflow-wrap:anywhere}
+.verse figcaption{margin-top:8px;font-size:11.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-2)}
+.verse.sm{margin-top:8px;padding:10px 14px}.verse.sm blockquote{font-size:17px}
+.talk-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:14px;flex-wrap:wrap}
+.talk-empty{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border-style:dashed}
+.talk-empty h2{font-size:22px;margin:4px 0 2px;text-transform:uppercase}.talk-empty p{margin:0;color:#b4c2d2}
+.linkbtn{background:none;border:none;padding:6px 0;color:var(--gold-2);font-weight:600;font-size:12.5px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;min-height:32px}
+.pasttalk{padding:12px 0;border-top:1px solid var(--line)}.pasttalk:first-child{border-top:none;padding-top:0}
+/* Glossary */
+.gsearch{flex-direction:row!important;align-items:center;gap:8px}.gsearch input{width:170px}
+.gchips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.gchip{border:1px solid var(--line);background:var(--surface-2);color:#cfd8e3;border-radius:999px;padding:5px 11px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;min-height:32px}
+.gchip .num{color:var(--muted);margin-left:3px;font-weight:700}
+.gchip.on{background:var(--gold-bg);border-color:var(--gold);color:#fff}.gchip.on .num{color:var(--gold-ink)}
+.gtools{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:-4px 0 8px}
+.glist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;align-items:start}
+.ggroup{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);min-width:0}
+.ggroup>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:12px 16px;cursor:pointer;user-select:none}
+.ggroup>summary::-webkit-details-marker{display:none}
+.ggroup>summary h2{font-size:18px;flex:1;min-width:0}
+.ggroup[open]>summary .chev{transform:rotate(90deg)}.ggroup[open]>summary{border-bottom:1px solid var(--line)}
+.gbody{padding:4px 16px 12px}.gterm p{margin:2px 0 0}
+.gempty{padding:28px 20px}.gempty h2{color:var(--ink);margin-bottom:6px}.gempty p{margin:0 0 14px}
+/* Scouting history */
+.histcard{margin-bottom:14px;border-left:4px solid var(--gold)}
+.hist{display:flex;gap:14px;align-items:flex-start}
+.hs{font-family:var(--display);font-size:24px;font-weight:700;color:var(--gold-ink);line-height:1.1;white-space:nowrap;flex:none}
+.tplrow.nomini{grid-template-columns:1fr}
+.meetseason+.meetseason{margin-top:12px}
+@media (max-width:820px){.gchips{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-left:-2px;padding:2px 2px 6px}.gchips::-webkit-scrollbar{display:none}.gchip{min-height:40px}
+  .glist{grid-template-columns:1fr}.gsearch{width:100%}.gsearch input{flex:1;width:auto}.talk{padding:18px 16px}.verse blockquote{font-size:19px}.histgrid{grid-template-columns:1fr}.ggroup>summary{min-height:52px}}
 .banner{margin:0 0 14px;display:flex;background:var(--gold-bg);border:1px solid rgba(194,176,138,.35);border-radius:12px;padding:10px 12px;font-size:13px;align-items:center;gap:10px}
 
 .fade{animation:fadeup .22s ease both}
@@ -387,10 +430,12 @@ button.bdg{cursor:pointer;font:inherit;font-size:12px}
    - Claude can also update data directly in the site's database.
      Collections are named "live_<name>", one document per item:
        players  {no, first, last, pos, yr, ht}
-       games    {date:"YYYY-MM-DD", opp:<opps id>, home, lg, time, us, them}
+       games    {date:"YYYY-MM-DD", opp:<opps id>, site:"home|away|neutral", home, lg, time, us, them, ot?, venue?,
+                 type?:"exh" (exhibition: not counted in record, standings or season stats; never lg), event?:"Jamboree"}
        opps     {name, city, league, status:"none|progress|ready",
                  coach:{name,tenure,record,offense,defense,press,sets},
-                 keys:[...], players:[{no,name,pos,yr,ht,ppg,rpg,apg,tend:[...],info}], last:[{date,res,us,them,src}]}
+                 keys:[...], players:[{no,name,pos,yr,ht,ppg,rpg,apg,tend:[...],info}],
+                 last:[{date:"YYYY-MM-DD", site:"home|away|neutral", us, them, res:"W|L", note?, src?}]}  past meetings, last two seasons
        notes    {opp, author, vis:"coach|team", text, ts}    clips {opp,label,t,url,author}
        posts    {author,text,pinned,ts}
        calls    {cat, name, def}                              terms {cat,name,def}
@@ -403,6 +448,9 @@ button.bdg{cursor:pointer;font:inherit;font-size:12px}
        stand    {lw, ll, w, l}  id = opps id or "cpc"          lres  {date,a,as,b,bs}
        statgames {lines:[{id:<player id>,min,pts,reb,ast,stl,blk,to,fgm,fga,tpm,tpa,ftm,fta}],by,ts}  id = game date
        badges   {name, stat, min, on, desc}                   awards {pid,name,note,by,ts}
+       talk     {from:<coach id>, msg, ref, verse, ts}  id = "current" (Coach Talk on Home)
+       talks    {from, msg, ref, verse, ts}  id = timestamp (past Coach Talk messages)
+       history  {seasons:[{season:"2025-26", w, l, lw, ll, finish, coach, notes}]}  id = "seasons"
        accounts {salt, hash, setAt}  id = "coach" or "player" (one shared login each; stored only as salted hashes)
    - On the live site (GitHub Pages) the same collections live in Supabase table public.docs
      as rows {coll:"<name>", id, data:{...}}; logins are Supabase users (CONFIG.supabase).
@@ -452,28 +500,312 @@ const NFHS_SCHOOL=CONFIG.nfhs;
 const COACHES=CONFIG.coaches;
 const coachName=id=>(COACHES.find(c=>c.id===id)||{}).name||"Coach";
 const PP=a=>({1:a[0],2:a[1],3:a[2],4:a[3],5:a[4]});
+/* Built-in glossary: [group, [[term, definition], ...]]. Coaches can edit or delete any of these (ids "gl-<slug>"). */
+const GLOSS=[
+ ["Offense: Actions & sets",[
+  ["Horns","A set with two bigs at the elbows, two shooters in the corners and the ball handler up top. Many plays start from it."],
+  ["Chicago action","A pin-down that flows right into a dribble handoff, so the shooter comes off two actions in a row."],
+  ["Hammer","As the ball is driven baseline, a teammate sets a back screen on the weak-side corner defender so a shooter can slide to the corner for a kick-out three."],
+  ["Floppy","A shooter starts under the basket and picks a side: a single screen on one side or a double screen on the other."],
+  ["Stagger screen","Two screens set one after the other for the same cutter, usually to free a shooter."],
+  ["Double screen","Two screeners stand side by side so the cutter comes off a wide wall."],
+  ["Elevator screen","Two screeners stand apart, the shooter runs between them, and they close together behind him like elevator doors."],
+  ["Pin-down","A screen set facing the baseline (also called a down screen) so a teammate can come up toward the ball."],
+  ["Flare screen","A screen set on the shooter's defender so the shooter can fade away from the ball toward the wing for a jumper."],
+  ["Back screen","A screen set behind a defender, on his blind side, so a teammate can cut to the basket."],
+  ["Cross screen","A screen set across the lane, usually block to block, to free a post player."],
+  ["UCLA cut","The guard passes to the wing, then cuts to the rim off a back screen from the high post."],
+  ["Iverson cut","A player runs across the top of the floor from wing to wing, using screens at both elbows."],
+  ["Zipper cut","A player cuts straight up from the block to the top of the key off a screen near the elbow to catch the ball."],
+  ["Dribble handoff (DHO)","The ball handler dribbles toward a teammate and hands him the ball, screening his defender at the same time."],
+  ["Delay","A set run through a big at the top of the key, with guards cutting backdoor or coming off handoffs."],
+  ["Blind pig","When a guard is denied on the wing, a big flashes to the high post, catches, and hits the guard cutting backdoor."],
+  ["Screen the screener","A player sets a screen and then immediately gets screened himself, which is hard for the defense to switch."],
+  ["Flex","A continuity offense built on baseline cross screens followed by down screens."],
+  ["Motion offense","Players screen, cut and pass by reading the defense and following rules instead of running a fixed pattern."],
+  ["5-out","All five players start outside the three-point line, opening the lane for drives and cuts."]]],
+ ["Offense: Spacing & movement",[
+  ["Spacing","Keeping about 15 to 18 feet between teammates so one defender can't guard two players."],
+  ["Floor balance","Keeping players spread on both sides of the floor, with someone ready to get back on defense."],
+  ["Lift","When the ball is driven baseline, the corner player moves up to the wing to stay open for a pass."],
+  ["Drift","When the ball is driven to the middle, the wing slides down to the corner to give the driver a kick-out target."],
+  ["Shake","When a teammate drives baseline, the big in the dunker spot slides out of the way, to the front of the rim or the other side, to stay open for a dump-off."],
+  ["45 cut","A cut at a 45-degree angle from the wing or slot toward the rim, often right after passing or when your defender turns his head."],
+  ["Shallow cut","A player runs toward the ball handler, then underneath and out to the wing, to clear space or swap spots."],
+  ["Backdoor cut","Cutting behind a defender who is overplaying the pass, straight to the basket."],
+  ["V-cut","Walking your defender in, then pushing off hard back out in a V to get open."],
+  ["L-cut","Walking up the lane line, then cutting hard out to the wing in an L shape."],
+  ["Give-and-go","Passing to a teammate, then cutting to the basket to get it right back."],
+  ["Flash cut","A quick cut into an open area, usually the high post, to show for the ball."],
+  ["Curl","Coming off a screen tight and turning toward the basket instead of popping out."],
+  ["Relocate","Moving to a new open spot after passing so your defender loses track of you."],
+  ["Ball reversal","Moving the ball from one side of the floor to the other to make the defense shift."],
+  ["Paint touch","Getting the ball into the lane by drive or pass, which pulls the defense in."],
+  ["Isolation (iso)","Teammates clear to the other side so one player can go one-on-one."],
+  ["Slot","The area between the wing and the top of the key."]]],
+ ["Pick-and-roll",[
+  ["Ball screen","A screen set on the defender guarding the ball handler."],
+  ["Pick-and-roll (PnR)","A teammate sets a ball screen, then rolls to the basket after the ball handler uses it."],
+  ["Pick-and-pop","The screener steps out for a jump shot instead of rolling to the rim."],
+  ["Roll man","The screener in a pick-and-roll who dives to the rim after the screen."],
+  ["Short roll","The screener rolls only to the middle of the free-throw area, catches, and makes a play with a 4-on-3 advantage."],
+  ["Slip","The screener cuts to the rim before making contact, usually when the defense jumps out early or switches."],
+  ["Spain pick-and-roll","A pick-and-roll where a third player sets a back screen on the roller's defender. The roller gets free and the back-screener often pops for a three."],
+  ["Ram screen","A screen set for the big right before he sets a ball screen, so his defender is late to the pick-and-roll."],
+  ["High pick-and-roll","A ball screen at the top of the key."],
+  ["Side pick-and-roll","A ball screen on the wing."],
+  ["Empty-side pick-and-roll","A ball screen on a side with no other offensive players, so no help defender is close."],
+  ["Drag screen","An early ball screen set in transition by a trailing big before the defense is set."],
+  ["Step-up screen","A ball screen set from the side of the ball handler, often early in the shot clock, sending him toward the middle."],
+  ["Ghost screen","The screener fakes a ball screen, then slips or pops away before contact to confuse a switching defense."],
+  ["Re-screen","The screener flips around and sets the screen again, often from the other direction."],
+  ["Reject","The ball handler fakes using the screen and drives the other way."],
+  ["Snake","The ball handler comes off the screen, then dribbles back toward where he started, keeping the big defender behind him."],
+  ["Split","The ball handler dribbles between the two defenders guarding the screen."],
+  ["Pocket pass","A pass, usually a bounce pass, to the rolling screener between the two defenders."]]],
+ ["Post play",[
+  ["Post up","Setting up near the basket with your back to it to catch and score."],
+  ["Low post","The area on and around the block, close to the basket."],
+  ["High post","The area around the free-throw line and the elbows."],
+  ["Seal","Using your body to hold your defender behind or beside you so you can catch close to the rim."],
+  ["Duck-in","A post player steps into the lane and seals his defender on his back, usually as the ball swings to his side."],
+  ["Drop step","A post move where you step past your defender's hip toward the rim and power up to score."],
+  ["Up-and-under","Faking a shot, then stepping through underneath the defender for a layup."],
+  ["Hook shot","A one-handed shot with your shoulder to the rim, arm sweeping up over your head."],
+  ["Face-up","Turning to face the basket after a post catch so you can shoot, drive or pass."],
+  ["Turnaround jumper","Turning toward the basket off a post catch and shooting a jump shot."],
+  ["Dream Shake","A series of post fakes and pivots made famous by Hakeem Olajuwon."],
+  ["Post entry","The pass that gets the ball into the post."],
+  ["High-low","A pass from a big at the high post to a big at the low post."],
+  ["Short corner","The area along the baseline between the lane and the corner."],
+  ["Dunker spot","The area along the baseline just outside the lane, where a big waits for a dump-off pass."],
+  ["Swim move","Swinging your arm over a defender to get past him for post position."]]],
+ ["Shooting & finishing",[
+  ["Catch-and-shoot","Shooting right off the catch without dribbling."],
+  ["Pull-up jumper","Stopping off the dribble and rising into a jump shot."],
+  ["Step-back","Stepping back away from the defender to make space before shooting."],
+  ["Side-step","Stepping sideways off the dribble to make room for a shot, usually a three."],
+  ["1-2 step","Landing on one foot, then the other, into your shot."],
+  ["Jump stop","Landing on both feet at once. You can then use either foot as your pivot foot."],
+  ["Gather","The moment you pick up the ball to finish or pass. Your steps are counted from there for traveling."],
+  ["Euro step","A finishing move where you step one way, then take a long step the other way around a defender."],
+  ["Floater","A soft, high one-handed shot over taller defenders, released in the lane before reaching the rim."],
+  ["Runner","A one-handed shot off one foot while still moving toward the basket."],
+  ["Reverse layup","Finishing on the other side of the rim so the rim protects the ball from the defender."],
+  ["Power layup","Jump-stopping and finishing strong off two feet through contact."],
+  ["Alley-oop","A pass thrown near the rim that a teammate catches in the air and finishes before landing."],
+  ["Shot fake","Faking a shot (a pump fake) to get the defender to jump or close out too hard."],
+  ["Mid-range","Shots taken inside the three-point line but outside the paint."],
+  ["Corner three","A three from the corner, the shortest three on an NBA or college court."],
+  ["BEEF","A shooting checklist: Balance, Eyes on the target, Elbow under the ball, Follow-through."]]],
+ ["Ball handling & passing",[
+  ["Triple threat","Holding the ball ready to shoot, pass or dribble, so the defender has to respect all three."],
+  ["Pivot foot","The foot that must stay planted when you hold the ball. Lift it and put it back down before you dribble and it's a travel."],
+  ["Jab step","A short hard step at the defender to see how he reacts before you shoot or drive."],
+  ["Crossover","Switching the dribble from one hand to the other in front of you to change direction."],
+  ["Hesitation (hesi)","Slowing or pausing the dribble to freeze the defender, then exploding past him."],
+  ["In-and-out","Faking a crossover with one hand, then keeping the ball in the same hand and going."],
+  ["Spin move","Turning your back to the defender and spinning around him while keeping the dribble."],
+  ["Escape dribble","A dribble to get out of trouble, like a trap or a crowded spot."],
+  ["Dead ball (picked-up dribble)","You've stopped dribbling and can only pass, shoot or pivot. Defenders will close in."],
+  ["Chest pass","A two-hand pass from the chest, thumbs turning down on the release."],
+  ["Bounce pass","A pass that bounces about two-thirds of the way to your teammate."],
+  ["Skip pass","A pass from one side of the floor to the other, skipping over the next player."],
+  ["Kick-out","A pass from a driver or post player back out to a shooter on the perimeter."],
+  ["Dump-off","A short pass to a big near the rim when his defender steps up to stop the driver."],
+  ["Lob pass","A high, soft pass over the defense to a player near the rim."],
+  ["Swing pass","A quick pass to the next player on the perimeter to keep the ball moving."]]],
+ ["Defense: Man-to-man",[
+  ["Man-to-man","Each defender guards one player instead of an area."],
+  ["Defensive stance","Feet wider than shoulders, knees bent, back flat, hands active, ready to slide."],
+  ["On-ball defense","Guarding the player with the ball: stay between him and the basket and keep him in front."],
+  ["Closeout","Sprinting at a shooter, then chopping your feet to arrive balanced with a hand high."],
+  ["Deny","Playing in the passing lane, one hand in it, so your man can't catch the ball easily."],
+  ["Force baseline","Turning the ball handler toward the baseline, where help is waiting."],
+  ["Fight over","Going over the top of a screen to stay attached to your man, usually a shooter."],
+  ["Go under","Going below the screen and the screener, giving up a jump shot to stop the drive."],
+  ["Lock and trail","Staying on a shooter's hip and following him over the top of screens."],
+  ["Switch","Two defenders trade the players they're guarding, usually on a screen."],
+  ["Show (hedge)","The screener's defender steps out to slow the ball handler, then recovers to his own man."],
+  ["Drop","In pick-and-roll defense, the big sinks back toward the rim to stop the drive and protect the paint."],
+  ["ICE (blue)","Forcing a side ball screen toward the baseline and away from the middle and the screen."],
+  ["Weak","Forcing the ball handler to his weak hand on a ball screen, away from the screen."],
+  ["Blitz","Both defenders trap the ball handler as he uses a ball screen."],
+  ["At the level","The screener's defender meets the ball handler right at the screen, then recovers."],
+  ["Front the post","Playing in front of a post player so the entry pass has to go over you."],
+  ["Three-quarter front","Playing on the side of a post player, between him and the ball, to block the entry."],
+  ["Take a charge","Getting to a spot with feet set before the offensive player starts his upward motion, so the contact is his foul."]]],
+ ["Defense: Help & rotations",[
+  ["Help defense","Leaving your man for a moment to stop the ball, then recovering."],
+  ["Help side","The side of the floor away from the ball. Defenders there protect the paint."],
+  ["Ball-you-man","Help position where you can see both the ball and your man, forming a flat triangle."],
+  ["Jump to the ball","Moving toward the ball on every pass so you're in help position as it arrives."],
+  ["Low man","The weak-side defender closest to the basket. He stops drives and rollers."],
+  ["Tag","A weak-side defender bumps the roller in a pick-and-roll to slow him, then gets back to his man."],
+  ["X-out","When the ball is skipped, the help defender sprints to the shooter while another defender rotates to the open man."],
+  ["Peel switch","A defender switches to a driver who beats his teammate, and the beaten defender peels off to the open player."],
+  ["Scram switch","A quick switch away from the ball to get a defender off a bad mismatch."],
+  ["Stunt","A quick fake at the ball handler to slow him, then getting back to your man."],
+  ["Dig","Reaching in to help on a drive or post player from the ball side, then recovering."],
+  ["Sink","Dropping toward the paint from your man to clog driving lanes."],
+  ["Rotation","Defenders moving in order to cover for a teammate who helped."],
+  ["Help the helper","When a teammate rotates to stop the ball, the next defender rotates to cover his man."],
+  ["Wall up","Standing tall with arms straight up to contest at the rim without fouling."],
+  ["Pack the paint","Keeping extra defenders near the lane to take away drives and post-ups."],
+  ["Nail help","A defender at the middle of the free-throw line helps on drives from the top."]]],
+ ["Defense: Zones & presses",[
+  ["2-3 zone","Two defenders up top and three across the baseline, each guarding an area instead of a player."],
+  ["3-2 zone","Three defenders across the top and two down low. Good against teams that shoot from the perimeter."],
+  ["1-3-1 zone","One defender up top, three across the free-throw line and one on the baseline. Traps the wings and corners."],
+  ["1-2-2 zone","One defender at the top, two at the wings and two down low, often used to pressure the ball."],
+  ["Matchup zone","A zone where each defender also picks up a player in his area, so it looks like man-to-man."],
+  ["Box-and-one","Four defenders play a box zone while one defender guards their best player man-to-man."],
+  ["Triangle-and-two","Three defenders play a triangle zone while two guard the opponent's best two players."],
+  ["Zone gap","The space between two zone defenders. Driving or passing into it makes both of them commit."],
+  ["Overload","Putting more offensive players on one side than the zone can cover."],
+  ["Full-court press","Guarding the other team the length of the floor to force turnovers or speed them up."],
+  ["2-2-1 press","A full-court press with two players up, two at midcourt and one deep."],
+  ["1-2-1-1 press","A diamond press that traps the first pass and has one safety back."],
+  ["3/4-court press","A press that picks up after the first pass, usually trapping near half court."],
+  ["Run-and-jump","A press where a defender leaves his man and runs at the dribbler to trap or switch."],
+  ["Trap","Two defenders guard the ball at once to force a bad pass or turnover."],
+  ["Safety","The deepest press defender, who protects the basket against long passes."],
+  ["Press break","An offense used to get the ball up the floor against a press."],
+  ["Middle flash","Cutting to the middle of the floor to give the ball handler an outlet against a press or zone."]]],
+ ["Transition",[
+  ["Transition","The moments right after a change of possession, before the defense is set."],
+  ["Fast break","Pushing the ball up the floor quickly to score before the defense gets back."],
+  ["Early offense","Quick actions right after the break, before running a half-court set. Also called secondary break."],
+  ["Outlet pass","The first pass after a defensive rebound, usually to a guard on the wing."],
+  ["Hit-ahead","A quick pass up the floor to a teammate who is ahead of the ball, beating the defense."],
+  ["Rim run","A big sprints straight down the middle of the floor to the rim in transition."],
+  ["Trailer","A player, often a big, who follows the break and arrives late for a shot or a drag screen."],
+  ["Fill the lanes","Running wide down each sideline and the middle so the break has spacing."],
+  ["Leak out","Releasing early toward the other end as the shot goes up, hoping for a long pass."],
+  ["Numbers","Having more players than the defense on a break, like a 2-on-1 or 3-on-2."],
+  ["Transition defense","Getting back on defense right after a turnover or a miss."],
+  ["Sprint back","Running hard back to defend the basket first, then finding your man."],
+  ["Stop the ball","The first defender back makes the ball handler stop or pick up his dribble."],
+  ["Cross-match","In transition defense, guarding the nearest player instead of your own man, then switching back later."]]],
+ ["Rebounding",[
+  ["Box out","Making contact with your man and holding him behind you to get rebounding position."],
+  ["Hit and get","Hitting your man first with a box out, then going to get the ball."],
+  ["Offensive rebound","Getting the ball after your own team's missed shot."],
+  ["Defensive rebound","Getting the ball after the other team's missed shot."],
+  ["Crash the glass","Sending players hard to the basket for offensive rebounds."],
+  ["Putback","Scoring right off an offensive rebound."],
+  ["Tip-in","Tapping a missed shot into the basket without catching it."],
+  ["Long rebound","A rebound that bounces far from the rim, often off a missed three."],
+  ["Weak-side rebound","About two-thirds of missed shots bounce to the side away from the shot, so get to that side."],
+  ["Gang rebounding","Everyone, including guards, goes to the boards to finish the possession."],
+  ["Inside position","Being between your man and the basket when the shot goes up."],
+  ["Free throw rebounding","Lining up on the lane to box out and rebound a missed free throw."]]],
+ ["Special situations (ATO, BLOB/SLOB, end of game, fouling)",[
+  ["ATO","After timeout: a play called during a timeout, often a quick hitter."],
+  ["BLOB","Baseline out of bounds: a play run when inbounding from under your own basket."],
+  ["SLOB","Sideline out of bounds: a play run when inbounding from the sideline."],
+  ["Inbounder","The player throwing the ball in. He has 5 seconds to release the pass."],
+  ["End of game (EOG)","Plays and rules for the last minutes, like clock management, fouling and the last shot."],
+  ["2-for-1","Taking a quick shot near the end of a period so your team gets the ball back for one more possession."],
+  ["Hold for the last shot","Running the clock down so your team takes the last shot of the period."],
+  ["Foul to give","A foul you can commit without sending the other team to the free-throw line."],
+  ["Fouling up three","Fouling on purpose late when ahead by three so the other team can't tie with a three."],
+  ["Foul to stop the clock","When behind late, fouling right away to stop the clock and get the ball back."],
+  ["Intentional foul","A foul that isn't a real play on the ball. In high school it means free throws and the ball out of bounds."],
+  ["Clock management","Using timeouts, fouls and shot timing to control how much time is left."],
+  ["Milk the clock","Taking time off the clock before shooting when you're ahead."],
+  ["0.3-second rule","With less than 0.3 seconds on the clock, a player can only score with a tip or tap, not a catch-and-shoot."],
+  ["Home run pass","A long full-court pass to a teammate streaking to the basket."]]],
+ ["Rules & officiating",[
+  ["Traveling","Moving your pivot foot or taking too many steps while holding the ball."],
+  ["Zero step","In NBA and FIBA rules, the step taken while gathering the ball doesn't count, so you get two more steps."],
+  ["Double dribble","Dribbling with both hands at once, or starting to dribble again after stopping."],
+  ["Carrying","Turning the ball over in your hand or palming it while dribbling."],
+  ["Backcourt violation","Bringing the ball back across half court after your team has crossed it. Also called over-and-back."],
+  ["10-second rule","The offense must get the ball across half court in 10 seconds (8 in the NBA)."],
+  ["3 seconds","An offensive player can't stay in the lane for more than three seconds."],
+  ["Defensive 3 seconds","An NBA rule: a defender can't stay in the lane more than three seconds unless he's guarding someone closely."],
+  ["5-second closely guarded","In high school, a player held closely for 5 seconds must pass, shoot or dribble."],
+  ["Shot clock","The time a team has to shoot: 24 seconds in the NBA, 30 in college and 35 in high school where used."],
+  ["Blocking foul","A defender is called for illegal contact because he wasn't set or moved into the offensive player's path."],
+  ["Charge","An offensive foul for running into a defender who has set legal guarding position."],
+  ["Restricted area","An arc under the basket where a defender can't draw a charge. Used in the NBA and college."],
+  ["Technical foul","A foul for unsportsmanlike behavior or certain administrative violations."],
+  ["Flagrant foul","Excessive or violent contact. It can lead to ejection."],
+  ["Bonus","After a set number of team fouls, every foul sends the other team to the line. In high school, that's the fifth team foul each quarter."],
+  ["Foul out","Being removed after five personal fouls in high school and college (six in the NBA)."],
+  ["Goaltending","Touching a shot on its way down toward the basket or while it's above the cylinder."],
+  ["Possession arrow","When two players tie up the ball (a held ball), high school and college alternate possession using the arrow."],
+  ["Illegal screen","A screener moves, leans or sticks out a hip or leg to make contact. It's an offensive foul."],
+  ["Verticality","A defender who jumps straight up with arms up has the right to that space."]]],
+ ["Positions & roles",[
+  ["Point guard (1)","The primary ball handler who runs the offense."],
+  ["Shooting guard (2)","A guard who is usually the team's best perimeter shooter or scorer."],
+  ["Small forward (3)","A wing who can score inside and out and guard many positions."],
+  ["Power forward (4)","A forward who rebounds, screens and scores near the basket or as a stretch shooter."],
+  ["Center (5)","Usually the tallest player, who protects the rim, rebounds and scores close in."],
+  ["Combo guard","A guard who can play both point and shooting guard."],
+  ["Wing","A player who plays on the wings, usually a 2 or 3."],
+  ["Big","A forward or center who plays near the basket."],
+  ["Stretch four","A power forward who can shoot threes and pull his defender away from the basket."],
+  ["Point forward","A forward who handles the ball and makes plays like a point guard."],
+  ["3-and-D","A player whose main jobs are making threes and guarding well."],
+  ["Rim protector","A big who blocks and changes shots at the basket."],
+  ["Rim runner","A big whose strengths are rolling hard to the rim and sprinting the floor."],
+  ["Stopper","The team's best defender, who takes the other team's top scorer."],
+  ["Sixth man","The first player off the bench."],
+  ["Connector","A player who keeps the offense moving with quick passes, screens and good decisions."],
+  ["Small-ball five","A smaller player who plays center to add speed and shooting."]]],
+ ["Analytics & stats",[
+  ["Possession","One team's turn with the ball. Estimated as FGA − OREB + TO + 0.44 × FTA."],
+  ["Pace","Possessions per game, adjusted for game length (48 minutes in the NBA, 40 in college, 32 in high school)."],
+  ["ORtg","Offensive rating: points scored per 100 possessions."],
+  ["DRtg","Defensive rating: points allowed per 100 possessions."],
+  ["Net rating","ORtg minus DRtg. Positive means you outscore opponents per 100 possessions."],
+  ["Points per possession (PPP)","Points scored divided by possessions. About 1.00 is average in high school; higher is better."],
+  ["eFG%","Effective field goal %: (FGM + 0.5 × 3PM) ÷ FGA. Gives extra credit for threes."],
+  ["TS%","True shooting %: points ÷ (2 × (FGA + 0.44 × FTA)). Counts twos, threes and free throws together."],
+  ["Usage rate","The share of team possessions a player finishes with a shot, free throws or a turnover while he's on the floor."],
+  ["AST/TO","Assists divided by turnovers. Above 2.0 is very good for a guard."],
+  ["TOV%","Turnovers per 100 plays: TO ÷ (FGA + 0.44 × FTA + TO)."],
+  ["OREB%","The share of our missed shots that we rebound."],
+  ["FT rate","Free-throw attempts divided by field-goal attempts. Shows how often you get to the line."],
+  ["Four Factors","Dean Oliver's keys to winning: shooting (eFG%), turnovers (TOV%), rebounding (OREB%) and free throws (FT rate)."],
+  ["Plus-minus","The point difference while a player is on the floor."],
+  ["On/off","How the team does with a player on the floor compared with when he sits."],
+  ["Hockey assist","The pass before the assist."],
+  ["Double-double","Reaching 10 or more in two stats in one game, like points and rebounds."],
+  ["Triple-double","Reaching 10 or more in three stats in one game."],
+  ["Second-chance points","Points scored after an offensive rebound."],
+  ["Points off turnovers","Points scored on possessions that start with the other team's turnover."]]],
+ ["Court & lingo",[
+  ["Paint","The painted lane between the baseline and the free-throw line. Also called the key or the lane."],
+  ["Elbow","Where the free-throw line meets the side of the lane."],
+  ["Block","The small square marks on the lane line near the basket."],
+  ["Nail","The middle of the free-throw line."],
+  ["Top of the key","The area above the free-throw circle, near the top of the three-point line."],
+  ["Corner","The area where the baseline meets the sideline."],
+  ["Baseline","The end line behind each basket."],
+  ["Arc","The three-point line."],
+  ["Free-throw line","The line 15 feet from the backboard where free throws are shot. Also called the charity stripe."],
+  ["Strong side","The side of the floor where the ball is."],
+  ["Weak side","The side of the floor away from the ball."],
+  ["Backcourt","The half of the court your team is defending. Also slang for a team's guards."],
+  ["Downhill","Attacking toward the rim with speed."],
+  ["Mismatch","When a defender is too small, too slow or too big to guard his man well."],
+  ["Hunt","Going after a weak defender on purpose, often by setting screens to force a switch."],
+  ["Dime","An assist, especially a great pass."],
+  ["Stop","A defensive possession that ends without the other team scoring."]]]
+];
+const GLOSS_GROUPS=GLOSS.map(g=>g[0]);
+const slug=x=>String(x).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
 const DEF={
  players:[],games:[],opps:[],notes:[],clips:[],posts:[],calls:[],
- terms:[
-  ["Defense","Ball screen","A teammate sets a screen on the player guarding the ball handler."],
-  ["Defense","Drop coverage","The screener's defender sinks toward the rim to stop the drive and protect the paint."],
-  ["Defense","Hedge","The screener's defender steps out hard to slow the ball handler, then recovers."],
-  ["Defense","ICE","Forcing a side ball screen toward the baseline and away from the middle."],
-  ["Defense","Help side","The side of the floor away from the ball. Defenders there protect the paint."],
-  ["Defense","Closeout","Sprinting at a shooter, then chopping your feet and arriving balanced with a hand high."],
-  ["Defense","2-3 zone","Two defenders up top, three across the baseline. Each guards an area instead of a player."],
-  ["Defense","2-2-1 press","A full-court press with two players up, two at midcourt and one deep."],
-  ["Offense","Horns","A set with two bigs at the elbows and the ball handler up top."],
-  ["Offense","Flare screen","A screen set away from the ball so a shooter can fade to the wing for a jumper."],
-  ["Offense","Pin-down","A screen set facing the baseline so a teammate can curl or pop up toward the ball."],
-  ["Offense","Zipper cut","A cut straight up the lane from the block to the top, usually off a screen at the elbow."],
-  ["Offense","Middle flash","Cutting to the middle of the floor to give the ball handler an outlet against a press."],
-  ["Situations","BLOB / SLOB","Baseline and sideline out-of-bounds plays."],
-  ["Analytics","eFG%","Effective field goal %. (FGM + 0.5 × 3PM) ÷ FGA. Gives extra credit for 3s."],
-  ["Analytics","TS%","True shooting %. Points ÷ (2 × (FGA + 0.44 × FTA)). Counts 2s, 3s and free throws together."]
- ].map(([cat,name,def],i)=>({id:"t"+i,cat,name,def})),
- stand:[],lres:[],plays:[],templates:[],statgames:[],badges:[],awards:[],accounts:[]
+ terms:GLOSS.flatMap(([cat,a])=>a.map(([name,def])=>({id:"gl-"+slug(name),cat,name,def}))),
+ stand:[],lres:[],plays:[],templates:[],statgames:[],badges:[],awards:[],accounts:[],talk:[],talks:[],history:[]
 };
+/* Terms saved by older versions under ids t0..t15 duplicate the built-in list; hide those copies. */
+const DEF_TERM_NAMES=new Set(DEF.terms.map(t=>t.name.trim().toLowerCase()));
 const COLLS=Object.keys(DEF);
 const DEFMAP={};COLLS.forEach(c=>{DEFMAP[c]={};DEF[c].forEach(x=>DEFMAP[c][x.id]=x)});
 
@@ -488,7 +820,7 @@ const saveLocal=()=>{if(LOCAL_OK)LS.set(CONFIG.storageKey,store)};
 const col=c=>CONFIG.dataPrefix+c;
 let DB=null,syncState="local",pendingRender=false;
 const LEGACY=new Set(["bg1","bg2","bg3","bg4","bg5","bg6","bg7","aw1","aw2"]);
-function items(c){const out=[];const seen=new Set();DEF[c].forEach(d=>{seen.add(d.id);const o=store[c][d.id];if(o&&o.deleted)return;out.push(o?{...o,id:d.id}:d)});Object.entries(store[c]).forEach(([id,o])=>{if(seen.has(id)||!o||o.deleted||((c==="badges"||c==="awards")&&LEGACY.has(id)))return;out.push({...o,id})});return out}
+function items(c){const out=[];const seen=new Set();DEF[c].forEach(d=>{seen.add(d.id);const o=store[c][d.id];if(o&&o.deleted)return;out.push(o?{...o,id:d.id}:d)});Object.entries(store[c]).forEach(([id,o])=>{if(seen.has(id)||!o||o.deleted||((c==="badges"||c==="awards")&&LEGACY.has(id))||(c==="terms"&&/^t\d{1,2}$/.test(id)&&DEF_TERM_NAMES.has(String(o.name||"").trim().toLowerCase())))return;out.push({...o,id})});return out}
 const get=(c,id)=>items(c).find(x=>x.id===id);
 const shared=()=>DB&&syncState!=="local";
 let recording=null;
@@ -572,10 +904,23 @@ const O=id=>get("opps",id)||{id,name:"Opponent",city:"",keys:[],players:[],last:
 const oppName=id=>id==="cpc"?"CPC Eagles":O(id).name;
 const games=()=>items("games").map(g=>({...g,d:D(g.date),played:g.us!=null&&g.them!=null&&g.us!==""&&g.them!=="",res:(g.us!=null&&g.them!=null&&g.us!==""&&g.them!=="")?(+g.us>+g.them?"W":"L"):null})).sort((a,b)=>a.d-b.d);
 const played=()=>games().filter(g=>g.played);
+const isExh=g=>!!g&&g.type==="exh";
+/* Games that count: played and not exhibitions (record, standings, season stats, badges) */
+const counted=()=>played().filter(g=>!isExh(g));
 const upcoming=()=>games().filter(g=>!g.played&&g.d>=TODAY);
 const needsScore=()=>games().filter(g=>!g.played&&g.d<TODAY);
 const nextGame=()=>upcoming()[0];
 const nextFor=oid=>upcoming().find(g=>g.opp===oid);
+/* Game label: "Jamboree: vs Issaquah" for exhibitions with an event name (escaped HTML) */
+const gTitle=(g,o)=>(isExh(g)&&g.event?esc(g.event)+": ":"")+vsAt(g)+" "+esc((o||O(g.opp)).name);
+const gKind=g=>isExh(g)?"Exhibition":g.lg?"League":"Non-league";
+const EXH_CHIP='<span class="chip gold">Exhibition</span>';
+/* Seasons before this one, newest first; past meetings cover the last two */
+const pastSeasons=()=>{const y=parseInt(CONFIG.season,10);return[1,2].map(k=>({lo:`${y-k}-08-01`,hi:`${y-k+1}-07-31`,label:`${y-k}–${String(y-k+1).slice(2)}`}))};
+const inPast2=x=>{const p=pastSeasons();return realDate(x)&&x>=p[1].lo&&x<=p[0].hi};
+const seasonOf=x=>{const d=D(x);const y=d.getMonth()>=7?d.getFullYear():d.getFullYear()-1;return `${y}–${String(y+1).slice(2)}`};
+function lastMet(o){const cur=games().filter(g=>g.opp===o.id&&g.played).map(g=>({date:g.date,us:+g.us,them:+g.them}));const past=(o.last||[]).filter(l=>realDate(l.date)&&l.us!=null&&l.them!=null).map(l=>({date:l.date,us:+l.us,them:+l.them}));
+  const m=[...cur,...past].sort((a,b)=>b.date.localeCompare(a.date))[0];if(!m)return null;m.res=m.us>m.them?"W":"L";m.when=mon(D(m.date))+" "+D(m.date).getFullYear();return m}
 /* Games: where + tip-off. Old games have no `site`; they read as home ? "home" : "away". */
 const siteOf=g=>g&&["home","away","neutral"].includes(g.site)?g.site:(g&&g.home?"home":"away");
 const vsAt=g=>siteOf(g)==="away"?"@":"vs";
@@ -612,12 +957,12 @@ const box=g=>{const imp=store.statgames[g.date];return imp&&Array.isArray(imp.li
 const hasBox=g=>{const imp=store.statgames[g.date];return !!(imp&&Array.isArray(imp.lines)&&imp.lines.length)};
 function seasonStats(){
   const T={};players().forEach(p=>{T[p.id]={id:p.id,gp:0};KEYS.forEach(k=>T[p.id][k]=0)});
-  played().forEach(g=>box(g).forEach(l=>{const t=T[l.id];if(!t)return;if(l.min>0)t.gp++;KEYS.forEach(k=>t[k]+=+l[k]||0)}));
+  counted().forEach(g=>box(g).forEach(l=>{const t=T[l.id];if(!t)return;if(l.min>0)t.gp++;KEYS.forEach(k=>t[k]+=+l[k]||0)}));
   return Object.values(T).map(t=>{const g=t.gp||1;return{...t,mpg:t.min/g,ppg:t.pts/g,rpg:t.reb/g,apg:t.ast/g,spg:t.stl/g,tpg:t.to/g,fgp:t.fga?t.fgm/t.fga:0,tpp:t.tpa?t.tpm/t.tpa:0,ftp:t.fta?t.ftm/t.fta:0,efg:t.fga?(t.fgm+.5*t.tpm)/t.fga:0,ts:(t.fga+.44*t.fta)?t.pts/(2*(t.fga+.44*t.fta)):0,bpg:t.blk/g}});
 }
-function teamTotals(){const t={n:played().filter(hasBox).length};KEYS.forEach(k=>t[k]=0);played().filter(hasBox).forEach(g=>box(g).forEach(l=>KEYS.forEach(k=>t[k]+=+l[k]||0)));return t}
-function record(){const p=played();const w=p.filter(g=>g.res==="W").length;const lg=p.filter(g=>g.lg);const lw=lg.filter(g=>g.res==="W").length;return{w,l:p.length-w,lw,ll:lg.length-lw,ppg:p.length?p.reduce((a,g)=>a+ +g.us,0)/p.length:0,opp:p.length?p.reduce((a,g)=>a+ +g.them,0)/p.length:0}}
-function winStreak(){const p=played();if(!p.length)return"";const last=p[p.length-1].res;let n=0;for(let i=p.length-1;i>=0&&p[i].res===last;i--)n++;return last+n}
+function teamTotals(){const t={n:counted().filter(hasBox).length};KEYS.forEach(k=>t[k]=0);counted().filter(hasBox).forEach(g=>box(g).forEach(l=>KEYS.forEach(k=>t[k]+=+l[k]||0)));return t}
+function record(){const p=counted();const w=p.filter(g=>g.res==="W").length;const lg=p.filter(g=>g.lg);const lw=lg.filter(g=>g.res==="W").length;return{w,l:p.length-w,lw,ll:lg.length-lw,ppg:p.length?p.reduce((a,g)=>a+ +g.us,0)/p.length:0,opp:p.length?p.reduce((a,g)=>a+ +g.them,0)/p.length:0}}
+function winStreak(){const p=counted();if(!p.length)return"";const last=p[p.length-1].res;let n=0;for(let i=p.length-1;i>=0&&p[i].res===last;i--)n++;return last+n}
 
 /* ================= Session, routing, nav ================= */
 let user=LOCAL_OK?LS.get(CONFIG.sessionKey):null;
@@ -748,7 +1093,7 @@ function openSheet(cfg){
       return `<div class="grid g2" style="gap:10px"><label class="f" for="${id}">${esc(f.label)} (feet)${val&&!ph?`<span class="hint">Now “${esc(val)}”. Pick feet and inches to replace it.</span>`:""}<select id="${id}"><option value="">—</option>${[4,5,6,7].map(n=>opt(n,"ft",ph&&ph[0]===n)).join("")}</select></label><label class="f" for="${id}-in">${esc(f.label)} (inches)<select id="${id}-in"><option value="">—</option>${[...Array(12).keys()].map(n=>opt(n,"in",ph&&ph[1]===n)).join("")}</select></label></div>`}
     if(f.type==="seg")return `<div class="f" role="group" aria-labelledby="${id}-l"><span id="${id}-l">${esc(f.label)}</span>${hint}<div class="seg">${f.options.map(([ov,ol])=>`<button type="button" data-seg="${id}" data-v="${esc(ov)}" class="${String(val)===String(ov)?"on":""}" aria-pressed="${String(val)===String(ov)}">${esc(ol)}</button>`).join("")}</div><input type="hidden" id="${id}" value="${esc(val??"")}"></div>`;
     if(f.type==="time"){const tba=val==="TBA";return `<div style="display:flex;flex-direction:column;gap:6px"><label class="f" for="${id}">${esc(f.label)}${hint}<input type="time" id="${id}" ${req} value="${tba?"":esc(val??"")}" ${tba?"disabled":""}></label>${f.tba?`<label class="check tba" for="${id}-tba"><input type="checkbox" id="${id}-tba" ${tba?"checked":""}>${esc(f.tba)}</label>`:""}</div>`}
-    if(f.type==="textarea"||f.type==="list")return `<label class="f" for="${id}">${esc(f.label)}${hint}<textarea id="${id}" ${req} placeholder="${esc(f.ph||"")}">${esc(f.type==="list"?(val||[]).join("\n"):(val??""))}</textarea></label>`;
+    if(f.type==="textarea"||f.type==="list")return `<label class="f" for="${id}">${esc(f.label)}${hint}<textarea id="${id}" ${req} ${f.max?`maxlength="${f.max}"`:""} placeholder="${esc(f.ph||"")}">${esc(f.type==="list"?(val||[]).join("\n"):(val??""))}</textarea></label>`;
     if(f.type==="select")return `<label class="f" for="${id}">${esc(f.label)}<select id="${id}" ${req}><option value="" ${val==null||val===""?"selected":""} ${f.req?"disabled":""}>—</option>${f.options.map(o=>{const [ov,ol]=Array.isArray(o)?o:[o,o];return `<option value="${esc(ov)}" ${String(val)===String(ov)?"selected":""}>${esc(ol)}</option>`}).join("")}</select></label>`;
     return `<label class="f" for="${id}">${esc(f.label)}${hint}<input type="${f.type||"text"}" id="${id}" ${req} value="${esc(val??"")}" placeholder="${esc(f.ph||"")}" ${f.max?`maxlength="${f.max}"`:""} ${f.im?`inputmode="${f.im}"`:""} ${f.type==="number"?(f.int?'inputmode="numeric" step="1"':'inputmode="decimal" step="any"'):""}></label>`};
   const field=f=>{const h=field0(f);return f.when?`<div data-when="${esc(f.when[0])}" data-eq="${esc(f.when[1])}">${h}</div>`:h};
@@ -784,15 +1129,16 @@ function closeSheet(silent,viaPop){if(!$("#sheetroot").firstChild)return;if(ed&&
 function gameRow(g){
   const o=O(g.opp);const isNext=g===nextGame()||(nextGame()&&g.id===nextGame().id);
   const right=g.played?`<span class="num"><span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b></span>`:g.d<TODAY?`<span class="chip warn">Needs final score</span>`:(isNext?`<span class="chip gold">Up next</span>`:`<span class="muted small num">${esc(fmtTime(g.time))}</span>`);
-  return `<div class="li ${isNext?"upnext":""}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${vsAt(g)} ${esc(o.name)}</a><div class="small muted">${dow(g.d)} · ${esc(siteText(g,o))} · ${g.lg?"League":"Non-league"} · ${g.played?(hasBox(g)?`<a href="#game-${g.date}">Box score</a>`:"Final"):`<a href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch</a>`}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
+  return `<div class="li ${isNext?"upnext":""}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${gTitle(g,o)}</a><div class="small muted">${dow(g.d)} · ${esc(siteText(g,o))} · ${isExh(g)?EXH_CHIP:g.lg?"League":"Non-league"} · ${g.played?(hasBox(g)?`<a href="#game-${g.date}">Box score</a>`:"Final"):`<a href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch</a>`}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
 }
 function nextHero(){
   const g=nextGame();if(!g)return `<div class="card hero"><div class="eyebrow">Schedule</div><h2>No games scheduled</h2>${abtn("addGame","","Add a game")}</div>`;
   const o=O(g.opp);const days=Math.max(0,Math.floor((g.d-TODAY)/864e5));
   const st=o.status==="ready"?'<span class="chip good">Report ready</span>':o.status==="progress"?'<span class="chip warn">Report in progress</span>':'<span class="chip">Not scouted</span>';
-  return `<div class="card hero"><div class="eyebrow">Next game · ${g.lg?"League":"Non-league"}</div><h2>${vsAt(g)} ${esc(o.name)}</h2>
+  const lm=lastMet(o);
+  return `<div class="card hero"><div class="eyebrow">Next game · ${gKind(g)}</div><h2>${gTitle(g,o)}</h2>
   <div class="meta">${[longDate(g.d),fmtTime(g.time),siteOf(g)==="home"?CONFIG.homeGym:siteOf(g)==="neutral"?(g.venue?"Neutral · "+g.venue:"Neutral site"):(o.city||"Away")].filter(Boolean).map(esc).join(" · ")}</div>
-  ${heroPill(g,days)}${o.last&&o.last.length?`<span class="pill"><b class="num">${o.last.filter(x=>x.res==="W").length}–${o.last.filter(x=>x.res==="L").length}</b>vs them last season</span>`:""}
+  ${heroPill(g,days)}${lm?`<span class="pill">Last met<b class="num">${lm.res} ${lm.us}–${lm.them}</b>${esc(lm.when)}</span>`:""}
   <div class="actions"><a class="btn gold" href="#opp-${esc(g.opp)}">Open scouting report</a><a class="btn ghost" href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch on NFHS</a>${isCoach()?st:""}</div></div>`;
 }
 function heroPill(g,days){
@@ -818,6 +1164,37 @@ function feedBody(){
 }
 let feedN=8;
 
+/* ================= Coach Talk (Home) ================= */
+const talkNow=()=>{const t=get("talk","current");return t&&t.msg?t:null};
+const pastTalks=()=>items("talks").filter(t=>t&&t.msg).sort((a,b)=>(b.ts||0)-(a.ts||0)||String(b.id).localeCompare(String(a.id)));
+const dShort=ts=>new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
+const coachOf=id=>COACHES.find(c=>c.id===id);
+function talkCard(){
+  const t=talkNow();const n=pastTalks().length;const pastLink=n?`<button type="button" class="linkbtn" data-act="pastTalks">Past messages (${n})</button>`:"";
+  if(!t){if(!isCoach())return"";return `<section class="talk talk-empty" aria-label="Coach Talk"><div><div class="eyebrow">Coach Talk</div><h2>Share a word with the team</h2><p>A short message and a Bible verse every player sees at the top of Home.</p></div><div class="row">${pastLink}${abtn("editTalk","","Add")}</div></section>`}
+  const c=coachOf(t.from);
+  return `<section class="talk" aria-label="Coach Talk"><div class="talk-top"><span class="eyebrow">Coach Talk</span><span class="talk-date">Updated ${esc(dShort(t.ts||Date.now()))}</span></div>
+  <p class="talk-msg">${esc(t.msg)}</p><div class="talk-from">${esc(c?c.name:"Coach")}${c&&c.title?`<span>${esc(c.title)}</span>`:""}</div>
+  ${t.verse||t.ref?`<figure class="verse"><blockquote>“${esc(t.verse)}”</blockquote><figcaption>${esc(t.ref)}</figcaption></figure>`:""}
+  ${pastLink||isCoach()?`<div class="talk-foot">${pastLink||"<span></span>"}${isCoach()?`<span class="row">${ebtn("editTalk")}<button class="btn sm del" data-act="clearTalk">${TRASH}Clear</button></span>`:""}</div>`:""}</section>`;
+}
+function talkSheet(){
+  const t=talkNow();
+  openSheet({title:t?"Edit Coach Talk":"Coach Talk",intro:"Every coach and player sees this at the top of Home.",
+    fields:[{key:"from",label:"From",type:"select",options:COACHES.map(c=>[c.id,c.name]),req:true},{key:"msg",label:"Message",type:"textarea",req:true,max:600,hint:"Up to 600 characters"},{key:"ref",label:"Verse reference",req:true,max:60,hint:"Book chapter:verse, like Colossians 3:23"},{key:"verse",label:"Verse text",type:"textarea",req:true,max:500,hint:"Up to 500 characters"},...(t?[{key:"keep",label:"Keep the current message in Past messages",type:"check"}]:[])],
+    value:t?{...t,from:authorOf(t.from),keep:true}:{from:lastAuthor()},saved:"Coach Talk saved",
+    onSave:async v=>{const bad=(k,m)=>{const el=$("#sf-"+k);el&&el.focus();throw new Error(m)};
+      if(!coachOf(v.from))bad("from","From is required");
+      const msg=v.msg.trim(),ref=v.ref.replace(/\s+/g," ").trim(),verse=v.verse.trim().replace(/^["“”']+|["“”']+$/g,"").trim();
+      if(msg.length>600)bad("msg","Message must be 600 characters or fewer");if(ref.length>60)bad("ref","Verse reference must be 60 characters or fewer");
+      if(!verse)bad("verse","Verse text is required");if(verse.length>500)bad("verse","Verse text must be 500 characters or fewer");
+      rememberAuthor(v.from);const obj={from:v.from,msg,ref,verse,ts:Date.now()};
+      if(t&&v.keep&&(t.msg!==msg||t.ref!==ref||t.verse!==verse||t.from!==v.from))await saveDoc("talks",String(Date.now()),{from:t.from,msg:t.msg,ref:t.ref,verse:t.verse,ts:t.ts});
+      await saveDoc("talk","current",obj)}});
+}
+function pastTalksHTML(){const L=pastTalks();if(!L.length)return '<p class="muted" style="margin:0">No past messages yet.</p>';
+  return L.map(t=>{const c=coachOf(t.from);return `<div class="pasttalk"><div class="spread"><span class="small"><b>${esc(c?c.name:"Coach")}</b> <span class="muted">· ${esc(dShort(t.ts||+t.id||Date.now()))}</span></span>${isCoach()?`<button type="button" class="btn icon del" data-act="delTalk" data-id="${esc(t.id)}" aria-label="Delete this past message">${TRASH}</button>`:""}</div><p class="talk-msg sm">${esc(t.msg)}</p>${t.verse||t.ref?`<figure class="verse sm"><blockquote>“${esc(t.verse)}”</blockquote><figcaption>${esc(t.ref)}</figcaption></figure>`:""}</div>`}).join("")}
+
 /* ================= Home ================= */
 function homeView(){
   const rec=record();const ws=winStreak();
@@ -825,13 +1202,13 @@ function homeView(){
   if(isCoach()){
         const feed=items("notes").sort((a,b)=>b.ts-a.ts).slice(0,4);
     const ns=needsScore();
-    return `<div class="head"><div><div class="eyebrow">Coaches' office · ${longDate(TODAY)}</div><h1>Welcome back, Coach</h1></div>${chips}</div>${ns.length?`<a class="banner" href="#schedule" style="text-decoration:none"><span class="chip warn">Action needed</span><span style="flex:1">${ns.length===1?"1 past game needs":ns.length+" past games need"} a final score.</span><b style="color:var(--gold-2)">Enter scores →</b></a>`:""}
+    return `<div class="head"><div><div class="eyebrow">Coaches' office · ${longDate(TODAY)}</div><h1>Welcome back, Coach</h1></div>${chips}</div>${ns.length?`<a class="banner" href="#schedule" style="text-decoration:none"><span class="chip warn">Action needed</span><span style="flex:1">${ns.length===1?"1 past game needs":ns.length+" past games need"} a final score.</span><b style="color:var(--gold-2)">Enter scores →</b></a>`:""}${talkCard()}
     <div class="grid split">${nextHero()}<div class="card"><div class="cardhead"><h2>Coming up</h2><a class="small" href="#schedule">Schedule</a></div><div class="list">${upcoming().slice(1,4).map(gameRow).join("")||'<p class="muted">Nothing else scheduled.</p>'}</div></div></div>
     <div class="section">${panel("feed","Team feed","Posts go to every player",feedBody())}${panel("team-stats","Team stats",`${teamTotals().n} game${teamTotals().n===1?"":"s"} imported`,teamStatsBody())}
     ${panel("notes-feed","Latest scouting notes",`${feed.length} recent`,feed.map(n=>`<div class="note"><div class="by"><b>${esc(coachName(n.author))}</b><span>on <a href="#opp-${esc(n.opp)}">${esc(O(n.opp).name)}</a></span><span>${ago(n.ts)}</span></div><p>${esc(n.text.length>140?n.text.slice(0,138)+"…":n.text)}</p></div>`).join("")||'<p class="muted" style="margin:0">No notes yet.</p>')}</div>`;
   }
   const g=nextGame();const o=g?O(g.opp):null;
-  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.team)} · ${longDate(TODAY)}</div><h1>Let's go, Eagles</h1></div>${chips}</div>
+  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.team)} · ${longDate(TODAY)}</div><h1>Let's go, Eagles</h1></div>${chips}</div>${talkCard()}
   <div class="grid split">${nextHero()}${o?panel("keys",`Keys vs ${esc(o.name)}`,"",o.keys&&o.keys.length?`<ol>${o.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ol>`:'<p class="muted" style="margin:0">Coaches are still building this report.</p>',"keys"):`<div class="card"><h2 style="margin-bottom:6px">Coming up</h2><div class="list">${upcoming().slice(1,4).map(gameRow).join("")||'<p class="muted">Nothing else scheduled.</p>'}</div></div>`}</div>
   <div class="section">${panel("feed","Team feed","From your coaches",feedBody())}${panel("team-stats","Team stats","",teamStatsBody())}</div>`;
 }
@@ -846,7 +1223,7 @@ function scheduleView(){
 function gameView(date){
   const g=games().find(x=>x.date===date);if(!g||!g.played||!hasBox(g))return `<div class="empty">No box score for this game yet.${isCoach()?' Import one from <a href="#stats">Stats → Import</a>.':""}</div>`;
   const PL=players();const lines_=box(g).filter(l=>l.min>0&&PL.find(p=>p.id===l.id));const imp=store.statgames[g.date];const myId=null;
-  return `<div class="head"><div><div class="eyebrow">${longDate(g.d)} · ${g.lg?"League":"Non-league"}</div><h1>${vsAt(g)} ${esc(O(g.opp).name)} <span class="res ${g.res}" style="font-size:30px;width:auto">${g.res}</span> <span class="num">${scoreTxt(g)}</span></h1><p>${imp?`Imported by ${esc(coachName(imp.by))}`:"No box score imported yet"}</p></div><div class="row">${ebtn("editGame",`data-id="${esc(g.id)}"`,"Edit game")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="game" data-id="${esc(g.id)}">${TRASH}Delete</button>`:""}<a class="btn sm" href="#schedule">Schedule</a></div></div>
+  return `<div class="head"><div><div class="eyebrow">${longDate(g.d)} · ${gKind(g)}</div><h1>${gTitle(g)} <span class="res ${g.res}" style="font-size:30px;width:auto">${g.res}</span> <span class="num">${scoreTxt(g)}</span></h1><p>${imp?`Imported by ${esc(coachName(imp.by))}`:"No box score imported yet"}</p></div><div class="row">${ebtn("editGame",`data-id="${esc(g.id)}"`,"Edit game")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="game" data-id="${esc(g.id)}">${TRASH}Delete</button>`:""}<a class="btn sm" href="#schedule">Schedule</a></div></div>
   <div class="card"><div class="tablewrap"><table><thead><tr><th class="l nosort">Player</th>${["MIN","PTS","REB","AST","STL","BLK","TO","FG","3PT","FT"].map(h=>`<th class="nosort">${h}</th>`).join("")}</tr></thead><tbody>
   ${lines_.map(l=>{const p=P(l.id);return `<tr class="${l.id===myId?"me-row":""}"><td class="l"><span class="muted num">#${p.no}</span> ${esc(pName(p))}</td><td class="num">${l.min}</td><td class="num us">${l.pts}</td><td class="num">${l.reb}</td><td class="num">${l.ast}</td><td class="num">${l.stl}</td><td class="num">${l.blk}</td><td class="num">${l.to}</td><td class="num">${l.fgm}-${l.fga}</td><td class="num">${l.tpm}-${l.tpa}</td><td class="num">${l.ftm}-${l.fta}</td></tr>`}).join("")}</tbody>
   <tfoot>${(()=>{const t={};KEYS.forEach(k=>t[k]=box(g).reduce((a,l)=>a+(+l[k]||0),0));return `<tr class="totrow"><td class="l">Team totals</td><td class="num">${t.min}</td><td class="num us">${t.pts}</td><td class="num">${t.reb}</td><td class="num">${t.ast}</td><td class="num">${t.stl}</td><td class="num">${t.blk}</td><td class="num">${t.to}</td><td class="num">${t.fgm}-${t.fga}</td><td class="num">${t.tpm}-${t.tpa}</td><td class="num">${t.ftm}-${t.fta}</td></tr>`})()}</tfoot></table></div></div>`;
@@ -865,7 +1242,7 @@ const BSTATS=[["ppg","Points per game",""],["rpg","Rebounds per game",""],["apg"
 const bstat=k=>BSTATS.find(b=>b[0]===k)||BSTATS[0];
 function metric(p,s,k){if(!s||!s.gp)return -1;
   if(k==="tpp")return s.tpa>=10?s.tpm/s.tpa*100:-1;if(k==="ftp")return s.fta>=10?s.ftm/s.fta*100:-1;if(k==="ts")return s.fga>=20?s.ts*100:-1;
-  if(k==="dd"||k==="hi"){const logs=played().map(g=>box(g).find(l=>l.id===p.id)).filter(l=>l&&l.min>0);return k==="dd"?logs.filter(l=>[l.pts,l.reb,l.ast].filter(v=>v>=10).length>=2).length:Math.max(0,...logs.map(l=>l.pts))}
+  if(k==="dd"||k==="hi"){const logs=counted().map(g=>box(g).find(l=>l.id===p.id)).filter(l=>l&&l.min>0);return k==="dd"?logs.filter(l=>[l.pts,l.reb,l.ast].filter(v=>v>=10).length>=2).length:Math.max(0,...logs.map(l=>l.pts))}
   return s[k]??-1}
 const fmtM=(k,v)=>k==="dd"||k==="hi"?String(Math.round(v)):(bstat(k)[2]?v.toFixed(1)+"%":fmt1(v));
 const ruleText=b=>`${bstat(b.stat)[1]} at least ${b.min}${bstat(b.stat)[2]}`;
@@ -882,7 +1259,7 @@ function playerView(pid){
    ${s.gp?`<div class="bigstats"><div><b class="num">${fmt1(s.ppg)}</b><span>PPG</span></div><div><b class="num">${fmt1(s.rpg)}</b><span>RPG</span></div><div><b class="num">${fmt1(s.apg)}</b><span>APG</span></div><div><b class="num">${s.fga?(s.ts*100).toFixed(1):"–"}</b><span>TS%</span></div><div><b class="num">${s.gp}</b><span>Games</span></div></div>`:`<p style="margin:0;color:#c9d4df;position:relative">Season stats show up after his first imported box score.</p>`}
    ${chips?`<div class="badges">${chips}</div>`:""}${coach?`<div class="small" style="margin-top:10px;position:relative"><a href="#badges" style="color:var(--gold-2)">How badges work</a></div>`:""}</div>`;
   const logBody=`<div class="tablewrap"><table><thead><tr><th class="l nosort">Game</th><th class="nosort">MIN</th><th class="nosort">PTS</th><th class="nosort">REB</th><th class="nosort">AST</th><th class="nosort">FG</th><th class="nosort">3PT</th></tr></thead><tbody>
-   ${log.map(({g,l})=>`<tr><td class="l"><span class="res ${g.res}" style="font-size:14px;width:16px">${g.res}</span> ${mon(g.d)} ${g.d.getDate()} ${vsAt(g)} ${esc(O(g.opp).name)}</td><td class="num">${l.min||"DNP"}</td><td class="num us">${l.min?l.pts:"–"}</td><td class="num">${l.min?l.reb:"–"}</td><td class="num">${l.min?l.ast:"–"}</td><td class="num">${l.min?l.fgm+"-"+l.fga:"–"}</td><td class="num">${l.min?l.tpm+"-"+l.tpa:"–"}</td></tr>`).join("")}</tbody></table></div>`;
+   ${log.map(({g,l})=>`<tr><td class="l"><span class="res ${g.res}" style="font-size:14px;width:16px">${g.res}</span> ${mon(g.d)} ${g.d.getDate()} ${gTitle(g)}${isExh(g)?' <span class="chip gold">Exh</span>':""}</td><td class="num">${l.min||"DNP"}</td><td class="num us">${l.min?l.pts:"–"}</td><td class="num">${l.min?l.reb:"–"}</td><td class="num">${l.min?l.ast:"–"}</td><td class="num">${l.min?l.fgm+"-"+l.fga:"–"}</td><td class="num">${l.min?l.tpm+"-"+l.tpa:"–"}</td></tr>`).join("")}</tbody></table></div>`;
   return `<div class="row" style="margin-bottom:12px"><a class="btn sm" href="#roster">← Roster</a></div>${hero}
   <div class="section">${panel("plog","Game log",`${log.length} games`,logBody)}</div>`;
 }
@@ -948,13 +1325,17 @@ function parseCSV(text){
 }
 
 /* ================= Scouting ================= */
+const teamHist=()=>{const d=get("history","seasons");return d&&Array.isArray(d.seasons)?d.seasons.slice().sort((a,b)=>String(b.season).localeCompare(String(a.season))):[]};
+const seasonTxt=x=>String(x||"").replace("-","–");
+function histCard(){const h=teamHist().slice(0,2);if(!h.length)return"";
+  return `<div class="card histcard"><div class="cardhead"><h2>Our last two seasons</h2>${ebtn("editHist")}</div><div class="grid g2 histgrid">${h.map(x=>`<div class="hist"><div class="hs num">${esc(seasonTxt(x.season))}</div><div><div class="num"><b>${x.w}–${x.l}</b> <span class="muted">overall</span> · <b>${x.lw}–${x.ll}</b> <span class="muted">league</span></div>${x.finish||x.coach?`<div class="small muted">${parts(x.finish,x.coach?"Coach "+x.coach:"")}</div>`:""}${x.notes?`<div class="small muted">${esc(x.notes)}</div>`:""}</div></div>`).join("")}</div></div>`}
 function scoutingView(){
   const list=opps().map(o=>({o,next:nextFor(o.id)})).sort((a,b)=>(a.next?a.next.d:9e15)-(b.next?b.next.d:9e15));
-  return `<div class="head"><div><div class="eyebrow">${isCoach()?"Opponent scouting":"Game-day scouting"}</div><h1>Scouting</h1><p>${isCoach()?"Every coach can edit reports, notes, film and players.":"What you need to know about each opponent."}</p></div>${abtn("addOpp","","Add opponent")}</div>
-  ${list.length?"":`<div class="empty">No opponents yet.${isCoach()?" Tap Add opponent to start a scouting report.":""}</div>`}<div class="grid g3">${list.map(({o,next})=>{const st=o.status==="ready"?'<span class="chip good">Ready</span>':o.status==="progress"?'<span class="chip warn">In progress</span>':'<span class="chip">Not started</span>';
+  return `<div class="head"><div><div class="eyebrow">${isCoach()?"Opponent scouting":"Game-day scouting"}</div><h1>Scouting</h1><p>${isCoach()?"Every coach can edit reports, notes, film and players.":"What you need to know about each opponent."}</p></div><div class="row">${teamHist().length?"":abtn("editHist","","Our last two seasons")}${abtn("addOpp","","Add opponent")}</div></div>
+  ${histCard()}${list.length?"":`<div class="empty">No opponents yet.${isCoach()?" Tap Add opponent to start a scouting report.":""}</div>`}<div class="grid g3">${list.map(({o,next})=>{const st=o.status==="ready"?'<span class="chip good">Ready</span>':o.status==="progress"?'<span class="chip warn">In progress</span>':'<span class="chip">Not started</span>';
     return `<a class="card oppcard" href="#opp-${esc(o.id)}"><div class="spread"><span class="eyebrow">${o.league?"League":"Non-league"}</span>${isCoach()?st:""}</div><h3>${esc(o.name)}</h3><div class="small muted">${next?`Next: ${dow(next.d)}, ${mon(next.d)} ${next.d.getDate()} · ${({home:"Home",away:"Away",neutral:"Neutral"})[siteOf(next)]}`:"No games scheduled"}</div>
     ${(()=>{const gs=games().filter(g=>g.opp===o.id);return gs.length?`<div class="small muted">This season</div><div class="row">${gs.map(g=>`<span class="chip ${g.played?(g.res==="W"?"good":"bad"):""} num">${mon(g.d)} ${g.d.getDate()} ${vsAt(g)} · ${g.played?g.res+" "+scoreTxt(g):g.d<TODAY?"No score":esc(fmtTime(g.time)||SITE_L[siteOf(g)])}</span>`).join("")}</div>`:""})()}
-    ${(o.last||[]).length?'<div class="small muted">Last season</div>':""}<div class="row">${(o.last||[]).map(l=>`<span class="chip ${l.res==="W"?"good":"bad"} num">${l.res} ${l.us}–${l.them} · ${mon(D(l.date))} '${String(D(l.date).getFullYear()).slice(2)}</span>`).join("")}</div></a>`}).join("")}</div>
+    ${(()=>{const lm=lastMet(o);return lm?`<div class="row"><span class="chip ${lm.res==="W"?"good":"bad"} num">Last met: ${lm.res} ${lm.us}–${lm.them} (${esc(lm.when)})</span></div>`:""})()}</a>`}).join("")}</div>
   `;
 }
 function oppView(id){
@@ -970,9 +1351,12 @@ function oppView(id){
     <div class="statline"><span><b class="num">${fmt1(pl.ppg)}</b>PPG</span><span><b class="num">${fmt1(pl.rpg)}</b>RPG</span><span><b class="num">${fmt1(pl.apg)}</b>APG</span></div>${(pl.tend||[]).length?`<ul class="tend">${pl.tend.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}${pl.info?`<p class="small muted" style="margin:6px 0 0">${esc(pl.info)}</p>`:""}</div>`).join("")}</div>`:'<p class="muted" style="margin:0">No players scouted yet.</p>');
   const filmBody=T(abtn("addClip",`data-opp="${esc(id)}"`,"Add clip"))+(clips.length?clips.map(cl=>`<div class="clip"><span class="playic" aria-hidden="true"><svg width="11" height="11" viewBox="0 0 12 12"><path d="M3 1.5v9l7-4.5z" fill="currentColor"/></svg></span><div><b>${esc(cl.label)}</b><div class="small muted">${cl.author?"Added by "+esc(coachName(cl.author)):""}</div></div>${cl.url&&/^https?:\/\//i.test(cl.url)?`<a class="ts num" href="${esc(cl.url)}" target="_blank" rel="noopener">${cl.t?esc(cl.t):"Open clip"}</a>`:`<span class="ts-wrap">${cl.t?`<span class="ts num">${esc(cl.t)}</span>`:""}<a class="small" href="${esc(NFHS_SCHOOL)}" target="_blank" rel="noopener">Open NFHS Network</a></span>`}${coach?`<button class="btn icon edit" data-act="editClip" data-id="${esc(cl.id)}" aria-label="Edit clip">${PEN}</button>`:"<span></span>"}</div>`).join(""):'<p class="muted" style="margin:0">No clips yet.</p>');
   const notesBody=T(abtn("addNote",`data-opp="${esc(id)}"`,"Add note"))+(notes.length?notes.map(n=>noteHtml(n,"editNote")).join(""):'<p class="muted" style="margin:0">No notes yet.</p>');
-  const lastBody=T(abtn("addMeet",`data-id="${esc(id)}"`,"Add meeting"))+((o.last||[]).length?o.last.map((l,i)=>`<div class="meet"><div class="spread"><span>${longDate(D(l.date))}, ${D(l.date).getFullYear()}${l.site?" · "+SITE_L[l.site]:""}</span><span class="row"><span class="num"><span class="res ${l.res}">${l.res}</span><b>${l.us}–${l.them}</b></span>${l.src?`<span class="chip good verified">${esc(l.src)}</span>`:""}${coach?`<button class="btn icon edit" data-act="editMeet" data-id="${esc(id)}" data-idx="${i}" aria-label="Edit meeting">${PEN}</button>`:""}</span></div>${l.note?`<p class="small muted" style="margin:4px 0 0">${esc(l.note)}</p>`:""}</div>`).join(""):'<p class="muted" style="margin:0">No meeting last season.</p>');
-  const mine=games().filter(g=>g.opp===id);const mrec=mine.filter(g=>g.played);
-  const seasonBody=T(abtn("addGame",`data-opp="${esc(id)}"`,"Add game"))+(mine.length?mine.map(g=>`<div class="spread" style="padding:7px 0;border-top:1px solid var(--line)"><span>${dow(g.d)}, ${mon(g.d)} ${g.d.getDate()} · ${vsAt(g)} ${esc(o.name)}${siteOf(g)==="neutral"?" (neutral)":""}${g.venue?" · "+esc(g.venue):""}${g.lg?" · League":""}</span><span class="num" style="white-space:nowrap">${g.played?`<span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b>`:g.d<TODAY?'<span class="chip warn">Needs final score</span>':esc(fmtTime(g.time)||"Time TBA")}</span></div>`).join(""):'<p class="muted" style="margin:0">No games against them this season.</p>');
+  const pm=(o.last||[]).map((l,i)=>({...l,i,res:+l.us>+l.them?"W":"L"})).filter(l=>inPast2(l.date)).sort((a,b)=>b.date.localeCompare(a.date));
+  const pmW=pm.filter(l=>l.res==="W").length;
+  const meetRow=l=>`<div class="meet"><div class="spread"><span class="row" style="gap:8px"><span class="chip ${l.res==="W"?"good":"bad"}">${l.res}</span><b class="num">${l.us}–${l.them}</b><span class="small muted">${mon(D(l.date))} ${D(l.date).getDate()}, ${D(l.date).getFullYear()}${l.site?" · "+SITE_L[l.site]:""}</span></span><span class="row">${l.src?`<span class="chip good verified">${esc(l.src)}</span>`:""}${coach?`<button class="btn icon edit" data-act="editMeet" data-id="${esc(id)}" data-idx="${l.i}" aria-label="Edit meeting">${PEN}</button>`:""}</span></div>${l.note?`<p class="small muted" style="margin:4px 0 0">${esc(l.note)}</p>`:""}</div>`;
+  const lastBody=T(abtn("addMeet",`data-id="${esc(id)}"`,"Add meeting"))+(pm.length?pastSeasons().map(ps=>{const rows=pm.filter(l=>seasonOf(l.date)===ps.label);if(!rows.length)return"";const w=rows.filter(l=>l.res==="W").length;return `<div class="meetseason"><div class="tplgroup">${esc(ps.label)} · <span class="num">${w}–${rows.length-w}</span></div>${rows.map(meetRow).join("")}</div>`}).join(""):'<p class="muted" style="margin:0">No meetings in the last two seasons.</p>');
+  const mine=games().filter(g=>g.opp===id);const mrec=mine.filter(g=>g.played&&!isExh(g));
+  const seasonBody=T(abtn("addGame",`data-opp="${esc(id)}"`,"Add game"))+(mine.length?mine.map(g=>`<div class="spread" style="padding:7px 0;border-top:1px solid var(--line)"><span>${dow(g.d)}, ${mon(g.d)} ${g.d.getDate()} · ${vsAt(g)} ${esc(o.name)}${siteOf(g)==="neutral"?" (neutral)":""}${g.venue?" · "+esc(g.venue):""}${g.lg&&!isExh(g)?" · League":""}${isExh(g)?" "+EXH_CHIP+(g.event?" "+esc(g.event):""):""}</span><span class="num" style="white-space:nowrap">${g.played?`<span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b>`:g.d<TODAY?'<span class="chip warn">Needs final score</span>':esc(fmtTime(g.time)||"Time TBA")}</span></div>`).join(""):'<p class="muted" style="margin:0">No games against them this season.</p>');
   return `<div class="head"><div><div class="eyebrow">${o.league?"League":"Non-league"}${o.city?" · "+esc(o.city):""}${stand?` · ${stand.lw}–${stand.ll} league`:""}</div><h1>${esc(o.name)}</h1><p>${next?`Next meeting ${longDate(next.d)}, ${({home:"at home",away:"away",neutral:"at a neutral site"})[siteOf(next)]}.`:"No games scheduled."}</p></div><div class="row"><button class="btn sm" data-act="printReport" data-id="${esc(id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-2"/><rect x="6" y="14" width="12" height="7"/></svg>Print report</button>${ebtn("editOpp",`data-id="${esc(id)}"`,"Edit team")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="opp" data-id="${esc(id)}">${TRASH}Delete</button>`:""}<a class="btn sm" href="#scouting">All opponents</a></div></div>
   ${panel("this-season","This season",mine.length?plural(mine.length,"game")+(mrec.length?` · ${mrec.filter(g=>g.res==="W").length}–${mrec.filter(g=>g.res==="L").length}`:""):"No games",seasonBody)}
   ${panel("keys","Keys to the game",keys.length?keys.length+" keys":"",keysBody,"keys")}
@@ -980,7 +1364,7 @@ function oppView(id){
   ${panel("their-coach","Their coach & schemes","Offense, defense, press, sets",coachBody)}
   ${panel("film","Film",plural(clips.length,"clip"),filmBody)}
   ${panel("opp-notes",coach?"Scouting notes":"Notes from your coaches",`${notes.length} note${notes.length===1?"":"s"}`,notesBody)}
-  ${panel("last-season","Last season",(o.last||[]).map(l=>l.res+" "+l.us+"–"+l.them).join(" · ")||"No meeting",lastBody)}`;
+  ${panel("past-meetings","Past meetings",pm.length?`${plural(pm.length,"game")} · ${pmW}–${pm.length-pmW}`:"Last two seasons",lastBody)}`;
 }
 
 function reportHTML(id,forPlayers){
@@ -1007,15 +1391,33 @@ function leagueView(){
 }
 
 /* ================= Glossary & calls ================= */
-let glossQ="",glossTab="calls";
+let glossQ="",glossTab=null,glossGrp="";const glossOpen=new Set();
+const CALL_CATS=["Defense","Offense","Out of bounds","Situations"];
+const grpShort=g=>g.replace(/\s*\(.*\)$/,"");
+const termGroup=t=>GLOSS_GROUPS.includes(t.cat)?t.cat:"Other";
 function glossaryView(){
-  const q=glossQ.toLowerCase();const coll=glossTab==="calls"?"calls":"terms";
-  const cats=glossTab==="calls"?["Defense","Offense","Out of bounds","Situations"]:["Defense","Offense","Situations","Analytics"];
-  const hit=items(coll).filter(c=>!q||c.name.toLowerCase().includes(q)||c.def.toLowerCase().includes(q));
-  const allCats=[...new Set([...cats,...hit.map(h=>h.cat)])];
-  const tabs=`<div class="seg" role="tablist"><button data-gtab="calls" class="${glossTab==="calls"?"on":""}">Our calls</button><button data-gtab="terms" class="${glossTab==="terms"?"on":""}">Terms</button></div>`;
-  const body=`<div class="grid g2">${allCats.map(cat=>{const its=hit.filter(c=>c.cat===cat);return its.length?`<div class="card"><h2 style="margin-bottom:6px">${esc(cat)}</h2>${its.map(c=>`<div class="note"><div class="by" style="padding:0">${glossTab==="calls"?`<b style="font-family:var(--display);font-size:19px;letter-spacing:.04em;color:var(--gold-ink)">${esc(c.name.toUpperCase())}</b>`:`<b style="font-size:14px">${esc(c.name)}</b>`}${ebtn(glossTab==="calls"?"editCall":"editTerm",`data-id="${esc(c.id)}"`)}</div><p class="muted">${esc(c.def)}</p></div>`).join("")}</div>`:""}).join("")||`<div class="empty">${q?"Nothing matches that search.":glossTab==="calls"?"No calls yet."+(isCoach()?" Tap Add call.":""):"No terms yet."}</div>`}</div>`;
-  return `<div class="head"><div><div class="eyebrow">Learn the language</div><h1>Glossary & calls</h1><p>Our calls, plus the terms we use in practice, film and scouting.</p></div><div class="row">${tabs}${abtn(glossTab==="calls"?"addCall":"addTerm","",glossTab==="calls"?"Add call":"Add term")}<label class="f" for="gq" style="flex-direction:row;align-items:center;gap:8px">Search<input type="search" id="gq" value="${esc(glossQ)}" style="width:150px" aria-label="Search the glossary"></label></div></div>${body}`;
+  if(!glossTab)glossTab=items("calls").length?"calls":"terms";
+  const q=glossQ.trim().toLowerCase();const calls=glossTab==="calls";const coll=calls?"calls":"terms";
+  const all=items(coll);const match=c=>!q||String(c.name).toLowerCase().includes(q)||String(c.def).toLowerCase().includes(q);const hit=all.filter(match);
+  const tabs=`<div class="seg" role="tablist"><button data-gtab="calls" class="${calls?"on":""}" role="tab" aria-selected="${calls}">Our calls</button><button data-gtab="terms" class="${calls?"":"on"}" role="tab" aria-selected="${!calls}">Terms</button></div>`;
+  const search=all.length?`<label class="f gsearch" for="gq">Search<input type="search" id="gq" value="${esc(glossQ)}" aria-label="Search the glossary" autocomplete="off"></label>`:"";
+  const head=`<div class="head"><div><div class="eyebrow">Learn the language</div><h1>Glossary & calls</h1><p>${calls?"Our program's calls: what we say on the floor and what it means.":"Basketball terms used at the college and NBA level, in plain English."}</p></div><div class="row">${tabs}${all.length||!calls?abtn(calls?"addCall":"addTerm","",calls?"Add call":"Add term"):""}${search}</div></div>`;
+  const termRow=c=>`<div class="note gterm"><div class="by" style="padding:0">${calls?`<b style="font-family:var(--display);font-size:19px;letter-spacing:.04em;color:var(--gold-ink)">${esc(String(c.name).toUpperCase())}</b>`:`<b style="font-size:14px">${esc(c.name)}</b>`}${ebtn(calls?"editCall":"editTerm",`data-id="${esc(c.id)}"`)}</div><p class="muted">${esc(c.def)}</p></div>`;
+  const byName=(a,b)=>String(a.name).localeCompare(String(b.name),undefined,{sensitivity:"base",numeric:true});
+  if(calls){
+    if(!all.length)return head+`<div class="empty gempty"><h2>${isCoach()?"No calls yet":"Our calls"}</h2><p>${isCoach()?"Add the words we use on the floor, like defensive coverages, sets and out-of-bounds plays, so every player learns them.":"Coaches will add our calls here."}</p>${abtn("addCall","","Add your first call")}</div>`;
+    const cats=[...new Set([...CALL_CATS,...hit.map(h=>h.cat)])];
+    return head+`<div class="grid g2">${cats.map(cat=>{const its=hit.filter(c=>c.cat===cat).sort(byName);return its.length?`<div class="card"><h2 style="margin-bottom:6px">${esc(cat||"Other")}</h2>${its.map(termRow).join("")}</div>`:""}).join("")||`<div class="empty">Nothing matches that search.</div>`}</div>`;
+  }
+  const groups=[...GLOSS_GROUPS,"Other"];const cnt={};groups.forEach(g=>cnt[g]=0);hit.forEach(t=>cnt[termGroup(t)]++);
+  if(glossGrp&&!groups.includes(glossGrp))glossGrp="";
+  const chips=`<div class="gchips" role="group" aria-label="Filter by group"><button type="button" class="gchip ${glossGrp?"":"on"}" data-ggrp="" aria-pressed="${!glossGrp}">All <span class="num">${hit.length}</span></button>${groups.filter(g=>cnt[g]||g===glossGrp).map(g=>`<button type="button" class="gchip ${glossGrp===g?"on":""}" data-ggrp="${esc(g)}" aria-pressed="${glossGrp===g}">${esc(grpShort(g))} <span class="num">${cnt[g]}</span></button>`).join("")}</div>`;
+  const shown=groups.filter(g=>(!glossGrp||g===glossGrp)&&cnt[g]);
+  const allOpen=shown.length&&shown.every(g=>glossOpen.has(g));
+  const tools=!q&&!glossGrp&&shown.length>1?`<div class="gtools"><span class="small muted">${plural(hit.length,"term")} in ${shown.length} groups</span><button type="button" class="linkbtn" data-gall="${allOpen?"close":"open"}">${allOpen?"Collapse all":"Expand all"}</button></div>`:"";
+  const body=shown.map(g=>{const its=hit.filter(t=>termGroup(t)===g).sort(byName);const open=!!q||!!glossGrp||glossOpen.has(g);
+    return `<details class="ggroup" data-grp="${esc(g)}" ${open?"open":""}><summary>${CHEV}<h2>${esc(g)}</h2><span class="chip num">${its.length}</span></summary><div class="gbody">${its.map(termRow).join("")}</div></details>`}).join("");
+  return head+(all.length?chips+tools+(body?`<div class="glist">${body}</div>`:`<div class="empty">Nothing matches that search.</div>`):`<div class="empty">No terms yet.${isCoach()?" Tap Add term.":""}</div>`);
 }
 
 /* ================= Playbook: court drawing & animation ================= */
@@ -1346,6 +1748,16 @@ const ACT={
   addPost(){postSheet({pinned:false},true)},editPost(d){postSheet(get("posts",d.id),false)},
   addCall(){glossSheet("calls",null)},editCall(d){glossSheet("calls",get("calls",d.id))},
   addTerm(){glossSheet("terms",null)},editTerm(d){glossSheet("terms",get("terms",d.id))},
+  /* Coach Talk */
+  editTalk(){if(isCoach())talkSheet()},
+  pastTalks(){listSheet("Past messages",pastTalksHTML())},
+  clearTalk(){const t=talkNow();if(!t||!isCoach())return;confirmDelete({title:"Clear Coach Talk?",body:"It comes off Home for everyone. The message is kept in Past messages.",button:"Clear",done:"Coach Talk cleared",
+    run:async()=>{await saveDoc("talks",String(Date.now()),{from:t.from,msg:t.msg,ref:t.ref,verse:t.verse,ts:t.ts});await removeDoc("talk","current")}})},
+  delTalk(d){const t=get("talks",d.id);if(!t||!isCoach())return;confirmDelete({title:"Delete this past message?",body:"“"+esc(excerpt(t.msg))+"”",button:"Delete message",done:"Message deleted",run:()=>removeDoc("talks",t.id)})},
+  /* Team history (Scouting) */
+  editHist(){if(!isCoach())return;listSheet("Our last two seasons",histListHTML())},
+  histAdd(){histSheet(null)},histRow(d){histSheet(+d.i)},
+  histDel(d){const arr=teamHist();const x=arr[+d.i];if(!x)return;confirmDelete({title:`Delete the ${seasonTxt(x.season)} season?`,body:`${x.w}–${x.l} overall, ${x.lw}–${x.ll} league.`,button:"Delete season",done:"Season deleted",run:()=>{const a=arr.slice();a.splice(+d.i,1);return saveDoc("history","seasons",{seasons:a})}})},
   editStand(d){standSheet(get("stand",d.id))},addStand(){standSheet(null)},
   addLres(){lresSheet(null)},editLres(d){lresSheet(get("lres",d.id))},
   /* playbook viewer */
@@ -1401,9 +1813,11 @@ function playerSheet(p){
 function gameSheet(g,preOpp){
   const NEW="__new";const list=opps().slice().sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:"base"}));
   const legacy=g?parseTime(g.time):"";let oddOk=null;const pre=!g&&preOpp?get("opps",preOpp):null;
-  const value=g?{...g,site:siteOf(g),time:legacy||""}:{opp:pre?pre.id:(list.length?"":NEW),time:"",lg:pre?!!pre.league:false};
+  const value=g?{...g,site:siteOf(g),time:legacy||"",type:isExh(g)?"exh":"reg"}:{opp:pre?pre.id:(list.length?"":NEW),time:"",lg:pre?!!pre.league:false,type:"reg"};
   openSheet({title:g?"Edit game":"Add game",intro:"Leave the score blank until the game is played.",
-    fields:[{key:"date",label:"Date",type:"date",req:true,half:true},{key:"time",label:"Tip-off",type:"time",tba:"Time TBA",half:true,hint:legacy===null?`Was “${g.time}”. Pick the time again.`:""},
+    fields:[{key:"type",label:"Type",type:"seg",options:[["reg","Regular"],["exh","Exhibition"]],req:true,hint:"Exhibitions don't count toward our record, standings or season stats"},
+      {key:"event",label:"Event name",max:60,hint:"Optional, like Jamboree",when:["type","exh"]},
+      {key:"date",label:"Date",type:"date",req:true,half:true},{key:"time",label:"Tip-off",type:"time",tba:"Time TBA",half:true,hint:legacy===null?`Was “${g.time}”. Pick the time again.`:""},
       {key:"opp",label:"Opponent",type:"select",options:[...list.map(o=>[o.id,o.name]),[NEW,"+ New opponent…"]],req:true},
       {key:"newOpp",label:"New opponent name",max:60,req:true,when:["opp",NEW]},
       {key:"site",label:"Where",type:"seg",options:[["home","Home"],["away","Away"],["neutral","Neutral"]],req:true},
@@ -1420,12 +1834,15 @@ function gameSheet(g,preOpp){
       const time=v.time==="TBA"?"TBA":(parseTime(v.time)||"");
       if(/^\d\d:\d\d$/.test(time)&&(time<"09:00"||time>"22:00")&&oddOk!==time){oddOk=time;bad("time","Tip-off looks wrong. Did you mean PM? Press Save again to keep "+fmtTime(time)+".")}
       let oid=v.opp;if(v.opp===NEW){const ex=oppDup(nm);if(ex)oid=ex.id;else{oid=uid("o");await saveDoc("opps",oid,{name:nm,city:"",status:"none",league:!!v.lg,coach:{},keys:[],players:[],last:[]})}}
-      const id=g?g.id:uid("g");const obj={...(g||{}),date:v.date,time,opp:oid,site:v.site,home:v.site==="home",lg:!!v.lg,us:v.us,them:v.them};const ven=(v.venue||"").replace(/\s+/g," ").trim().slice(0,60);if(v.site==="neutral"&&ven)obj.venue=ven;else delete obj.venue;if(v.us!=null&&v.ot)obj.ot=true;else delete obj.ot;
+      const exh=v.type==="exh";const id=g?g.id:uid("g");const obj={...(g||{}),date:v.date,time,opp:oid,site:v.site,home:v.site==="home",lg:exh?false:!!v.lg,us:v.us,them:v.them};
+      const evn=(v.event||"").replace(/\s+/g," ").trim();if(evn.length>60)bad("event","Event name must be 60 characters or fewer");if(exh){obj.type="exh";if(evn)obj.event=evn;else delete obj.event}else{delete obj.type;delete obj.event}const ven=(v.venue||"").replace(/\s+/g," ").trim().slice(0,60);if(v.site==="neutral"&&ven)obj.venue=ven;else delete obj.venue;if(v.us!=null&&v.ot)obj.ot=true;else delete obj.ot;
       await saveDoc("games",id,obj);
       if(g&&g.date!==v.date&&store.statgames[g.date]){await saveDoc("statgames",v.date,store.statgames[g.date]);await removeDoc("statgames",g.date)}},
     del:g?["game",g.id]:null});
-  const op=$("#sf-opp"),lg=$("#sf-lg"),us=$("#sf-us"),th=$("#sf-them"),ot=$("#sf-ot");
-  op.addEventListener("change",()=>{const o=get("opps",op.value);if(o)lg.checked=!!o.league});
+  const op=$("#sf-opp"),lg=$("#sf-lg"),us=$("#sf-us"),th=$("#sf-them"),ot=$("#sf-ot"),tp=$("#sf-type");
+  op.addEventListener("change",()=>{const o=get("opps",op.value);if(o&&tp.value!=="exh")lg.checked=!!o.league});
+  let wasExh=tp.value==="exh";const lgSync=()=>{const ex=tp.value==="exh";if(ex){lg.checked=false}else if(wasExh){const o=get("opps",op.value);lg.checked=!!(o&&o.league)}lg.disabled=ex;lg.closest("label").classList.toggle("off",ex);wasExh=ex};
+  $$('#sheetform [data-seg="sf-type"]').forEach(b=>b.addEventListener("click",lgSync));lgSync();sheetInit=formState();
   const otSync=()=>{const has=us.value.trim()!==""&&th.value.trim()!=="";ot.disabled=!has;if(!has)ot.checked=false;ot.closest("label").classList.toggle("off",!has)};
   us.addEventListener("input",otSync);th.addEventListener("input",otSync);otSync();
 }
@@ -1450,8 +1867,9 @@ function clipSheet(c,isNew){openSheet({title:isNew?"Add film clip":"Edit clip",f
     rememberAuthor(v.author);return saveDoc("clips",isNew?uid("c"):c.id,{...c,...v,url,author:v.author||c.author||user.cid})},del:isNew?null:["clip",c.id]})}
 function postSheet(p,isNew){openSheet({title:isNew?"Post to the team":"Edit post",fields:[{key:"text",label:"Message",type:"textarea",req:true},authorField(isNew),{key:"pinned",label:"Pin to the top",type:"check"}],value:{...p,author:isNew?lastAuthor():authorOf(p.author)},saved:isNew?"Posted to the team":"Post saved",
   onSave:v=>{rememberAuthor(v.author);return saveDoc("posts",isNew?uid("po"):p.id,{...p,...v,author:v.author||p.author||user.cid,ts:isNew?Date.now():p.ts})},del:isNew?null:["post",p.id]})}
-function glossSheet(coll,c){const calls=coll==="calls";const cats=calls?["Defense","Offense","Out of bounds","Situations"]:["Defense","Offense","Situations","Analytics"];
-  openSheet({title:(c?"Edit ":"Add ")+(calls?"call":"term"),fields:[{key:"name",label:calls?"Call word":"Term",req:true,half:true},{key:"cat",label:"Type",type:"select",options:cats,half:true,req:true},{key:"def",label:"What it means",type:"textarea",req:true}],value:c||{},saved:(calls?"Call":"Term")+(c?" saved":" added"),
+function glossSheet(coll,c){const calls=coll==="calls";const cats=calls?CALL_CATS:GLOSS_GROUPS;
+  const value=c?{...c}:(!calls&&GLOSS_GROUPS.includes(glossGrp)?{cat:glossGrp}:{});
+  openSheet({title:(c?"Edit ":"Add ")+(calls?"call":"term"),intro:c&&!calls&&!GLOSS_GROUPS.includes(c.cat)?`This term was filed under “${esc(c.cat||"none")}”. Pick one of the current groups.`:"",fields:[{key:"name",label:calls?"Call word":"Term",req:true,max:60},{key:"cat",label:calls?"Type":"Group",type:"select",options:cats,req:true},{key:"def",label:"What it means",type:"textarea",req:true,max:400}],value,saved:(calls?"Call":"Term")+(c?" saved":" added"),
   onSave:v=>{const dup=items(coll).find(x=>(!c||x.id!==c.id)&&String(x.name).trim().toLowerCase()===v.name.trim().toLowerCase());if(dup){$("#sf-name").focus();throw new Error(`“${dup.name}” is already in ${calls?"our calls":"the terms"}`)}return saveDoc(coll,c?c.id:uid(calls?"k":"t"),v)},del:c?[coll==="calls"?"call":"term",c.id]:null})}
 function standSheet(s){if(s&&s.id==="cpc"){toast("Our row updates from the Schedule",true);return}
   const teams=oppOptions().filter(([id])=>!s?!get("stand",id):true);const n={type:"number",req:true,half:true,int:true,lo:0,hi:200};
@@ -1462,10 +1880,26 @@ function standSheet(s){if(s&&s.id==="cpc"){toast("Our row updates from the Sched
 function lresSheet(r){const teams=oppOptions();const n={type:"number",req:true,half:true,int:true,lo:0,hi:200};
   openSheet({title:r?"Edit result":"Add league result",fields:[{key:"date",label:"Date",type:"date",req:true},{key:"a",label:"Team",type:"select",options:teams,half:true,req:true},{key:"as",label:"Score",...n},{key:"b",label:"Team",type:"select",options:teams,half:true,req:true},{key:"bs",label:"Score",...n}],value:r||{},saved:r?"Result saved":"Result added",
   onSave:v=>{if(!inSeason(v.date)){$("#sf-date").focus();throw new Error("Pick a date in the "+CONFIG.season+" season")}if(v.a===v.b)throw new Error("Pick two different teams");if(v.as===v.bs){$("#sf-as").focus();throw new Error("Basketball games can't end in a tie. Check the score.")}return saveDoc("lres",r?r.id:uid("r"),v)},del:r?["lres",r.id]:null})}
-function meetSheet(oid,idx){const o=get("opps",oid);if(!o)return;const arr=o.last||[];const m=idx!=null?arr[idx]:null;const LS_=lastSeason();const n={type:"number",req:true,half:true,int:true,lo:0,hi:200};
-  openSheet({title:m?"Edit meeting":"Add last-season meeting",intro:`A game we played against ${esc(o.name)} in ${LS_.label}.`,fields:[{key:"date",label:"Date",type:"date",req:true},{key:"site",label:"Where",type:"seg",options:[["home","Home"],["away","Away"],["neutral","Neutral"]],req:true},{key:"us",label:"Our score",...n},{key:"them",label:"Their score",...n},{key:"note",label:"Note",hint:"Optional"}],value:m||{},saved:m?"Meeting saved":"Meeting added",
+function meetSheet(oid,idx){const o=get("opps",oid);if(!o)return;const arr=o.last||[];const m=idx!=null?arr[idx]:null;const PS=pastSeasons();const LS_={lo:PS[1].lo,hi:PS[0].hi,label:PS[1].label+" or "+PS[0].label};const n={type:"number",req:true,half:true,int:true,lo:0,hi:200};
+  openSheet({title:m?"Edit meeting":"Add past meeting",intro:`A game we played against ${esc(o.name)} in ${LS_.label}.`,fields:[{key:"date",label:"Date",type:"date",req:true},{key:"site",label:"Where",type:"seg",options:[["home","Home"],["away","Away"],["neutral","Neutral"]],req:true},{key:"us",label:"Our score",...n},{key:"them",label:"Their score",...n},{key:"note",label:"Note",hint:"Optional"}],value:m||{},saved:m?"Meeting saved":"Meeting added",
   onSave:v=>{if(!(m&&v.date===m.date)&&!(realDate(v.date)&&v.date>=LS_.lo&&v.date<=LS_.hi)){$("#sf-date").focus();throw new Error(`Pick a date in the ${LS_.label} season`)}if(v.us===v.them){$("#sf-us").focus();throw new Error("Basketball games can't end in a tie. Check the score.")}
     const rec={...(m||{}),date:v.date,site:v.site,us:v.us,them:v.them,res:v.us>v.them?"W":"L",note:(v.note||"").slice(0,200)};if(!rec.note)delete rec.note;const a=[...arr];if(m)a[idx]=rec;else a.push(rec);a.sort((x,y)=>String(x.date).localeCompare(String(y.date)));return saveDoc("opps",oid,{...o,last:a})},del:m?["meet",oid,idx]:null})}
+
+/* ---------- Team history ---------- */
+function cleanSeasonRow(x,others){const fail=m=>{throw new Error(m)};if(!x||typeof x!=="object")fail("Each season needs season, w, l, lw and ll");
+  const season=String(x.season||"").trim().replace(/[–—]/g,"-");const m=/^(\d{4})-(\d{2})$/.exec(season);if(!m||(+m[1]+1)%100!==+m[2])fail(`Season “${x.season||""}” should look like 2025-26`);
+  const n={};for(const k of["w","l","lw","ll"]){const v=x[k]===""||x[k]==null?NaN:Number(x[k]);if(!Number.isInteger(v)||v<0||v>40)fail(`${season}: ${({w:"Overall wins",l:"Overall losses",lw:"League wins",ll:"League losses"})[k]} must be a whole number from 0 to 40`);n[k]=v}
+  if(n.lw>n.w||n.ll>n.l)fail(`${season}: league wins and losses can't be more than overall wins and losses`);
+  if((others||[]).some(o=>o.season===season))fail(`${season} is already listed`);
+  const str=(v,max)=>String(v??"").replace(/\s+/g," ").trim().slice(0,max);const out={season,...n};const f=str(x.finish,80),c=str(x.coach,60),no=str(x.notes,300);if(f)out.finish=f;if(c)out.coach=c;if(no)out.notes=no;return out}
+function histListHTML(){const h=teamHist();
+  return `<p class="small muted" style="margin:0">The Scouting page shows the two most recent seasons.</p>${h.map((x,i)=>`<div class="tplitem"><button type="button" class="tplrow nomini" data-act="histRow" data-i="${i}"><span><b class="num">${esc(seasonTxt(x.season))}</b><span class="num">${x.w}–${x.l} overall · ${x.lw}–${x.ll} league${x.finish?" · "+esc(x.finish):""}</span></span></button><button type="button" class="btn icon del" data-act="histDel" data-i="${i}" aria-label="Delete ${esc(seasonTxt(x.season))}">${TRASH}</button></div>`).join("")||'<p class="muted" style="margin:0">No seasons yet.</p>'}<div class="row"><button type="button" class="btn gold" data-act="histAdd">${PLUS}Add season</button></div>`}
+function histSheet(i){const arr=teamHist();const x=i!=null?arr[i]:null;const n={type:"number",req:true,half:true,int:true,lo:0,hi:40};
+  const y=parseInt(CONFIG.season,10);const taken=new Set(arr.map(a=>a.season));let sug="";for(let k=1;k<4&&!x;k++){const c=`${y-k}-${String(y-k+1).slice(2)}`;if(!taken.has(c)){sug=c;break}}
+  openSheet({title:x?"Edit "+seasonTxt(x.season):"Add a season",fields:[{key:"season",label:"Season",req:true,max:7,hint:"Like 2025-26"},{key:"w",label:"Overall wins",...n},{key:"l",label:"Overall losses",...n},{key:"lw",label:"League wins",...n},{key:"ll",label:"League losses",...n},{key:"finish",label:"Finish",max:80,hint:"Optional, like 2nd in league, district semifinal"},{key:"coach",label:"Head coach",max:60,hint:"Optional"},{key:"notes",label:"Notes",type:"textarea",max:300,hint:"Optional"}],
+    value:x?{...x}:{season:sug},saved:x?"Season saved":"Season added",
+    onSave:v=>{let row;try{row=cleanSeasonRow(v,arr.filter((_,k)=>k!==i))}catch(e){const el=$("#sf-season");if(/Season|already/.test(e.message)&&el)el.focus();throw e}const a=arr.slice();if(x)a[i]=row;else a.push(row);a.sort((p,q)=>q.season.localeCompare(p.season));return saveDoc("history","seasons",{seasons:a})},
+    del:null})}
 
 /* ---------- Delete: warning, validation, Undo ---------- */
 const plural=(n,w)=>n+" "+w+(n===1?"":"s");
@@ -1485,7 +1919,7 @@ function deleteFlow(kind,id,idx){
       run:async()=>{if(imp)await removeDoc("statgames",g.date);await removeDoc("games",id)},after:()=>{if(location.hash.startsWith("#game-"))location.hash="schedule"}}}
   else if(kind==="play"){const p=get("plays",id);if(!p)return;cfg={title:`Delete ${p.name}?`,body:"It's removed from the playbook for every coach and player.",impacts:[plural(p.phases.length,"step")+" of diagram work",p.notes&&"Its roles, notes and reads"].filter(Boolean),button:"Delete play",done:p.name+" deleted",run:()=>removeDoc("plays",id),after:()=>{ed=null;curPlay=null}}}
   else if(kind==="oppPlayer"){const o=get("opps",id);const pl=o&&o.players[+idx];if(!pl)return;cfg={title:`Remove #${pl.no} ${pl.name}?`,body:`From ${o.name}'s players to know, with his tendencies and notes.`,button:"Remove player",done:"Player removed",run:()=>{const arr=[...o.players];arr.splice(+idx,1);return saveDoc("opps",id,{...o,players:arr})}}}
-  else if(kind==="meet"){const o=get("opps",id);const m=o&&(o.last||[])[+idx];if(!m)return;cfg={title:"Delete this meeting?",body:`${esc(longDate(D(m.date)))}, ${D(m.date).getFullYear()}: ${m.res} ${m.us}–${m.them} will be removed from last season.`,button:"Delete meeting",done:"Meeting deleted",run:()=>{const a=[...o.last];a.splice(+idx,1);return saveDoc("opps",id,{...o,last:a})}}}
+  else if(kind==="meet"){const o=get("opps",id);const m=o&&(o.last||[])[+idx];if(!m)return;cfg={title:"Delete this meeting?",body:`${esc(longDate(D(m.date)))}, ${D(m.date).getFullYear()}: ${m.res} ${m.us}–${m.them} will be removed from past meetings.`,button:"Delete meeting",done:"Meeting deleted",run:()=>{const a=[...o.last];a.splice(+idx,1);return saveDoc("opps",id,{...o,last:a})}}}
   else if(kind==="badge"){const b=get("badges",id);if(!b)return;const n=players().filter(p=>{const v=metric(p,seasonStats().find(x=>x.id===p.id),b.stat);return v>=0&&v>=b_min(b)}).length;cfg={title:`Delete the ${b.name} badge?`,body:"The rule is removed. To hide it for now instead, edit it and turn it off.",impacts:[n&&`${plural(n,"player")} currently showing it will lose it`].filter(Boolean),button:"Delete badge",done:"Badge deleted",run:()=>removeDoc("badges",id)}}
   else cfg=({note:()=>simple("notes","note",x=>"“"+esc(excerpt(x.text))+"”"),clip:()=>simple("clips","clip",x=>esc(x.label)+" · "+esc(x.t)),post:()=>simple("posts","post",x=>"“"+esc(excerpt(x.text))+"” will disappear from every player's feed."),
     call:()=>simple("calls","call",x=>esc(x.name.toUpperCase())+": "+esc(x.def)),term:()=>simple("terms","term",x=>esc(x.name)),stand:()=>simple("stand","standings row",x=>esc(oppName(id))+" will be removed from the standings."),lres:()=>simple("lres","result",x=>esc(oppName(x.a))+" "+x.as+", "+esc(oppName(x.b))+" "+x.bs),award:()=>simple("awards","award",x=>esc(x.name)+" for "+esc(pName(P(x.pid))||"a former player"))}[kind]||(()=>null))();
@@ -1552,7 +1986,11 @@ function bindView(r){
     }
   }
   if(r==="playbook")bindPlaybook();
-  if(r==="glossary"){$$("[data-gtab]").forEach(b=>b.onclick=()=>{glossTab=b.dataset.gtab;render()});const q=$("#gq");q.oninput=()=>{glossQ=q.value;const pos=q.selectionStart;render();const n=$("#gq");n.focus();n.setSelectionRange(pos,pos)}}
+  if(r==="glossary"){$$("[data-gtab]").forEach(b=>b.onclick=()=>{glossTab=b.dataset.gtab;render()});
+    $$("[data-ggrp]").forEach(b=>b.onclick=()=>{glossGrp=glossGrp===b.dataset.ggrp?"":b.dataset.ggrp;render();const n=$(`[data-ggrp="${CSS.escape(glossGrp)}"]`);if(n){n.focus({preventScroll:true});n.scrollIntoView({block:"nearest",inline:"center"})}});
+    $$("[data-gall]").forEach(b=>b.onclick=()=>{const open=b.dataset.gall==="open";$$("details.ggroup").forEach(d=>{open?glossOpen.add(d.dataset.grp):glossOpen.delete(d.dataset.grp)});render()});
+    $$("details.ggroup").forEach(d=>d.addEventListener("toggle",()=>{if(glossQ.trim()||glossGrp)return;d.open?glossOpen.add(d.dataset.grp):glossOpen.delete(d.dataset.grp);const b=$("[data-gall]");if(b){const all=$$("details.ggroup").every(x=>x.open);b.dataset.gall=all?"close":"open";b.textContent=all?"Collapse all":"Expand all"}}));
+    const q=$("#gq");if(q)q.oninput=()=>{glossQ=q.value;const pos=q.selectionStart;render();const n=$("#gq");n.focus();n.setSelectionRange(pos,pos)}}
 }
 
 /* ================= Plain website: remove any app install left from earlier versions ================= */
@@ -1562,15 +2000,66 @@ if("serviceWorker" in navigator){navigator.serviceWorker.getRegistrations().then
 window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a coach first");if(!o||!String(o.name||"").trim()||!o.cat||!Array.isArray(o.phases)||o.phases.length<2)throw new Error("A play needs a name, a category and at least 2 steps");
   const dup=plays().find(p=>p.name.trim().toLowerCase()===String(o.name).trim().toLowerCase());if(dup)throw new Error("A play named "+dup.name+" already exists");
   const id=uid("pl");await saveDoc("plays",id,{name:String(o.name).trim().slice(0,80),cat:o.cat,court:o.court==="full"?"full":"half",roles:o.roles||{},notes:String(o.notes||"").slice(0,3000),phases:cleanPhases(o.phases),author:user.cid,ts:Date.now()});render();return id},
-  /* CPC.addGames([{date:"YYYY-MM-DD",time:"19:00"|"7:00 PM"|"TBA",opp:"Opponent name",site?:"home"|"away"|"neutral",home?:bool,lg?:bool}]) creates missing opponents; skips dates that already have a game */
-  async addGames(list){if(!user||!isCoach())throw new Error("Sign in as a coach first");const out={added:[],skipped:[]};
-    for(const g of list){if(!/^\d{4}-\d{2}-\d{2}$/.test(g.date||"")||!String(g.opp||"").trim()||parseTime(g.time)===null)throw new Error("Bad game: "+JSON.stringify(g));
+  /* CPC.addGames([{date:"YYYY-MM-DD",time:"19:00"|"7:00 PM"|"TBA",opp:"Opponent name",site?:"home"|"away"|"neutral",home?:bool,lg?:bool,
+       type?:"exh",event?:"Jamboree",venue?:"Name (neutral site only)",city?}]) creates missing opponents; skips dates that already have a game */
+  async addGames(list){needCoach();if(!Array.isArray(list))throw new Error("addGames needs an array of games");const out={added:[],skipped:[]};
+    for(const g of list){if(!g||!realDate(g.date)||!String(g.opp||"").trim()||parseTime(g.time)===null)throw new Error("Bad game: "+JSON.stringify(g));
       if(games().find(x=>x.date===g.date)){out.skipped.push(g.date);continue}
-      const nm=String(g.opp).trim();let o=opps().find(x=>x.name.trim().toLowerCase()===nm.toLowerCase());
-      if(!o){const oid=uid("o");await saveDoc("opps",oid,{name:nm,city:g.city||"",status:"none",league:!!g.lg,coach:{},keys:[],players:[],last:[]});o={id:oid}}
+      const exh=g.type==="exh";const oid=await cpcOpp(g.opp,{city:g.city,league:!exh&&!!g.lg});
       const site=["home","away","neutral"].includes(g.site)?g.site:(g.home?"home":"away");
-      await saveDoc("games",uid("g"),{date:g.date,time:parseTime(g.time),opp:o.id,site,home:site==="home",lg:!!g.lg});out.added.push(g.date)}
-    render();return out}};
+      const obj=cpcGameExtras({date:g.date,time:parseTime(g.time),opp:oid,site,home:site==="home",lg:!exh&&!!g.lg},g);
+      await saveDoc("games",uid("g"),obj);out.added.push(g.date)}
+    render();return out},
+  /* CPC.updateGame("YYYY-MM-DD",{time?,site?,lg?,type?:"exh"|"reg",event?,venue?,opp?:"Opponent name"}) -> true | false (no game that day) */
+  async updateGame(date,patch){needCoach();const g=games().find(x=>x.date===date);if(!g)return false;patch=patch||{};
+    const allowed=["time","site","lg","type","event","venue","opp"];const extra=Object.keys(patch).filter(k=>!allowed.includes(k));if(extra.length)throw new Error("updateGame can't change: "+extra.join(", "));
+    const {d:_d,played:_p,res:_r,id:_i,...base}=g;const obj={...base};
+    if("time" in patch){const t=parseTime(patch.time);if(t===null)throw new Error("Can't read the time “"+patch.time+"”. Use 19:00, 7:00 PM or TBA");obj.time=t}
+    if("site" in patch){if(!["home","away","neutral"].includes(patch.site))throw new Error("site must be home, away or neutral");obj.site=patch.site}
+    obj.site=siteOf(obj);obj.home=obj.site==="home";
+    if("type" in patch){if(patch.type==="exh")obj.type="exh";else if(patch.type==null||patch.type==="reg"||patch.type==="")delete obj.type;else throw new Error('type must be "exh" or "reg"')}
+    if("lg" in patch)obj.lg=!!patch.lg;
+    if("opp" in patch){if(!String(patch.opp||"").trim())throw new Error("Opponent is required");obj.opp=await cpcOpp(patch.opp,{league:obj.type!=="exh"&&!!obj.lg})}
+    const ext={event:"event" in patch?patch.event:obj.event,venue:"venue" in patch?patch.venue:obj.venue,type:obj.type};
+    await saveDoc("games",g.id,cpcGameExtras(obj,ext));render();return true},
+  /* CPC.removeGame("YYYY-MM-DD") -> true | false. Also removes that game's imported box score. */
+  async removeGame(date){needCoach();const g=games().find(x=>x.date===date);if(!g)return false;if(store.statgames[g.date])await removeDoc("statgames",g.date);await removeDoc("games",g.id);render();return true},
+  /* CPC.updateOpp("Opponent name",{name?,city?,league?}) -> opponent id */
+  async updateOpp(name,patch){needCoach();const o=cpcFindOpp(name);if(!o)throw new Error("No opponent named "+name);patch=patch||{};
+    const extra=Object.keys(patch).filter(k=>!["name","city","league"].includes(k));if(extra.length)throw new Error("updateOpp can't change: "+extra.join(", "));
+    const obj={...o};if("name" in patch){const nm=String(patch.name||"").replace(/\s+/g," ").trim();if(!nm||!/[a-z]/i.test(nm)||nm.length>60)throw new Error("Opponent name needs 1 to 60 characters with a letter");const dp=oppDup(nm,o.id);if(dp)throw new Error("There's already an opponent named "+dp.name);obj.name=nm}
+    if("city" in patch)obj.city=String(patch.city||"").replace(/\s+/g," ").trim().slice(0,60);if("league" in patch)obj.league=!!patch.league;
+    await saveDoc("opps",o.id,obj);render();return o.id},
+  /* CPC.removeOpp("Opponent name") -> true | false (not found). Refuses while any game points to it; removes its notes, clips, standings row and league results. */
+  async removeOpp(name){needCoach();const o=cpcFindOpp(name);if(!o)return false;const gs=games().filter(g=>g.opp===o.id);
+    if(gs.length)throw new Error(`${o.name} still has ${plural(gs.length,"game")} on the schedule (${gs.map(g=>g.date).join(", ")}). Remove those first.`);
+    for(const x of items("notes").filter(n=>n.opp===o.id))await removeDoc("notes",x.id);for(const x of items("clips").filter(n=>n.opp===o.id))await removeDoc("clips",x.id);
+    for(const r of items("lres").filter(r=>r.a===o.id||r.b===o.id))await removeDoc("lres",r.id);if(get("stand",o.id))await removeDoc("stand",o.id);
+    await removeDoc("opps",o.id);render();return true},
+  /* CPC.setOppHistory("Opponent name",[{date:"YYYY-MM-DD",site:"home"|"away"|"neutral",us,them,note?,src?,res?}]) replaces opps.last
+     (past meetings, last two seasons only). Creates the opponent (status "none") if missing. -> opponent id */
+  async setOppHistory(name,meetings){needCoach();if(!Array.isArray(meetings))throw new Error("meetings must be an array");const PS=pastSeasons();
+    const clean=meetings.map((m,k)=>{const at=`Meeting ${k+1}`;if(!m||typeof m!=="object")throw new Error(at+" is not an object");
+      if(!inPast2(m.date))throw new Error(`${at}: date must be YYYY-MM-DD in ${PS[1].label} or ${PS[0].label}`);
+      if(!["home","away","neutral"].includes(m.site))throw new Error(`${at}: site must be home, away or neutral`);
+      const us=Number(m.us),them=Number(m.them);if(![us,them].every(x=>Number.isInteger(x)&&x>=0&&x<=200))throw new Error(`${at}: scores must be whole numbers from 0 to 200`);
+      if(us===them)throw new Error(`${at}: games can't end in a tie`);const res=us>them?"W":"L";if(m.res!=null&&m.res!==res)throw new Error(`${at}: res "${m.res}" doesn't match the score`);
+      const r={date:m.date,site:m.site,us,them,res};const note=String(m.note||"").trim().slice(0,200);if(note)r.note=note;const src=String(m.src||"").trim().slice(0,40);if(src)r.src=src;return r});
+    const seen=new Set();clean.forEach(r=>{const key=r.date;if(seen.has(key))throw new Error("Two meetings on "+key);seen.add(key)});
+    clean.sort((a,b)=>a.date.localeCompare(b.date));const oid=await cpcOpp(name,{});const o=get("opps",oid);await saveDoc("opps",oid,{...o,last:clean});render();return oid},
+  /* CPC.setTeamHistory([{season:"2025-26",w,l,lw,ll,finish?,coach?,notes?}]) -> number of seasons stored (whole numbers 0-40) */
+  async setTeamHistory(seasons){needCoach();if(!Array.isArray(seasons))throw new Error("seasons must be an array");const out=[];for(const x of seasons)out.push(cleanSeasonRow(x,out));
+    out.sort((a,b)=>b.season.localeCompare(a.season));await saveDoc("history","seasons",{seasons:out});render();return out.length}};
+function needCoach(){if(!user||!isCoach())throw new Error("Sign in as a coach first")}
+const cpcFindOpp=name=>{const nm=String(name||"").replace(/\s+/g," ").trim().toLowerCase();return nm?opps().find(o=>o.name.trim().toLowerCase()===nm):null};
+async function cpcOpp(name,{city,league}){const nm=String(name||"").replace(/\s+/g," ").trim();if(!nm||nm.length>60||!/[a-z]/i.test(nm))throw new Error("Opponent name needs 1 to 60 characters with a letter");
+  const o=cpcFindOpp(nm);if(o)return o.id;const oid=uid("o");await saveDoc("opps",oid,{name:nm,city:String(city||"").trim().slice(0,60),status:"none",league:!!league,coach:{},keys:[],players:[],last:[]});return oid}
+/* Same rules as the game form: exhibitions are never league games; event only on exhibitions; venue only at neutral sites */
+function cpcGameExtras(obj,src){const o={...obj};const exh=src.type==="exh";
+  const ev=String(src.event||"").replace(/\s+/g," ").trim();if(ev.length>60)throw new Error("Event name must be 60 characters or fewer");
+  const ven=String(src.venue||"").replace(/\s+/g," ").trim();if(ven.length>60)throw new Error("Venue must be 60 characters or fewer");
+  if(exh){o.type="exh";o.lg=false;if(ev)o.event=ev;else delete o.event}else{delete o.type;delete o.event}
+  if(o.site==="neutral"&&ven)o.venue=ven;else delete o.venue;return o}
 render();initDb();
 })();
 </script>
