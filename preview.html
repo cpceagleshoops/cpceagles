@@ -250,7 +250,7 @@ input:disabled{opacity:.45}
 .staffrow .em{overflow-wrap:anywhere}
 .logrow .when{flex:0 0 92px;font-size:12.5px;color:var(--muted)}
 .logrow .when button{background:none;border:none;padding:4px 0;color:inherit;font:inherit;cursor:pointer;text-align:left;min-height:32px;text-decoration:underline dotted;text-underline-offset:3px}
-.logrow .what b{overflow-wrap:anywhere}
+.logrow .what b{overflow-wrap:anywhere}.logrow .what .lbl{display:block;margin-top:4px}
 .adfilters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:10px;align-items:end;margin-bottom:12px}.adfilters .f{min-width:0}.adfilters select,.adfilters input{width:100%;min-width:0;box-sizing:border-box}
 .diff{display:grid;gap:10px}.diff .k{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
 .diff .v{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:start;font-size:13.5px}
@@ -846,12 +846,12 @@ const snapOf=(c,id)=>store[c][id]===undefined?undefined:JSON.parse(JSON.stringif
 async function saveDoc(c,id,data){
   if(recording)recording.push([c,id,snapOf(c,id)]);
   const clean=JSON.parse(JSON.stringify(data));delete clean.id;
-  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error}=await SB.from("docs").upsert({coll:c,id,data:clean,updated_at:new Date().toISOString()});if(error){toast("Couldn't save: "+error.message,true);throw new Error("Couldn't save. Check your connection and try again.")}store[c][id]=clean;return true}
+  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error}=await SB.from("docs").upsert({coll:c,id,data:clean,updated_at:new Date().toISOString()});if(isRls(error))throw sbAccessLost();if(error){toast("Couldn't save: "+error.message,true);throw new Error("Couldn't save. Check your connection and try again.")}store[c][id]=clean;return true}
   if(shared()){try{await DB.collection(col(c)).doc(id).set(clean);store[c][id]=clean;return true}catch(e){toast("Couldn't save to the shared hub. Saved on this device.",true)}}
   store[c][id]=clean;saveLocal();return true;
 }
 async function dropDoc(c,id){
-  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error,count}=await SB.from("docs").delete({count:"exact"}).eq("coll",c).eq("id",id);if(error||count===0){toast("Couldn't delete: "+(error?error.message:"nothing was removed"),true);throw new Error("Couldn't delete")}delete store[c][id];return}
+  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error,count}=await SB.from("docs").delete({count:"exact"}).eq("coll",c).eq("id",id);if(isRls(error))throw sbAccessLost();if(error||count===0){toast("Couldn't delete: "+(error?error.message:"nothing was removed"),true);throw new Error("Couldn't delete")}delete store[c][id];return}
   if(shared()){try{await DB.collection(col(c)).doc(id).delete()}catch(e){}}
   delete store[c][id];saveLocal();
 }
@@ -859,7 +859,7 @@ async function restoreAll(snaps){for(const [c,id,raw] of snaps.slice().reverse()
 async function removeDoc(c,id){
   if(recording)recording.push([c,id,snapOf(c,id)]);
   if(DEFMAP[c][id])return saveDoc(c,id,{deleted:true});
-  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error,count}=await SB.from("docs").delete({count:"exact"}).eq("coll",c).eq("id",id);if(error||count===0){toast("Couldn't delete: "+(error?error.message:"nothing was removed"),true);throw new Error("Couldn't delete. Check your connection and try again.")}delete store[c][id];return true}
+  if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error,count}=await SB.from("docs").delete({count:"exact"}).eq("coll",c).eq("id",id);if(isRls(error))throw sbAccessLost();if(error||count===0){toast("Couldn't delete: "+(error?error.message:"nothing was removed"),true);throw new Error("Couldn't delete. Check your connection and try again.")}delete store[c][id];return true}
   if(shared()){try{await DB.collection(col(c)).doc(id).delete();delete store[c][id];return true}catch(e){toast("Couldn't delete. Try again.",true);return false}}
   delete store[c][id];saveLocal();return true;
 }
@@ -867,7 +867,11 @@ async function removeDoc(c,id){
 let sbLoaded=false,sbChannel=null,sbGen=0,sbFailed=false,sbBooting=!!SB,sbChanOk=false,sbLastFetch=0;
 /* Who is signed in: the shared player account, or a staff member (role from public.my_role(); null = not on the staff list or deactivated) */
 let sbRecovery=false;
-const NOT_STAFF="This email isn't on the coaching staff list yet. Ask the site admin to add you.";
+const NOT_STAFF="This email doesn't have coach access. Ask the site admin to add you or turn your access back on.";
+/* Docs write refused by row-level security (code 42501): coach access was removed or turned off. Sign out locally. */
+const ACCESS_LOST="You no longer have coach access. Sign in again.";
+function sbAccessLost(){toast(ACCESS_LOST,true);loginStage={step:"signin",u:"coach",msg:ACCESS_LOST};setTimeout(async()=>{try{await SB.auth.signOut({scope:"local"})}catch(e){}if(user){user=null;sbClear();closeSheet(true);render()}toast(ACCESS_LOST,true)},0);return new Error(ACCESS_LOST)}
+const isRls=e=>!!e&&(e.code==="42501"||/row-level security/i.test(String(e.message||"")));
 async function sbResolve(sess){const em=sess&&sess.user&&sess.user.email;if(!em)return null;const e=em.toLowerCase();
   if(e===CONFIG.supabase.playerEmail)return{role:"player",email:e};
   const {data,error}=await SB.rpc("my_role");if(error)throw error;
@@ -896,7 +900,12 @@ async function sbLoad(silent){
     sbFailed=true;syncState="sbfail"}
   if(silent){paintSync();requestRender()}else render();
 }
-function sbRefetchSoon(){if(!SB||!user||!sbLoaded||sbFailed||Date.now()-sbLastFetch<60000)return;sbLastFetch=Date.now();sbLoad(true)}
+function sbRefetchSoon(){if(!SB||!user||!sbLoaded||sbFailed||Date.now()-sbLastFetch<60000)return;sbLastFetch=Date.now();sbLoad(true);if(isCoach())sbRecheckRole()}
+/* Coach sessions: re-check the role on refocus. Off the staff list → sign out; promoted/demoted → update the menu. Network errors are ignored. */
+async function sbRecheckRole(){const u0=user;let r;try{const {data,error}=await SB.rpc("my_role");if(error)return;r=Array.isArray(data)?data[0]:data;if(r&&typeof r==="object")r=Object.values(r)[0]}catch(e){return}
+  if(user!==u0||!user)return;
+  if(r!=="admin"&&r!=="coach"){loginStage={step:"signin",u:"coach",email:user.email,msg:NOT_STAFF};user=null;try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear();closeSheet(true);render();toast(NOT_STAFF,true);return}
+  if(r!==user.role){user={...user,role:r};requestRender()}}
 if(SB){window.addEventListener("focus",sbRefetchSoon);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")sbRefetchSoon()})}
 async function sbBoot(){
   user=null;
@@ -1006,7 +1015,7 @@ let user=LOCAL_OK?LS.get(CONFIG.sessionKey):null;
 const ROUTES={coach:["home","schedule","roster","stats","scouting","league","playbook","glossary","badges"],admin:["home","schedule","roster","stats","scouting","league","playbook","glossary","badges","admin"],player:["home","schedule","roster","stats","scouting","league","playbook","glossary"]};
 const TABS=["home","schedule","scouting","playbook"];
 const route=()=>location.hash.slice(1)||"home";
-function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin()||(!SB&&isCoach());return (ROUTES[user.role]||[]).includes(r)}
+function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin();return (ROUTES[user.role]||[]).includes(r)}
 window.addEventListener("popstate",()=>{if(suppressPop>0){suppressPop--;return}if($("#cfmroot")){$("#cfmroot").remove()}if($("#sheetroot").firstChild){if(sheetDirty()){history.pushState({sheet:1},"",location.href);confirmDiscard(()=>closeSheet())}else closeSheet(false,true)}});
 window.addEventListener("hashchange",()=>{stopPlayback();ed=null;closeSheet(true);render()});
 const IC={
@@ -2106,7 +2115,13 @@ const staffRow=email=>(ADM.staff||[]).find(s=>s.email===email);
 const admWho=email=>{const s=staffRow(String(email||"").toLowerCase());return s&&s.name?s.name:(email||"Unknown")};
 const snip=(t,n=48)=>{t=String(t??"").replace(/\s+/g," ").trim();return t.length>n?t.slice(0,n-1)+"…":t};
 const shortDate=x=>realDate(x)?mon(D(x))+" "+D(x).getDate():String(x||"");
-function admLabel(a){const o=a.old||{},n=a.new||{};const d=a.action==="delete"||(n.deleted&&Object.keys(n).length<=2)?o:(Object.keys(n).length?n:o);const id=a.doc_id;let s="";
+/* Built-in items (DEF, e.g. glossary terms) live in code; the db only holds overrides. So the first saved override of a built-in is a change
+   (or a delete, if it says deleted:true), and removing the override brings the built-in back. Restoring the built-in = drop the override. */
+function admEff(a){const def=DEFMAP[a.coll]&&DEFMAP[a.coll][a.doc_id];if(!def||a._eff)return a;const {id:_i,...base}=def;
+  if(a.action==="insert")return{...a,_eff:1,builtin:base,action:"update",old:base,drop:true};
+  if(a.action==="delete")return{...a,_eff:1,builtin:base,action:"update",new:base};
+  return{...a,_eff:1,builtin:base}}
+function admLabel(a){a=admEff(a);const o=a.old||{},n=a.new||{};let d=a.action==="delete"||(n.deleted&&Object.keys(n).length<=2)?o:(Object.keys(n).length?n:o);const id=a.doc_id;let s="";if(a.builtin)d={...a.builtin,...(d.deleted&&Object.keys(d).length<=2?{}:d)};
   try{switch(a.coll){
     case"games":s=(d.opp?`${vsAt(d)} ${oppName(d.opp)}`:"Game")+(d.date?" · "+shortDate(d.date):"");break;
     case"players":s=d.first||d.last?`${d.no!=null&&d.no!==""?"#"+d.no+" ":""}${[d.first,d.last].filter(Boolean).join(" ")}`:"";break;
@@ -2124,9 +2139,9 @@ function admLabel(a){const o=a.old||{},n=a.new||{};const d=a.action==="delete"||
     default:s=d.name||d.title||"";
   }}catch(e){s=""}
   return String(s||"").trim()||String(id)}
-function admAction(a){const o=a.old||{},n=a.new||{};if(a.action==="insert")return["Added","good"];if(a.action==="delete")return["Deleted","bad"];if(n.deleted&&!o.deleted)return["Deleted","bad"];if(o.deleted&&!n.deleted)return["Brought back","good"];return["Changed","gold"]}
+function admAction(a){a=admEff(a);const o=a.old||{},n=a.new||{};if(a.action==="insert")return["Added","good"];if(a.action==="delete")return["Deleted","bad"];if(n.deleted&&!o.deleted)return["Deleted","bad"];if(o.deleted&&!n.deleted)return["Brought back","good"];return["Changed","gold"]}
 const exactTime=at=>new Date(at).toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
-function canRestore(a){if(!COLLS.includes(a.coll)||a.coll==="accounts")return null;if(a.action==="insert")return store[a.coll]&&store[a.coll][a.doc_id]!==undefined?"Remove it":null;return a.old&&typeof a.old==="object"?"Restore this version":null}
+function canRestore(a){a=admEff(a);if(!COLLS.includes(a.coll)||a.coll==="accounts")return null;if(a.drop)return store[a.coll]&&store[a.coll][a.doc_id]!==undefined?"Restore this version":null;if(a.action==="insert")return store[a.coll]&&store[a.coll][a.doc_id]!==undefined?"Remove it":null;return a.old&&typeof a.old==="object"?"Restore this version":null}
 function adminView(){
   const head=`<div class="head"><div><div class="eyebrow">Admin only</div><h1>Staff &amp; changes</h1><p>Who can edit the site, and every change they've made.</p></div></div>`;
   if(!SB)return head+`<div class="empty">Available on the live site.</div>`;
@@ -2162,7 +2177,7 @@ function admLogHTML(){const f=ADM.f;
   else if(!ADM.log.length)rows=ADM.logBusy||!ADM.logLoaded?`<p class="muted" role="status">Loading changes…</p>`:`<div class="empty">${any?"No changes match these filters.":"No changes yet."}</div>`;
   else rows=ADM.log.map(a=>{const id=esc(String(a.id));const [al,ac]=admAction(a);const rs=canRestore(a);const ex=ADM.exact.has(String(a.id));
     return `<div class="logrow"><div class="when"><button type="button" data-act="admWhen" data-id="${id}" title="${esc(exactTime(a.at))}" aria-label="${esc(exactTime(a.at))}"><time datetime="${esc(a.at)}">${esc(ex?exactTime(a.at):ago(new Date(a.at).getTime()))}</time></button></div>
-    <div class="what"><div class="row" style="gap:6px"><span class="chip ${ac}">${al}</span><b>${esc(admLabel(a))}</b></div><div class="small muted">${esc(admWho(a.actor))} · ${esc(sectName(a.coll))}</div></div>
+    <div class="what"><span class="chip ${ac}">${al}</span><b class="lbl">${esc(admLabel(a))}</b><div class="small muted">${esc(admWho(a.actor))} · ${esc(sectName(a.coll))}</div></div>
     <div class="row" style="gap:6px"><button class="btn sm" data-act="admView" data-id="${id}">View</button>${rs?`<button class="btn sm" data-act="admRestore" data-id="${id}">${rs}</button>`:""}</div></div>`}).join("")
     +(ADM.logErr?`<p class="small" style="color:var(--bad)">${esc(ADM.logErr)}</p>`:"")
     +(!ADM.logDone?`<div class="morep" style="text-align:center;margin-top:10px"><button class="btn sm" data-act="admMore" ${ADM.logBusy?"disabled":""}>${ADM.logBusy?"Loading…":"Load more"}</button></div>`:"");
@@ -2215,7 +2230,7 @@ Object.assign(ACT,{
   admMore(){if(!ADM.logBusy&&!ADM.logDone)admLoadLog(false)},
   admRefresh(){admLoadStaff();admLoadLog(true)},
   admClear(){ADM.f={actor:"",coll:"",from:"",to:""};admLoadLog(true)},
-  admView(d){const a=audById(d.id);if(!a)return;const [al]=admAction(a);const o=a.old||{},n=a.new||{};
+  admView(d){const a=admEff(audById(d.id)||{});if(!a.id)return;const [al]=admAction(a);const o=a.old||{},n=a.new||{};
     const keys=[...new Set([...Object.keys(o),...Object.keys(n)])].filter(k=>JSON.stringify(o[k])!==JSON.stringify(n[k]));
     const lab=k=>FIELD_L[k]||k;
     const blank=v=>v==null||v===""||(Array.isArray(v)&&!v.length)||(typeof v==="object"&&!Array.isArray(v)&&!Object.keys(v).length);
@@ -2227,12 +2242,12 @@ Object.assign(ACT,{
       <details class="rawjson"><summary class="small">Raw data</summary>${a.action!=="insert"?`<p class="small muted" style="margin:8px 0 4px">Before</p><pre>${esc(JSON.stringify(a.old,null,1))}</pre>`:""}${a.action!=="delete"?`<p class="small muted" style="margin:8px 0 4px">After</p><pre>${esc(JSON.stringify(a.new,null,1))}</pre>`:""}</details>`;
     const rs=canRestore(a);
     openInfo(admLabel(a),body,`<span class="grow"></span><button class="btn" data-act="closeSheet">Close</button>${rs?`<button class="btn gold" data-act="admRestore" data-id="${esc(String(a.id))}">${rs}</button>`:""}`)},
-  admRestore(d){if(!isAdmin())return;const a=audById(d.id);if(!a)return;const rs=canRestore(a);const lab=esc(admLabel(a));
+  admRestore(d){if(!isAdmin())return;const a=admEff(audById(d.id)||{});if(!a.id)return;const rs=canRestore(a);const lab=esc(admLabel(a));
     if(!rs)return toast(a.action==="insert"?"That item is already gone":"This change can't be restored",true);
     if(a.action==="insert")return confirmDelete({title:"Remove it?",body:`This removes <b>${lab}</b> (${esc(sectName(a.coll))}), which ${esc(admWho(a.actor))} added ${esc(ago(new Date(a.at).getTime()))}.`,button:"Remove it",done:"Removed",
       run:async()=>{await removeDoc(a.coll,a.doc_id)},after:()=>{admLoadLog(true)}});
     confirmDelete({title:"Restore this version?",body:`<b>${lab}</b> (${esc(sectName(a.coll))}) goes back to how it was before this change ${esc(ago(new Date(a.at).getTime()))}. Anything changed since then is replaced.`,button:"Restore",done:"Restored",
-      run:async()=>{await saveDoc(a.coll,a.doc_id,a.old)},after:()=>{admLoadLog(true)}})}
+      run:async()=>{if(a.drop){if(recording)recording.push([a.coll,a.doc_id,snapOf(a.coll,a.doc_id)]);await dropDoc(a.coll,a.doc_id)}else await saveDoc(a.coll,a.doc_id,a.old)},after:()=>{admLoadLog(true)}})}
 });
 
 /* ================= Page bindings ================= */
@@ -2316,7 +2331,37 @@ window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a 
     clean.sort((a,b)=>a.date.localeCompare(b.date));const oid=await cpcOpp(name,{});const o=get("opps",oid);await saveDoc("opps",oid,{...o,last:clean});render();return oid},
   /* CPC.setTeamHistory([{season:"2025-26",w,l,lw,ll,finish?,coach?,notes?}]) -> number of seasons stored (whole numbers 0-40) */
   async setTeamHistory(seasons){needCoach();if(!Array.isArray(seasons))throw new Error("seasons must be an array");const out=[];for(const x of seasons)out.push(cleanSeasonRow(x,out));
-    out.sort((a,b)=>b.season.localeCompare(a.season));await saveDoc("history","seasons",{seasons:out});render();return out.length}};
+    out.sort((a,b)=>b.season.localeCompare(a.season));await saveDoc("history","seasons",{seasons:out});render();return out.length},
+  /* CPC.setStandings(["Team", ...]) -> {added:[names], kept:[names]}. Makes sure each team is a league opponent with a standings row
+     (new rows start at 0-0). Skips our own name. Existing rows are left alone. */
+  async setStandings(names){needCoach();if(!Array.isArray(names))throw new Error("setStandings needs an array of team names");const out={added:[],kept:[]};const seen=new Set();
+    for(const raw of names){const nm=String(raw||"").replace(/\s+/g," ").trim();if(!nm)continue;const k=nm.toLowerCase();
+      if(/^(cpc|cpc eagles|cedar park christian|cedar park christian eagles|cedar park christian \(bothell\))$/.test(k)||seen.has(k))continue;seen.add(k);
+      const oid=await cpcOpp(nm,{league:true});const o=get("opps",oid);if(o&&!o.league)await saveDoc("opps",oid,{...o,league:true});
+      if(get("stand",oid)){out.kept.push(o?o.name:nm);continue}
+      await saveDoc("stand",oid,{lw:0,ll:0,w:0,l:0});out.added.push(o?o.name:nm)}
+    render();return out},
+  /* CPC.setOppScout("Opponent name",{coach?:{name,tenure,record,offense,defense,press,sets},players?:[{name,no,pos,yr,ht,info}],replacePlayers?:bool,source?:"text" (accepted, not stored)})
+     -> {coachFields:n, playersAdded:n, playersSkipped:[...]}. Coach: only non-empty fields are merged. Players: skips duplicates by jersey or name. */
+  async setOppScout(name,o){needCoach();const opp=cpcFindOpp(name);if(!opp)throw new Error("No opponent named "+name);o=o||{};
+    const extra=Object.keys(o).filter(k=>!["coach","players","replacePlayers","source"].includes(k));if(extra.length)throw new Error("setOppScout can't change: "+extra.join(", "));
+    const CK=["name","tenure","record","offense","defense","press","sets"];const coach={...(opp.coach||{})};let coachFields=0;
+    if(o.coach!=null){if(typeof o.coach!=="object"||Array.isArray(o.coach))throw new Error("coach must be an object");const bad=Object.keys(o.coach).filter(k=>!CK.includes(k));if(bad.length)throw new Error("Unknown coach fields: "+bad.join(", "));
+      CK.forEach(k=>{const v=o.coach[k];if(v==null)return;const t=String(v).trim();if(!t)return;if(t.length>(["name","tenure","record"].includes(k)?80:2000))throw new Error("coach."+k+" is too long");if(coach[k]!==t){coach[k]=t;coachFields++}})}
+    let list=o.replacePlayers?[]:[...(opp.players||[])];const added=[],skipped=[];
+    if(o.players!=null){if(!Array.isArray(o.players))throw new Error("players must be an array");
+      o.players.forEach((x,i)=>{const at="Player "+(i+1);if(!x||typeof x!=="object")throw new Error(at+" is not an object");
+        const nm=String(x.name||"").replace(/\s+/g," ").trim();if(!nm||nm.length>60)throw new Error(at+": name needs 1 to 60 characters");
+        const no=x.no==null?"":String(x.no).trim();if(no&&!/^\d{1,2}$/.test(no))throw new Error(at+": jersey must be 1 or 2 digits");
+        const pos=String(x.pos||"").trim().toUpperCase();if(pos&&!POS.includes(pos))throw new Error(at+": pos must be one of "+POS.join(", "));
+        const yr=String(x.yr||"").trim();const yrOk=YRS.find(y=>y.toLowerCase()===yr.toLowerCase());if(yr&&!yrOk)throw new Error(at+": yr must be one of "+YRS.join(", "));
+        let ht=String(x.ht||"").trim();if(ht){const h=parseHt(ht);if(!h)throw new Error(at+": height must look like 6'2\"");ht=`${h[0]}'${h[1]}"`}
+        const info=String(x.info||"").trim().slice(0,1000);
+        if(list.some(p=>(no&&String(p.no??"")===no)||String(p.name||"").trim().toLowerCase()===nm.toLowerCase())){skipped.push(nm);return}
+        const p={name:nm,no,pos,yr:yrOk||"",ht};if(info)p.info=info;list.push(p);added.push(nm)})}
+    const obj={...opp,coach,players:list};
+    const {id:_id,...clean}=obj;if(coachFields||added.length||o.replacePlayers)await saveDoc("opps",opp.id,clean);
+    render();return{coachFields,playersAdded:added.length,playersSkipped:skipped,players:list.length}}};
 function needCoach(){if(!user||!isCoach())throw new Error("Sign in as a coach first")}
 const cpcFindOpp=name=>{const nm=String(name||"").replace(/\s+/g," ").trim().toLowerCase();return nm?opps().find(o=>o.name.trim().toLowerCase()===nm):null};
 async function cpcOpp(name,{city,league}){const nm=String(name||"").replace(/\s+/g," ").trim();if(!nm||nm.length>60||!/[a-z]/i.test(nm))throw new Error("Opponent name needs 1 to 60 characters with a letter");
