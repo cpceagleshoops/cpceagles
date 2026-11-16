@@ -448,7 +448,7 @@ button.bdg{cursor:pointer;font:inherit;font-size:12px}
        stand    {lw, ll, w, l}  id = opps id or "cpc"          lres  {date,a,as,b,bs}
        statgames {lines:[{id:<player id>,min,pts,reb,ast,stl,blk,to,fgm,fga,tpm,tpa,ftm,fta}],by,ts}  id = game date
        badges   {name, stat, min, on, desc}                   awards {pid,name,note,by,ts}
-       talk     {from:<coach id>, msg, ref, verse, ts}  id = "current" (Coach Talk on Home)
+       talk     {msg, ref, verse, ts}  id = "current" (Coach Talk on Home)
        talks    {from, msg, ref, verse, ts}  id = timestamp (past Coach Talk messages)
        history  {seasons:[{season:"2025-26", w, l, lw, ll, finish, coach, notes}]}  id = "seasons"
        accounts {salt, hash, setAt}  id = "coach" or "player" (one shared login each; stored only as salted hashes)
@@ -460,10 +460,7 @@ const CONFIG={
   school:"Cedar Park Christian",campus:"Bothell",team:"CPC Eagles",level:"Varsity",
   season:"2026–27",homeGym:"CPC Bothell Gym",
   nfhs:"https://www.nfhsnetwork.com/schools/cedar-park-christian-school-bothell-wa/basketball",
-  coaches:[
-    {id:"scheffey",user:"jscheffey",name:"Jaden Scheffey",first:"Coach Scheffey",title:"Head Coach"},
-    {id:"duffy",user:"tduffy",name:"TJ Duffy",first:"TJ",title:"Lead Assistant · Scouting & Analytics"},
-    {id:"alex",user:"alex",name:"Alex",first:"Alex",title:"Analytics"}],
+  coaches:[],
   supabase:{url:"https://bxozzgbpgunuyxkqwmvs.supabase.co",key:"sb_publishable_3TTUPZjfTyRAMPQcGRhnHQ_OeOH0Dss",coachEmail:"coach@cpceagles.app",playerEmail:"cpcteam@cpceagles.app"},
   dataPrefix:"live_",storageKey:"cpc_live_v1",sessionKey:"cpc_session_v2",
   minPassword:{coach:8,player:6},undoSeconds:15
@@ -1172,28 +1169,26 @@ const coachOf=id=>COACHES.find(c=>c.id===id);
 function talkCard(){
   const t=talkNow();const n=pastTalks().length;const pastLink=n?`<button type="button" class="linkbtn" data-act="pastTalks">Past messages (${n})</button>`:"";
   if(!t){if(!isCoach())return"";return `<section class="talk talk-empty" aria-label="Coach Talk"><div><div class="eyebrow">Coach Talk</div><h2>Share a word with the team</h2><p>A short message and a Bible verse every player sees at the top of Home.</p></div><div class="row">${pastLink}${abtn("editTalk","","Add")}</div></section>`}
-  const c=coachOf(t.from);
   return `<section class="talk" aria-label="Coach Talk"><div class="talk-top"><span class="eyebrow">Coach Talk</span><span class="talk-date">Updated ${esc(dShort(t.ts||Date.now()))}</span></div>
-  <p class="talk-msg">${esc(t.msg)}</p><div class="talk-from">${esc(c?c.name:"Coach")}${c&&c.title?`<span>${esc(c.title)}</span>`:""}</div>
+  <p class="talk-msg">${esc(t.msg)}</p>
   ${t.verse||t.ref?`<figure class="verse"><blockquote>“${esc(t.verse)}”</blockquote><figcaption>${esc(t.ref)}</figcaption></figure>`:""}
   ${pastLink||isCoach()?`<div class="talk-foot">${pastLink||"<span></span>"}${isCoach()?`<span class="row">${ebtn("editTalk")}<button class="btn sm del" data-act="clearTalk">${TRASH}Clear</button></span>`:""}</div>`:""}</section>`;
 }
 function talkSheet(){
   const t=talkNow();
   openSheet({title:t?"Edit Coach Talk":"Coach Talk",intro:"Every coach and player sees this at the top of Home.",
-    fields:[{key:"from",label:"From",type:"select",options:COACHES.map(c=>[c.id,c.name]),req:true},{key:"msg",label:"Message",type:"textarea",req:true,max:600,hint:"Up to 600 characters"},{key:"ref",label:"Verse reference",req:true,max:60,hint:"Book chapter:verse, like Colossians 3:23"},{key:"verse",label:"Verse text",type:"textarea",req:true,max:500,hint:"Up to 500 characters"},...(t?[{key:"keep",label:"Keep the current message in Past messages",type:"check"}]:[])],
-    value:t?{...t,from:authorOf(t.from),keep:true}:{from:lastAuthor()},saved:"Coach Talk saved",
+    fields:[{key:"msg",label:"Message",type:"textarea",req:true,max:600,hint:"Up to 600 characters"},{key:"ref",label:"Verse reference",req:true,max:60,hint:"Book chapter:verse, like Colossians 3:23"},{key:"verse",label:"Verse text",type:"textarea",req:true,max:500,hint:"Up to 500 characters"},...(t?[{key:"keep",label:"Keep the current message in Past messages",type:"check"}]:[])],
+    value:t?{...t,keep:true}:{},saved:"Coach Talk saved",
     onSave:async v=>{const bad=(k,m)=>{const el=$("#sf-"+k);el&&el.focus();throw new Error(m)};
-      if(!coachOf(v.from))bad("from","From is required");
       const msg=v.msg.trim(),ref=v.ref.replace(/\s+/g," ").trim(),verse=v.verse.trim().replace(/^["“”']+|["“”']+$/g,"").trim();
       if(msg.length>600)bad("msg","Message must be 600 characters or fewer");if(ref.length>60)bad("ref","Verse reference must be 60 characters or fewer");
       if(!verse)bad("verse","Verse text is required");if(verse.length>500)bad("verse","Verse text must be 500 characters or fewer");
-      rememberAuthor(v.from);const obj={from:v.from,msg,ref,verse,ts:Date.now()};
-      if(t&&v.keep&&(t.msg!==msg||t.ref!==ref||t.verse!==verse||t.from!==v.from))await saveDoc("talks",String(Date.now()),{from:t.from,msg:t.msg,ref:t.ref,verse:t.verse,ts:t.ts});
+      const obj={msg,ref,verse,ts:Date.now()};
+      if(t&&v.keep&&(t.msg!==msg||t.ref!==ref||t.verse!==verse))await saveDoc("talks",String(Date.now()),{msg:t.msg,ref:t.ref,verse:t.verse,ts:t.ts});
       await saveDoc("talk","current",obj)}});
 }
 function pastTalksHTML(){const L=pastTalks();if(!L.length)return '<p class="muted" style="margin:0">No past messages yet.</p>';
-  return L.map(t=>{const c=coachOf(t.from);return `<div class="pasttalk"><div class="spread"><span class="small"><b>${esc(c?c.name:"Coach")}</b> <span class="muted">· ${esc(dShort(t.ts||+t.id||Date.now()))}</span></span>${isCoach()?`<button type="button" class="btn icon del" data-act="delTalk" data-id="${esc(t.id)}" aria-label="Delete this past message">${TRASH}</button>`:""}</div><p class="talk-msg sm">${esc(t.msg)}</p>${t.verse||t.ref?`<figure class="verse sm"><blockquote>“${esc(t.verse)}”</blockquote><figcaption>${esc(t.ref)}</figcaption></figure>`:""}</div>`}).join("")}
+  return L.map(t=>{return `<div class="pasttalk"><div class="spread"><span class="small muted">${esc(dShort(t.ts||+t.id||Date.now()))}</span>${isCoach()?`<button type="button" class="btn icon del" data-act="delTalk" data-id="${esc(t.id)}" aria-label="Delete this past message">${TRASH}</button>`:""}</div><p class="talk-msg sm">${esc(t.msg)}</p>${t.verse||t.ref?`<figure class="verse sm"><blockquote>“${esc(t.verse)}”</blockquote><figcaption>${esc(t.ref)}</figcaption></figure>`:""}</div>`}).join("")}
 
 /* ================= Home ================= */
 function homeView(){
@@ -1706,7 +1701,7 @@ const ACT={
   async signout(){stopPlayback();ed=null;closeSheet(true);if(SB){try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear()}user=null;LS.set(CONFIG.sessionKey,null);history.replaceState(null,"","#");render();toast("Signed out")},
   more(){const items_=ROUTES[user.role].filter(k=>!TABS.includes(k));lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href);document.addEventListener("keydown",escClose);$("#sheetroot").innerHTML=`<div class="sheet-back" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="More"><div class="sheet-head"><h2>More</h2><button class="btn icon" data-act="closeSheet" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="sheet-body"><nav class="nav">${items_.map(k=>`<a href="#${k}">${ico(k)}${LABEL[k]}</a>`).join("")}</nav><div class="me" style="margin-top:14px"><div><div class="who">${esc(whoLabel()[0])}</div><div class="role">${esc(whoLabel()[1])}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn" data-act="logins">Passwords</button>`:""}<button class="btn" data-act="signout">Sign out</button></div></div></div></div>`;paintSync()},
   logins(){if(!isCoach())return;closeSheet(true);
-    if(SB)return openSheet({title:"Coach password",intro:"Change the coach password. Every coach will need the new one next time they sign in.<br>To change the player password, ask Coach Duffy (he can have Claude do it).",fields:[{key:"cur",label:"Current coach password",type:"password",req:true},{key:"c1",label:"New coach password",type:"password",req:true,hint:`At least ${CONFIG.minPassword.coach} characters`},{key:"c2",label:"New coach password again",type:"password",req:true}],value:{},saved:"Coach password updated",
+    if(SB)return openSheet({title:"Coach password",intro:"Change the coach password. Every coach will need the new one next time they sign in.<br>To change the player password, ask the coach who manages the site.",fields:[{key:"cur",label:"Current coach password",type:"password",req:true},{key:"c1",label:"New coach password",type:"password",req:true,hint:`At least ${CONFIG.minPassword.coach} characters`},{key:"c2",label:"New coach password again",type:"password",req:true}],value:{},saved:"Coach password updated",
       onSave:async v=>{if(v.c1.length<CONFIG.minPassword.coach)throw new Error(`Use at least ${CONFIG.minPassword.coach} characters`);if(v.c1!==v.c2)throw new Error("The new passwords don't match");
         const chk=await SB.auth.signInWithPassword({email:CONFIG.supabase.coachEmail,password:v.cur});if(chk.error)throw new Error("The current coach password is wrong");
         const up=await SB.auth.updateUser({password:v.c1});if(up.error)throw new Error("Couldn't change it: "+up.error.message)}});
@@ -1752,7 +1747,7 @@ const ACT={
   editTalk(){if(isCoach())talkSheet()},
   pastTalks(){listSheet("Past messages",pastTalksHTML())},
   clearTalk(){const t=talkNow();if(!t||!isCoach())return;confirmDelete({title:"Clear Coach Talk?",body:"It comes off Home for everyone. The message is kept in Past messages.",button:"Clear",done:"Coach Talk cleared",
-    run:async()=>{await saveDoc("talks",String(Date.now()),{from:t.from,msg:t.msg,ref:t.ref,verse:t.verse,ts:t.ts});await removeDoc("talk","current")}})},
+    run:async()=>{await saveDoc("talks",String(Date.now()),{msg:t.msg,ref:t.ref,verse:t.verse,ts:t.ts});await removeDoc("talk","current")}})},
   delTalk(d){const t=get("talks",d.id);if(!t||!isCoach())return;confirmDelete({title:"Delete this past message?",body:"“"+esc(excerpt(t.msg))+"”",button:"Delete message",done:"Message deleted",run:()=>removeDoc("talks",t.id)})},
   /* Team history (Scouting) */
   editHist(){if(!isCoach())return;listSheet("Our last two seasons",histListHTML())},
@@ -1857,15 +1852,15 @@ function oppPlayerSheet(oid,idx){
       const arr=[...(o.players||[])];if(pl)arr[idx]=v;else arr.push(v);return saveDoc("opps",oid,{...o,players:arr})},
     del:pl?["oppPlayer",oid,idx]:null});
 }
-function noteSheet(n,isNew){openSheet({title:isNew?"Add scouting note":"Edit note",fields:[{key:"text",label:"Note",type:"textarea",req:true},{key:"vis",label:"Who can see it",type:"select",options:[["coach","Coaches only"],["team","Coaches and players"]],req:true},authorField(isNew)],value:{...n,author:isNew?lastAuthor():authorOf(n.author)},saved:isNew?"Note posted":"Note saved",
+function noteSheet(n,isNew){openSheet({title:isNew?"Add scouting note":"Edit note",fields:[{key:"text",label:"Note",type:"textarea",req:true},{key:"vis",label:"Who can see it",type:"select",options:[["coach","Coaches only"],["team","Coaches and players"]],req:true}],value:{...n,author:isNew?lastAuthor():authorOf(n.author)},saved:isNew?"Note posted":"Note saved",
   onSave:v=>{rememberAuthor(v.author);return saveDoc("notes",isNew?uid("n"):n.id,{...n,...v,author:v.author||n.author||user.cid,ts:isNew?Date.now():n.ts,edited:!isNew})},del:isNew?null:["note",n.id]})}
-function clipSheet(c,isNew){openSheet({title:isNew?"Add film clip":"Edit clip",fields:[{key:"label",label:"What happens",req:true},{key:"t",label:"Timestamp",hint:"Optional. Like 4:35 or 1:05:30"},{key:"url",label:"Game or clip link",type:"url",hint:"Optional"},authorField(isNew)],value:{...c,author:isNew?lastAuthor():authorOf(c.author)},saved:isNew?"Clip added":"Clip saved",
+function clipSheet(c,isNew){openSheet({title:isNew?"Add film clip":"Edit clip",fields:[{key:"label",label:"What happens",req:true},{key:"t",label:"Timestamp",hint:"Optional. Like 4:35 or 1:05:30"},{key:"url",label:"Game or clip link",type:"url",hint:"Optional"}],value:{...c,author:isNew?lastAuthor():authorOf(c.author)},saved:isNew?"Clip added":"Clip saved",
   onSave:v=>{const bad=(k,m)=>{const el=$("#sf-"+k);el&&el.focus();throw new Error(m)};
     if(v.t&&!/^\d{1,2}(:\d{2}){1,2}$/.test(v.t))bad("t","Timestamp should look like 4:35 or 1:05:30");
     let url=(v.url||"").trim();if(url&&!/^[a-z][a-z0-9+.-]*:/i.test(url))url="https://"+url;
     if(url){let u=null;try{u=new URL(url)}catch(e){}if(!u||!/^https?:$/.test(u.protocol)||!u.hostname.includes("."))bad("url","That link doesn't look right. Paste the full web address.")}
     rememberAuthor(v.author);return saveDoc("clips",isNew?uid("c"):c.id,{...c,...v,url,author:v.author||c.author||user.cid})},del:isNew?null:["clip",c.id]})}
-function postSheet(p,isNew){openSheet({title:isNew?"Post to the team":"Edit post",fields:[{key:"text",label:"Message",type:"textarea",req:true},authorField(isNew),{key:"pinned",label:"Pin to the top",type:"check"}],value:{...p,author:isNew?lastAuthor():authorOf(p.author)},saved:isNew?"Posted to the team":"Post saved",
+function postSheet(p,isNew){openSheet({title:isNew?"Post to the team":"Edit post",fields:[{key:"text",label:"Message",type:"textarea",req:true},{key:"pinned",label:"Pin to the top",type:"check"}],value:{...p,author:isNew?lastAuthor():authorOf(p.author)},saved:isNew?"Posted to the team":"Post saved",
   onSave:v=>{rememberAuthor(v.author);return saveDoc("posts",isNew?uid("po"):p.id,{...p,...v,author:v.author||p.author||user.cid,ts:isNew?Date.now():p.ts})},del:isNew?null:["post",p.id]})}
 function glossSheet(coll,c){const calls=coll==="calls";const cats=calls?CALL_CATS:GLOSS_GROUPS;
   const value=c?{...c}:(!calls&&GLOSS_GROUPS.includes(glossGrp)?{cat:glossGrp}:{});
@@ -1951,7 +1946,7 @@ function badgeSheet(b){openSheet({title:b?"Edit badge":"New badge rule",intro:"P
     if(v.min<0)fail("min","Cutoff can't be negative");if(bstat(v.stat)[2]&&v.min>100)fail("min","Percent cutoffs go from 0 to 100");if((v.stat==="dd"||v.stat==="hi")&&!Number.isInteger(v.min))fail("min","Use a whole number for this cutoff");
     const dup=items("badges").find(x=>(!b||x.id!==b.id)&&String(x.name).trim().toLowerCase()===v.name.trim().toLowerCase());if(dup)fail("name","There's already a badge named "+dup.name);
     const {hide,...rest}=v;return saveDoc("badges",b?b.id:uid("bg"),{...rest,on:!hide})},del:b?["badge",b.id]:null})}
-function awardSheet(a,pid){openSheet({title:a?"Edit award":"Award a badge",intro:"Hand-picked badges show in gold on the player's card.",fields:[{key:"pid",label:"Player",type:"select",options:players().map(p=>[p.id,"#"+p.no+" "+pName(p)]),req:true},{key:"name",label:"Badge name",req:true},{key:"note",label:"Why (optional)",type:"textarea"},authorField(!a,"by","Awarded by")],
+function awardSheet(a,pid){openSheet({title:a?"Edit award":"Award a badge",intro:"Hand-picked badges show in gold on the player's card.",fields:[{key:"pid",label:"Player",type:"select",options:players().map(p=>[p.id,"#"+p.no+" "+pName(p)]),req:true},{key:"name",label:"Badge name",req:true},{key:"note",label:"Why (optional)",type:"textarea"}],
   value:a?{...a,by:authorOf(a.by)}:{...(pid?{pid}:{}),by:lastAuthor()},saved:a?"Award saved":"Badge awarded",onSave:v=>{rememberAuthor(v.by);return saveDoc("awards",a?a.id:uid("aw"),{...(a||{}),...v,by:v.by||(a&&a.by)||user.cid,ts:a?a.ts:Date.now()})},del:a?["award",a.id]:null})}
 
 document.addEventListener("click",e=>{const a=e.target.closest('a[href^="#"]');if(a&&ed&&ed.dirty&&a.getAttribute("href")!=="#playbook"){e.preventDefault();e.stopPropagation();const h=a.getAttribute("href");confirmDiscard(()=>{ed=null;location.hash=h},"Leave without saving?","Your unsaved play will be lost.")}},true);
