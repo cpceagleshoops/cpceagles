@@ -437,6 +437,51 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 }
 @media (max-width:440px){.g4{grid-template-columns:1fr 1fr}.kv{grid-template-columns:repeat(2,minmax(0,1fr))}.scheme{grid-template-columns:1fr}.scheme dt{padding-top:6px}}
 .nextcell{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+/* Roster levels & staff */
+.rtabs{display:flex;width:max-content;max-width:100%}
+.jersey.ini{font-size:20px;color:var(--muted);letter-spacing:.02em}
+.slist .srow{display:flex;align-items:center;gap:12px;padding:12px 2px;border-top:1px solid var(--line)}.slist .srow:first-child{border-top:none}
+.srow .sinfo{flex:1;min-width:0}.srow .pline{overflow-wrap:anywhere}.stools{flex:none;gap:6px}.stools .btn[disabled]{opacity:.35}
+.biokv{position:relative;margin-top:12px}.biokv .v{font-family:var(--display);font-size:22px;font-weight:600}
+@media (max-width:820px){.rtabs{width:100%;flex-wrap:nowrap}.rtabs button{flex:1;min-height:40px;padding:6px 4px}.slist .srow{align-items:flex-start}.stools .btn.icon{width:34px;height:34px}}
+/* Calendar */
+.calsegs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.lvtag{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:0 5px;border-radius:4px;border:1px solid var(--line);color:#c4cfdc;background:var(--surface-2);line-height:16px}
+.ev.lvgame{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px;margin:3px 0}.ev.lvgame+.ev{border-top-color:transparent}.ev.lvgame .evtitle{color:#fff}
+.mi.lvgame{background:var(--surface-3);border-radius:5px;padding:0 4px}
+.checks{display:flex;gap:6px 16px;flex-wrap:wrap}
+@media (max-width:820px){.calsegs{width:100%}.calsegs .seg{width:100%;flex-wrap:nowrap}.calsegs .seg button{flex:1;min-height:38px;padding:6px 4px}}
+.caltools{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.calnav{display:flex;align-items:center;gap:6px}.callabel{display:flex;flex-direction:column;align-items:center;min-width:132px;text-align:center;line-height:1.2}.callabel b{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:.01em}
+.cweek{padding:6px 16px}.cday+.cday{border-top:1px solid var(--line)}.cday{padding:10px 0 6px}.cday.past .cdh{opacity:.7}
+.cdh{display:flex;align-items:center;gap:8px;margin:0 0 4px;font-size:13px}.cdh b{font-family:var(--display);font-size:16px;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
+.cday.istoday .cdh b{color:var(--gold-ink)}
+.cnone{margin:2px 0 6px}
+.ev{display:grid;grid-template-columns:70px minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 4px;border-top:1px solid rgba(34,56,90,.6);color:inherit;text-decoration:none}
+.list>.ev:first-child{border-top:none}
+.evt{display:flex;flex-direction:column;font-size:13px;line-height:1.25;white-space:nowrap}.evt b{font-weight:700;color:var(--ink)}.evt span{color:var(--muted);font-size:12px}
+.evtitle{font-weight:600;overflow-wrap:anywhere}.evmeta{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:12px;color:var(--muted);margin-top:1px}
+.evnote{margin:4px 0 0;font-size:12.5px;color:#c4cfdc;white-space:pre-wrap;overflow-wrap:anywhere}
+.evr{display:flex;align-items:center;gap:8px}.evr .chev{width:14px;height:14px;color:var(--gold-2)}
+.kdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--k);flex:none;margin-right:2px}
+.ev.game{background:var(--gold-bg);border:1px solid rgba(194,176,138,.35);border-radius:10px;padding:8px;margin:3px 0}.ev.game+.ev{border-top-color:transparent}
+.ev.game .evt b{color:var(--gold-ink);font-family:var(--display);text-transform:uppercase;letter-spacing:.06em;font-size:14px}.ev.game .evtitle{color:#fff}
+.ev.game:hover .evtitle{color:var(--gold-ink)}
+.ev.off .evtitle{color:var(--muted)}.ev.off .evt b{color:var(--muted)}
+.mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.mwd{background:var(--surface-2);padding:6px 8px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.mcell{background:var(--surface);min-height:104px;padding:6px 6px 8px;border:none;color:inherit;font:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
+.mcell:hover{background:var(--surface-2)}.mcell.out{background:var(--bg)}.mcell.out>*{opacity:.5}
+.mnum{font-size:12.5px;font-weight:700;color:var(--muted);align-self:flex-start;padding:0 5px;border-radius:999px;margin-bottom:2px}.mcell.today .mnum{background:var(--gold);color:#0b1522}
+.mi{display:flex;align-items:center;gap:3px;font-size:11.5px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;color:#d5dde7}.mi .mt{color:var(--muted);flex:none}
+.mi.game{background:var(--gold-bg);color:var(--gold-ink);font-weight:700;border-radius:5px;padding:0 4px;display:block}.mi.off{color:var(--muted)}
+.mmore{font-size:11px;color:var(--gold-2);font-weight:600}
+.mlist{display:flex;flex-direction:column;gap:10px}.mlist .cday{padding:10px 14px}
+@media (min-width:821px){.mlist{display:none}}
+@media (max-width:820px){.mgrid{display:none}.cweek{padding:4px 12px}.ev{grid-template-columns:66px minmax(0,1fr) auto;gap:8px}.evt{font-size:12.5px}.caltools{gap:8px}.calnav{flex:1;justify-content:space-between}.callabel{flex:1;min-width:0}}
+.todaycard{margin-bottom:14px}.todaycard .list{margin-top:-4px}.tmore{display:inline-block;margin:6px 0 0 4px;font-weight:600}
+.tnexts{display:flex;flex-wrap:wrap;gap:8px 24px;border-top:1px solid var(--line);margin-top:8px;padding-top:10px}
+.tnext{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;font-size:13.5px}.tnext a{font-weight:600}.tnext .eyebrow{font-size:10.5px}
 </style>
 </head>
 <body>
@@ -453,7 +498,8 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
    - Coaches edit everything in the site (Edit / Add / Delete buttons).
    - Claude can also update data directly in the site's database.
      Collections are named "live_<name>", one document per item:
-       players  {no, first, last, pos, yr, ht}
+       players  {no, first, last, pos, yr, ht, level:"V|JV|C" (missing = "V"), inactive?}
+                Jersey numbers are unique within a level. Stats, box scores and CSV import are varsity only.
        games    {date:"YYYY-MM-DD", opp:<opps id>, site:"home|away|neutral", home, lg, time, us, them, ot?, venue?,
                  type?:"exh" (exhibition: not counted in record, standings or season stats; never lg), event?:"Jamboree"}
        opps     {name, city, league, status:"none|progress|ready",
@@ -474,6 +520,12 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
        talk     {msg, ref, verse, ts}  id = "current" (Coach Talk on Home)
        talks    {from, msg, ref, verse, ts}  id = timestamp (past Coach Talk messages)
        history  {seasons:[{season:"2025-26", w, l, lw, ll, finish, coach, notes}]}  id = "seasons"
+       staffdir {name (max 60), role (max 100), levels:["V","JV","C"] (at least one), order}
+                Public coaching staff directory (Roster → Staff). Separate from the auth "staff" table.
+       events   {date:"YYYY-MM-DD", start:"HH:MM"|"", end:"HH:MM"|"", title (max 80),
+                 kind:"practice|lift|film|meeting|team|travel|off|other", who:"all|coaches", note? (max 300), author, ts}
+                Team calendar (practices, lifts, film, team events). Games stay in "games". start "" = all day.
+                who:"coaches" rows are hidden from the player login by the database rule and by the page.
        accounts {salt, hash, setAt}  id = "coach" or "player" (one shared login each; stored only as salted hashes)
    - On the live site (GitHub Pages) the same collections live in Supabase table public.docs
      as rows {coll:"<name>", id, data:{...}}; logins are Supabase users (CONFIG.supabase).
@@ -822,7 +874,7 @@ const slug=x=>String(x).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/
 const DEF={
  players:[],games:[],opps:[],notes:[],clips:[],posts:[],calls:[],
  terms:GLOSS.flatMap(([cat,a])=>a.map(([name,def])=>({id:"gl-"+slug(name),cat,name,def}))),
- stand:[],lres:[],plays:[],playsets:[],templates:[],statgames:[],accounts:[],talk:[],talks:[],history:[]
+ stand:[],lres:[],plays:[],playsets:[],templates:[],statgames:[],accounts:[],talk:[],talks:[],history:[],events:[],staffdir:[]
 };
 /* Terms saved by older versions under ids t0..t15 duplicate the built-in list; hide those copies. */
 const DEF_TERM_NAMES=new Set(DEF.terms.map(t=>t.name.trim().toLowerCase()));
@@ -956,8 +1008,13 @@ document.addEventListener("focusout",()=>setTimeout(flushRender,60));
 
 /* ================= Accessors ================= */
 /* Jersey order: numeric, with 0 before 00; anything non-numeric last */
-const noCmp=(a,b)=>{const x=String(a.no??""),y=String(b.no??"");const nx=/^\d+$/.test(x)?+x:1e9,ny=/^\d+$/.test(y)?+y:1e9;return(nx-ny)||(x.length-y.length)||x.localeCompare(y)};
-const players=()=>items("players").sort(noCmp);
+const noCmp=(a,b)=>{const x=String(a.no??""),y=String(b.no??"");const nx=/^\d+$/.test(x)?+x:1e9,ny=/^\d+$/.test(y)?+y:1e9;return(nx-ny)||(x.length-y.length)||x.localeCompare(y)||String(a.last||"").localeCompare(String(b.last||""))||String(a.first||"").localeCompare(String(b.first||""))};
+/* Program levels. A player's level: "V" (varsity, the default), "JV" or "C". */
+const PLV=[["V","Varsity"],["JV","JV"],["C","C-Team"]];const lvOf=p=>p&&(p.level==="JV"||p.level==="C")?p.level:"V";const lvName=k=>(PLV.find(x=>x[0]===k)||PLV[0])[1];
+const allPlayers=()=>items("players").sort(noCmp);
+/* Varsity only: everything about stats (season stats, leaders, box scores, CSV import) goes through players() */
+const players=()=>allPlayers().filter(p=>lvOf(p)==="V");
+const hasNo=p=>p&&p.no!=null&&String(p.no).trim()!=="";
 const P=id=>get("players",id);
 const parts=(...a)=>a.filter(x=>x!=null&&String(x).trim()!=="").map(x=>esc(x)).join(" · ");
 const pName=p=>p?p.first+" "+p.last:"";
@@ -1030,7 +1087,7 @@ function winStreak(){const p=counted();if(!p.length)return"";const last=p[p.leng
 
 /* ================= Session, routing, nav ================= */
 let user=LOCAL_OK?LS.get(CONFIG.sessionKey):null;
-const ROUTES={coach:["home","schedule","roster","stats","scouting","league","playbook","glossary"],admin:["home","schedule","roster","stats","scouting","league","playbook","glossary","admin"],player:["home","schedule","roster","stats","scouting","league","playbook","glossary"]};
+const ROUTES={coach:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary"],admin:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary","admin"],player:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary"]};
 const TABS=["home","schedule","scouting","playbook"];
 const route=()=>location.hash.slice(1)||"home";
 function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin();return (ROUTES[user.role]||[]).includes(r)}
@@ -1039,6 +1096,7 @@ window.addEventListener("hashchange",()=>{stopPlayback();ed=null;closeSheet(true
 const IC={
   home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
   schedule:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  calendar:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17.5h2M11 17.5h2"/>',
   roster:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c.5-3.5 3-5.5 6-5.5s5.5 2 6 5.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.5c2.6.2 4.4 2 5 5"/>',
   stats:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   scouting:'<circle cx="11" cy="11" r="6.5"/><path d="M20.5 20.5L16 16"/>',
@@ -1049,7 +1107,7 @@ const IC={
   admin:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
 };
-const LABEL={home:"Home",schedule:"Schedule",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"League",playbook:"Playbook",glossary:"Glossary & calls",admin:"Staff & changes",more:"More"};
+const LABEL={home:"Home",schedule:"Schedule",calendar:"Calendar",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"League",playbook:"Playbook",glossary:"Glossary & calls",admin:"Staff & changes",more:"More"};
 const ico=k=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
 const MARK=(w=36)=>`<img src="logo.png" width="${w}" height="${w}" alt="" aria-hidden="true" style="display:block;flex:none;object-fit:contain">`;
 const openSet=new Set(["keys","players-know","feed","play-roles","play-notes"]);
@@ -1084,7 +1142,7 @@ function render(){
   bindView(r);
 }
 function view(r){
-  if(r==="home")return homeView();if(r==="schedule")return scheduleView();if(r==="roster")return rosterView();if(r==="stats")return statsView();
+  if(r==="home")return homeView();if(r==="schedule")return scheduleView();if(r==="calendar")return calendarView();if(r==="roster")return rosterView();if(r==="stats")return statsView();
   if(r==="scouting")return scoutingView();if(r.startsWith("opp-"))return oppView(r.slice(4));if(r==="league")return leagueView();
   if(r==="playbook")return playbookView();if(r==="glossary")return glossaryView();if(r.startsWith("player-"))return playerView(r.slice(7));
 if(r.startsWith("game-"))return gameView(r.slice(5));if(r==="admin")return adminView();return homeView();
@@ -1221,7 +1279,8 @@ function bindSbLogin(){
 /* ================= First-time tips (coaches) ================= */
 const TIPS={
   home:"<b>Welcome.</b> Everything here can be changed. Look for <b>Edit</b> and <b>Add</b> buttons on any page. Posts in the Team feed go to every player.",
-  roster:"<b>Building the roster:</b> tap <b>Add player</b>. Tap a player to see his stats or edit him.",
+  roster:"<b>Roster:</b> switch between Varsity, JV, C-Team and Staff at the top. Tap <b>Add player</b> on a level, or tap a player to edit him. Stats are kept for varsity only.",
+  calendar:"<b>Calendar:</b> tap <b>Add event</b> for practices, lifts, film and team events. Games come from the Schedule on their own. Pick <b>Coaches only</b> to keep an event off the players' calendar.",
   schedule:"<b>Schedule:</b> tap <b>Add game</b>, or the pencil on any game. Enter the final score after the game to update the record.",
   scouting:"<b>Scouting:</b> add an opponent, then open it to fill in keys, players to know, their coach, film timestamps and notes. Notes can stay coaches-only or be shared with players.",
   playbook:"<b>Playbook:</b> tap <b>New play</b> and pick Offense or Defense. Drag players to where they start, tap <b>Add step</b> for each action, then use Pass and Screen. Preview before you save.",
@@ -1236,6 +1295,7 @@ function openSheet(cfg){
   sheetCfg=cfg;const v=cfg.value||{};if(!$("#sheetroot").firstChild){lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href)}
   const field0=f=>{const id="sf-"+f.key;const val=v[f.key];const req=f.req?"required":"";const hint=f.hint?`<span class="hint">${esc(f.hint)}</span>`:"";
     if(f.type==="password")return `<label class="f pw" for="${id}">${esc(f.label)}${hint}<input type="password" id="${id}" ${req} autocomplete="new-password"><button type="button" class="eye" data-eye="${id}" aria-label="Show password" aria-pressed="false">${EYE}</button></label>`;
+    if(f.type==="checks"){const on=Array.isArray(val)?val:[];return `<div class="f" role="group" aria-labelledby="${id}-l"><span id="${id}-l">${esc(f.label)}</span>${hint}<div class="checks">${f.options.map(([ov,ol])=>`<label class="check" for="${id}-${esc(ov)}"><input type="checkbox" id="${id}-${esc(ov)}" data-of="${id}" value="${esc(ov)}" ${on.includes(ov)?"checked":""}>${esc(ol)}</label>`).join("")}</div><input type="hidden" id="${id}" value=""></div>`}
     if(f.type==="check")return `<label class="check" for="${id}"><input type="checkbox" id="${id}" ${val?"checked":""}>${esc(f.label)}</label>`;
     if(f.type==="height"){const ph=parseHt(val);const opt=(n,u,sel)=>`<option value="${n}" ${sel?"selected":""}>${n} ${u}</option>`;
       return `<div class="grid g2" style="gap:10px"><label class="f" for="${id}">${esc(f.label)} (feet)${val&&!ph?`<span class="hint">Now “${esc(val)}”. Pick feet and inches to replace it.</span>`:""}<select id="${id}"><option value="">—</option>${[4,5,6,7].map(n=>opt(n,"ft",ph&&ph[0]===n)).join("")}</select></label><label class="f" for="${id}-in">${esc(f.label)} (inches)<select id="${id}-in"><option value="">—</option>${[...Array(12).keys()].map(n=>opt(n,"in",ph&&ph[1]===n)).join("")}</select></label></div>`}
@@ -1255,13 +1315,14 @@ function openSheet(cfg){
       if(f.type==="seg"&&f.req&&!el.value){const b=el.parentNode.querySelector("button");b&&b.focus();toast(f.label+" is required",true);return}
       if(f.type==="time"&&$("#sf-"+f.key+"-tba")&&$("#sf-"+f.key+"-tba").checked){out[f.key]="TBA";continue}
       if(f.type==="height"){const a=el.value,b=$("#"+el.id+"-in").value,orig=v[f.key];if(!a&&!b){out[f.key]=orig&&!parseHt(orig)?orig:"";continue}if(!a||!b){(a?$("#"+el.id+"-in"):el).focus();toast("Pick both feet and inches for "+f.label.toLowerCase(),true);return}out[f.key]=`${a}'${b}"`;continue}
+      if(f.type==="checks"){out[f.key]=$$(`#sheetform [data-of="${el.id}"]`).filter(c=>c.checked).map(c=>c.value);continue}
       if(f.type==="check")val=el.checked;else if(f.type==="number")val=el.value.trim()===""?null:Number(el.value);else if(f.type==="list")val=lines(el.value);else val=el.value.trim();
       if(f.req&&(val===""||val==null)){el.focus();toast(f.label+" is required",true);return}if(f.type==="number"&&val!=null&&!isFinite(val)){el.focus();toast(f.label+" must be a number",true);return}
       if(f.type==="number"&&val!=null){if(f.int&&!Number.isInteger(val)){el.focus();toast(f.label+" must be a whole number",true);return}if((f.lo!=null&&val<f.lo)||(f.hi!=null&&val>f.hi)){el.focus();toast(`${f.label} must be from ${f.lo} to ${f.hi}`,true);return}}
       out[f.key]=val}
     const btn=e.submitter||$('.sheet-foot .gold');btn.disabled=true;
     try{await cfg.onSave(out);closeSheet();toast(cfg.saved||"Saved")}catch(err){btn.disabled=false;toast(err.message||"Couldn't save",true)}};
-  const sync=()=>{$$("#sheetform [data-when]").forEach(w=>{const c=$("#sf-"+w.dataset.when);w.hidden=!c||c.value!==w.dataset.eq});$$('#sheetform input[id$="-tba"]').forEach(c=>{const t=$("#"+c.id.slice(0,-4));if(t){t.disabled=c.checked;if(c.checked)t.value=""}})};
+  const sync=()=>{$$("#sheetform [data-when]").forEach(w=>{const c=$("#sf-"+w.dataset.when);w.hidden=!c||(c.type==="checkbox"?String(c.checked):c.value)!==w.dataset.eq});$$('#sheetform input[id$="-tba"]').forEach(c=>{const t=$("#"+c.id.slice(0,-4));if(t){t.disabled=c.checked;if(c.checked)t.value=""}})};
   $$("#sheetform [data-seg]").forEach(b=>b.onclick=()=>{$("#"+b.dataset.seg).value=b.dataset.v;$$(`#sheetform [data-seg="${b.dataset.seg}"]`).forEach(x=>{const on=x===b;x.classList.toggle("on",on);x.setAttribute("aria-pressed",on)});sync()});
   $("#sheetform").addEventListener("change",sync);$("#sheetform").addEventListener("input",sync);sync();
   sheetInit=formState();
@@ -1351,13 +1412,13 @@ function homeView0(){
   if(isCoach()){
         const feed=items("notes").sort((a,b)=>b.ts-a.ts).slice(0,4);
     const ns=needsScore();
-    return `<div class="head"><div><div class="eyebrow">Coaches' office · ${longDate(TODAY)}</div><h1>Welcome back, Coach</h1></div>${chips}</div>${ns.length?`<a class="banner" href="#schedule" style="text-decoration:none"><span class="chip warn">Action needed</span><span style="flex:1">${ns.length===1?"1 past game needs":ns.length+" past games need"} a final score.</span><b style="color:var(--gold-2)">Enter scores →</b></a>`:""}${talkCard()}
+    return `<div class="head"><div><div class="eyebrow">Coaches' office · ${longDate(TODAY)}</div><h1>Welcome back, Coach</h1></div>${chips}</div>${ns.length?`<a class="banner" href="#schedule" style="text-decoration:none"><span class="chip warn">Action needed</span><span style="flex:1">${ns.length===1?"1 past game needs":ns.length+" past games need"} a final score.</span><b style="color:var(--gold-2)">Enter scores →</b></a>`:""}${talkCard()}${todayCard()}
     <div class="grid split">${nextHero()}<div class="card"><div class="cardhead"><h2>Coming up</h2><a class="small" href="#schedule">Schedule</a></div><div class="list">${upcoming().slice(1,4).map(gameRow).join("")||'<p class="muted">Nothing else scheduled.</p>'}</div></div></div>
     <div class="section">${panel("feed","Team feed","Posts go to every player",feedBody())}${panel("team-stats","Team stats",`${plural(teamTotals().n,"game")} imported`,teamStatsBody())}
     ${panel("notes-feed","Latest scouting notes",`${feed.length} recent`,feed.map(n=>`<div class="note ${n.vis==="team"?"":"coachonly"}"><div class="by"><a href="#opp-${esc(n.opp)}"><b>${esc(O(n.opp).name)}</b></a><span>${ago(n.ts)}</span>${n.vis==="team"?"":'<span class="chip">Coaches only</span>'}</div><p>${esc(n.text.length>140?n.text.slice(0,138)+"…":n.text)}</p></div>`).join("")||'<p class="muted" style="margin:0">No notes yet.</p>')}</div>`;
   }
   const g=nextGame();const o=g?O(g.opp):null;
-  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.team)} · ${longDate(TODAY)}</div><h1>Let's go, Eagles</h1></div>${chips}</div>${talkCard()}
+  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.team)} · ${longDate(TODAY)}</div><h1>Let's go, Eagles</h1></div>${chips}</div>${talkCard()}${todayCard()}
   <div class="grid split">${nextHero()}${o?panel("keys",`Keys vs ${esc(o.name)}`,"",o.keys&&o.keys.length?`<ol>${o.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ol>`:'<p class="muted" style="margin:0">Coaches are still building this report.</p>',"keys"):`<div class="card"><h2 style="margin-bottom:6px">Coming up</h2><div class="list">${upcoming().slice(1,4).map(gameRow).join("")||'<p class="muted">Nothing else scheduled.</p>'}</div></div>`}</div>
   <div class="section">${panel("feed","Team feed","From your coaches",feedBody())}${panel("team-stats","Team stats","",teamStatsBody())}</div>`;
 }
@@ -1369,6 +1430,119 @@ function scheduleView(){
   <div class="grid g2"><div class="card"><h2 style="margin-bottom:6px">Upcoming</h2><div class="list">${upcoming().map(gameRow).join("")||'<p class="muted">No upcoming games.</p>'}</div></div>
   <div class="card"><h2 style="margin-bottom:6px">Results</h2><div class="list">${[...needsScore().slice().reverse(),...played().slice().reverse()].map(gameRow).join("")||'<p class="muted">No results yet.</p>'}</div>${isCoach()?'<p class="small muted" style="margin:10px 0 0">To enter a final score, tap the pencil on a game.</p>':""}</div></div>`;
 }
+/* ================= Calendar (practices & team events; games come from the Schedule) ================= */
+const EV_KINDS={practice:["Practice","#6fa8dc"],game:["Game","#cfd8e3"],lift:["Lift","#e8836b"],film:["Film","#b48be0"],meeting:["Coaches meeting","#9aacc1"],team:["Team","#4cc08b"],travel:["Travel","#e5b45a"],off:["Off","#62778f"],other:["Other","#8fb8de"]};
+/* Program levels: Varsity, JV, C-Team. Varsity games come from the Schedule; JV and C-Team games are events with kind "game". */
+const EV_LEVELS=[["V","Varsity"],["JV","JV"],["C","C-Team"]];const LV_KEYS=EV_LEVELS.map(x=>x[0]);
+const LV_FILTERS=[["all","All levels"],...EV_LEVELS];
+/* Old events without teams count for every level; coaches-only staff items keep teams:[] */
+const evTeams=e=>Array.isArray(e.teams)?LV_KEYS.filter(k=>e.teams.includes(k)):LV_KEYS.slice();
+const lvPass=(lv,teams)=>lv==="all"||!teams.length||teams.includes(lv);
+let calLevel=(()=>{const v=LS.get("cpc_cal_level");return LV_FILTERS.some(f=>f[0]===v)?v:"all"})();
+const lvTags=teams=>!teams.length?"":teams.length===LV_KEYS.length?'<span class="lvtag">All levels</span>':teams.map(k=>`<span class="lvtag" title="${esc((EV_LEVELS.find(x=>x[0]===k)||[k,k])[1])}">${k}</span>`).join("");
+const EV_FILTERS=[["all","All"],["practice","Practices"],["games","Games"],["liftfilm","Lifts & film"],["team","Team"]];
+const evFilterHas=(f,k)=>f==="all"||(f==="games"&&k==="game")||(f==="practice"&&k==="practice")||(f==="liftfilm"&&(k==="lift"||k==="film"))||(f==="team"&&["team","travel","meeting","other"].includes(k));
+/* Players never see coaches-only events (the database hides them too) */
+const evs=()=>items("events").filter(e=>e&&realDate(e.date)&&String(e.title||"").trim()&&(isCoach()||e.who!=="coaches"));
+const evCmp=(a,b)=>(a.date<b.date?-1:a.date>b.date?1:0)||String(a.start||"").localeCompare(String(b.start||""))||String(a.title).localeCompare(String(b.title));
+const evDupKey=e=>e.date+"|"+(e.start||"")+"|"+String(e.title||"").replace(/\s+/g," ").trim().toLowerCase();
+const addDays=(d,n)=>{const x=new Date(d);x.setHours(12,0,0,0);x.setDate(x.getDate()+n);return x};
+const mondayOf=d=>addDays(d,-((d.getDay()+6)%7));
+let calView="week",calAnchor=new Date(TODAY),calFilt="all";
+/* One day's rows: events and games, sorted by time (all day first) */
+function calItems(lo,hi){const f=calFilt,lv=calLevel;const out={};const push=(d,x)=>{(out[d]=out[d]||[]).push(x)};
+  evs().filter(e=>e.date>=lo&&e.date<=hi&&evFilterHas(f,EV_KINDS[e.kind]?e.kind:"other")&&lvPass(lv,evTeams(e))).forEach(e=>push(e.date,{t:"ev",key:e.start||"",e}));
+  if((f==="all"||f==="games")&&lvPass(lv,["V"]))games().filter(g=>g.date>=lo&&g.date<=hi).forEach(g=>{const t=parseTime(g.time);push(g.date,{t:"game",key:/^\d\d:\d\d$/.test(t||"")?t:"99:99",g})});
+  Object.values(out).forEach(a=>a.sort((x,y)=>x.key.localeCompare(y.key)||(x.t==="game"?1:0)-(y.t==="game"?1:0)||String(x.e?x.e.title:"").localeCompare(String(y.e?y.e.title:""))));return out}
+const kindDot=k=>{const m=EV_KINDS[k]||EV_KINDS.other;return `<span class="kdot" style="--k:${m[1]}" aria-hidden="true"></span>`};
+const kindLabel=e=>e.kind==="off"?"Off day":(EV_KINDS[e.kind]||EV_KINDS.other)[0];
+function gameHref(g){return g.played&&hasBox(g)?"#game-"+g.date:"#opp-"+g.opp}
+function evRow(x,compact){
+  if(x.t==="game"){const g=x.g,o=O(g.opp);const tm=fmtTime(g.time);
+    const res=g.played?`<span class="res ${g.res}">${g.res}</span><b class="num">${scoreTxt(g)}</b>`:"";
+    return `<a class="ev game" href="${gameHref(g)}"><div class="evt"><b>Game</b></div><div class="evb"><div class="evtitle">${gTitle(g,o)}${tm?" · "+esc(tm):""}</div><div class="evmeta">${lvTags(["V"])}${parts("Varsity",siteText(g,o),isExh(g)?"Exhibition":g.lg?"League":"Non-league")}</div></div><div class="evr num">${res}${CHEV}</div></a>`}
+  const e=x.e;const off=e.kind==="off";const coachOnly=e.who==="coaches";const gm=e.kind==="game";
+  const time=e.start?`<b>${esc(fmtTime(e.start))}</b>${e.end?`<span>${esc(fmtTime(e.end))}</span>`:""}`:`<b>${off?"Off":"All day"}</b>`;
+  return `<div class="ev ${off?"off":""} ${gm?"lvgame":""}"><div class="evt num">${time}</div><div class="evb"><div class="evtitle">${esc(e.title)}</div><div class="evmeta">${lvTags(evTeams(e))}${gm?"":kindDot(e.kind)}${esc(kindLabel(e))}${coachOnly&&isCoach()?'<span class="chip">Coaches only</span>':""}</div>${e.note&&!compact?`<p class="evnote">${esc(e.note)}</p>`:""}</div>${isCoach()?`<div class="evr"><button class="btn icon edit" data-act="editEvent" data-id="${esc(e.id)}" aria-label="Edit ${esc(e.title)}">${PEN}</button></div>`:""}</div>`}
+const dayHead=d=>{const s=ymd(d);const today=s===ymd(TODAY);return `<div class="cdh" id="cd-${s}"><b>${d.toLocaleDateString("en-US",{weekday:"long"})}</b><span class="muted">${mon(d)} ${d.getDate()}</span>${today?'<span class="chip gold">Today</span>':""}</div>`};
+function calWeekBody(){const m=mondayOf(calAnchor);const days=[...Array(7).keys()].map(i=>addDays(m,i));const idx=calItems(ymd(days[0]),ymd(days[6]));
+  return `<div class="card cweek">${days.map(d=>{const s=ymd(d);const L=idx[s]||[];return `<section class="cday ${s===ymd(TODAY)?"istoday":""} ${d<TODAY?"past":""}">${dayHead(d)}<div class="list">${L.map(x=>evRow(x)).join("")||`<p class="muted small cnone">${calFilt==="all"?"No team events":"Nothing here"}</p>`}</div></section>`}).join("")}</div>`}
+function calMonthBody(){const first=new Date(calAnchor.getFullYear(),calAnchor.getMonth(),1,12);const last=new Date(first.getFullYear(),first.getMonth()+1,0,12);
+  const g0=mondayOf(first);const n=Math.ceil(((last-g0)/864e5+1)/7)*7;const cells=[...Array(n).keys()].map(i=>addDays(g0,i));
+  const idx=calItems(ymd(cells[0]),ymd(cells[n-1]));const inM=d=>d.getMonth()===first.getMonth();
+  const mi=x=>x.t==="game"?`<span class="mi game">${esc(vsAt(x.g))} ${esc(O(x.g.opp).name)}</span>`:`<span class="mi ${x.e.kind==="off"?"off":""} ${x.e.kind==="game"?"lvgame":""}">${kindDot(x.e.kind)}${x.e.start?`<span class="num mt">${esc(fmtTime(x.e.start).replace(":00","").replace(" AM","a").replace(" PM","p"))}</span>`:""}${esc(x.e.title)}</span>`;
+  const grid=`<div class="mgrid" role="grid" aria-label="${esc(first.toLocaleDateString("en-US",{month:"long",year:"numeric"}))}">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(w=>`<div class="mwd" role="columnheader">${w}</div>`).join("")}${cells.map(d=>{const s=ymd(d);const L=idx[s]||[];
+    return `<button type="button" class="mcell ${inM(d)?"":"out"} ${s===ymd(TODAY)?"today":""}" data-act="calDay" data-d="${s}" aria-label="${esc(longDate(d))}: ${L.length?plural(L.length,"item"):"nothing scheduled"}"><span class="mnum num">${d.getDate()}</span>${L.slice(0,3).map(mi).join("")}${L.length>3?`<span class="mmore">+${L.length-3} more</span>`:""}</button>`}).join("")}</div>`;
+  const ds=cells.filter(inM).filter(d=>(idx[ymd(d)]||[]).length);
+  const list=`<div class="mlist">${ds.length?ds.map(d=>`<section class="card cday ${ymd(d)===ymd(TODAY)?"istoday":""}">${dayHead(d)}<div class="list">${idx[ymd(d)].map(x=>evRow(x,true)).join("")}</div></section>`).join(""):`<div class="card"><p class="muted" style="margin:0">Nothing on the calendar this month.</p></div>`}</div>`;
+  return grid+list}
+function calendarView(){
+  const wk=calView==="week";const m=mondayOf(calAnchor),sun=addDays(m,6);
+  const label=wk?(m.getMonth()===sun.getMonth()?`${mon(m)} ${m.getDate()} – ${sun.getDate()}`:`${mon(m)} ${m.getDate()} – ${mon(sun)} ${sun.getDate()}`):calAnchor.toLocaleDateString("en-US",{month:"long",year:"numeric"});
+  const isNow=wk?ymd(m)===ymd(mondayOf(TODAY)):calAnchor.getMonth()===TODAY.getMonth()&&calAnchor.getFullYear()===TODAY.getFullYear();
+  const ARR=d=>`<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · Practices, lifts, film & team events</div><h1>Calendar</h1><p>${isCoach()?"Varsity, JV and C-Team. Varsity games come from the Schedule; coaches-only events stay off the players' calendar.":"Practices, team events and games for every level, all in one place."}</p></div><div class="row">${abtn("addEvent","","Add event")}</div></div>
+  <div class="caltools"><div class="calsegs"><div class="seg" role="group" aria-label="View">${[["week","Week"],["month","Month"]].map(([v,l])=>`<button type="button" data-act="calView" data-v="${v}" class="${calView===v?"on":""}" aria-pressed="${calView===v}">${l}</button>`).join("")}</div>
+   <div class="seg lvseg" role="group" aria-label="Level">${LV_FILTERS.map(([v,l])=>`<button type="button" data-act="calLevel" data-v="${v}" class="${calLevel===v?"on":""}" aria-pressed="${calLevel===v}">${l}</button>`).join("")}</div></div>
+   <div class="calnav"><button class="btn icon" data-act="calNav" data-dir="-1" aria-label="Previous ${wk?"week":"month"}">${ARR("M10 3.5L5.5 8 10 12.5")}</button><div class="callabel" aria-live="polite"><b>${esc(label)}</b>${isNow?`<span class="muted small">${wk?"This week":"This month"}</span>`:""}</div><button class="btn icon" data-act="calNav" data-dir="1" aria-label="Next ${wk?"week":"month"}">${ARR("M6 3.5L10.5 8 6 12.5")}</button><button class="btn sm" data-act="calToday" ${isNow&&(!wk||true)?"":""}>Today</button></div></div>
+  <div class="gchips" role="group" aria-label="Show">${EV_FILTERS.map(([v,l])=>`<button type="button" class="gchip ${calFilt===v?"on":""}" data-act="calFilt" data-v="${v}" aria-pressed="${calFilt===v}">${l}</button>`).join("")}</div>
+  ${wk?calWeekBody():calMonthBody()}`;
+}
+/* Home: today's events (players see only "Everyone" events) plus the next game */
+function todayCard(){const t=ymd(TODAY);const lv=calLevel;const ok=e=>lvPass(lv,evTeams(e));const L=evs().filter(e=>e.date===t&&ok(e)).sort(evCmp).map(e=>({t:"ev",key:e.start||"",e}));
+  const gToday=lvPass(lv,["V"])?games().filter(g=>g.date===t):[];gToday.forEach(g=>{const tm=parseTime(g.time);L.push({t:"game",key:/^\d\d:\d\d$/.test(tm||"")?tm:"99:99",g})});L.sort((a,b)=>a.key.localeCompare(b.key));
+  const MAX=4;const shown=L.slice(0,MAX);const ng=upcoming().find(g=>g.date!==t);
+  const nextEv=!L.length?evs().filter(e=>e.date>t&&e.kind!=="off"&&ok(e)).sort(evCmp)[0]:null;
+  const ngLine=ng?`<div class="tnext"><span class="eyebrow">Next varsity game</span><a href="${gameHref(ng)}">${gTitle(ng)}</a><span class="muted small">${esc(dow(ng.d))}, ${esc(mon(ng.d))} ${ng.d.getDate()}${fmtTime(ng.time)?" · "+esc(fmtTime(ng.time)):""}</span></div>`:`<div class="tnext"><span class="eyebrow">Next varsity game</span><span class="muted small">No games scheduled</span></div>`;
+  const nevLine=nextEv?`<div class="tnext"><span class="eyebrow">Next up</span><span>${kindDot(nextEv.kind)}${esc(nextEv.title)}</span><span class="muted small">${esc(dow(D(nextEv.date)))}, ${esc(mon(D(nextEv.date)))} ${D(nextEv.date).getDate()}${nextEv.start?" · "+esc(fmtTime(nextEv.start)):""}</span></div>`:"";
+  return `<div class="card todaycard"><div class="cardhead"><h2>Today & next up</h2><span class="row">${lv!=="all"?`<span class="chip">${esc(LV_FILTERS.find(f=>f[0]===lv)[1])}</span>`:""}<a class="small" href="#calendar">Calendar</a></span></div>
+  <div class="list">${shown.map(x=>evRow(x,true)).join("")||'<p class="muted small cnone">No team events today.</p>'}</div>${L.length>MAX?`<a class="small tmore" href="#calendar">+${L.length-MAX} more today</a>`:""}
+  <div class="tnexts">${nevLine}${ngLine}</div></div>`}
+function calGo(d){calAnchor=D(d);calView="week";render();setTimeout(()=>{const el=document.getElementById("cd-"+d);if(el)el.scrollIntoView({block:"start"})},40)}
+/* Validate one event; throws with a readable message. Returns the clean doc (without author/ts). */
+function cleanEvent(o){if(!o||typeof o!=="object")throw new Error("Bad event");const t=String(o.title??"").replace(/\s+/g," ").trim();const nm=t||"(no title)";
+  if(!realDate(o.date))throw new Error(nm+": date must be YYYY-MM-DD");if(!inSeason(o.date))throw new Error(nm+": "+o.date+" isn't in the "+CONFIG.season+" season");
+  if(!t)throw new Error("Event on "+o.date+" needs a title");if(t.length>80)throw new Error(nm+": title must be 80 characters or fewer");
+  const st=parseTime(o.start),en=parseTime(o.end);
+  if(st===null||st==="TBA")throw new Error(nm+": start time isn't readable");if(en===null||en==="TBA")throw new Error(nm+": end time isn't readable");
+  if(en&&!st)throw new Error(nm+": an end time needs a start time");if(en&&en<=st)throw new Error(nm+": end time must be after the start");
+  const kind=o.kind==null||o.kind===""?"other":o.kind;if(!EV_KINDS[kind])throw new Error(nm+": kind must be one of "+Object.keys(EV_KINDS).join(", "));
+  const who=o.who==null||o.who===""?"all":o.who;if(who!=="all"&&who!=="coaches")throw new Error(nm+': who must be "all" or "coaches"');
+  const note=String(o.note??"").trim();if(note.length>300)throw new Error(nm+": note must be 300 characters or fewer");
+  let teams;if(o.teams==null)teams=who==="coaches"?[]:LV_KEYS.slice();else{if(!Array.isArray(o.teams)||o.teams.some(x=>!LV_KEYS.includes(x)))throw new Error(nm+': teams must be a list of "V", "JV", "C"');teams=LV_KEYS.filter(k=>o.teams.includes(k))}
+  if(!teams.length&&who!=="coaches")throw new Error(nm+": pick at least one level (V, JV or C) unless it's coaches only");
+  const out={date:o.date,start:st,end:en,title:t,kind,who,teams};if(note)out.note=note;return out}
+function eventSheet(e){
+  const value=e?{...e,allday:!e.start}:{date:ymd(calView==="week"&&mondayOf(calAnchor)>TODAY?mondayOf(calAnchor):TODAY),allday:false,kind:"practice",who:"all",teams:calLevel==="all"?LV_KEYS.slice():[calLevel]};
+  if(e)value.teams=evTeams(e);
+  const cfg={title:e?"Edit event":"Add event",intro:e?"":"Games go on the Schedule, not here.",
+    fields:[{key:"date",label:"Date",type:"date",req:true},{key:"allday",label:"All day",type:"check"},
+      {key:"start",label:"Start",type:"time",half:true,when:["allday","false"]},{key:"end",label:"End",type:"time",half:true,hint:"Optional",when:["allday","false"]},
+      {key:"title",label:"Title",req:true,max:80},
+      {key:"kind",label:"Type",type:"select",req:true,options:Object.entries(EV_KINDS).map(([k,[l]])=>[k,k==="off"?"Off day":l])},
+      {key:"teams",label:"Levels",type:"checks",options:EV_LEVELS,hint:"Pick at least one, unless it's coaches only"},
+      {key:"who",label:"Who sees it",type:"seg",req:true,options:[["all","Everyone"],["coaches","Coaches only"]]},
+      {key:"note",label:"Note",type:"textarea",max:300,hint:"Optional, up to 300 characters"},
+      ...(e?[]:[{key:"until",label:"Repeat weekly until",type:"date",hint:"Optional. Adds the same event every week through this date"}])],
+    value,saved:e?"Event saved":"Event added",del:e?["event",e.id]:null,
+    onSave:async v=>{const bad=(k,m)=>{const el=$("#sf-"+k);el&&el.focus();throw new Error(m)};
+      if(!realDate(v.date)||!inSeason(v.date))bad("date","Pick a date in the "+CONFIG.season+" season");
+      const allday=!!v.allday;const start=allday?"":(v.start||""),end=allday?"":(v.end||"");
+      if(!allday&&!start)bad("start","Pick a start time, or turn on All day");
+      if(!(v.teams||[]).length&&v.who!=="coaches")bad("teams","Pick at least one level: Varsity, JV or C-Team");
+      if(end&&end<=start)bad("end","End time must be after the start");
+      if((v.title||"").length>80)bad("title","Title must be 80 characters or fewer");if((v.note||"").length>300)bad("note","Note must be 300 characters or fewer");
+      let obj;try{obj=cleanEvent({date:v.date,start,end,title:v.title,kind:v.kind,who:v.who,note:v.note,teams:v.teams||[]})}catch(err){bad("title",err.message.replace(/^.*?: /,""))}
+      const others=evs().filter(x=>!e||x.id!==e.id);const keys=new Set(others.map(evDupKey));
+      if(e){if(keys.has(evDupKey(obj)))bad("title","That event is already on the calendar");await saveDoc("events",e.id,{...obj,author:e.author||user.cid||"coach",ts:e.ts||Date.now(),edited:Date.now()});calAnchor=D(obj.date);return}
+      const dates=[obj.date];if(v.until){if(!realDate(v.until)||!inSeason(v.until))bad("until","Pick a repeat date in the "+CONFIG.season+" season");if(v.until<=obj.date)bad("until","Repeat until must be after the event date");
+        for(let d=addDays(D(obj.date),7);ymd(d)<=v.until;d=addDays(d,7))dates.push(ymd(d));if(dates.length>53)bad("until","That's more than a season of weeks. Pick an earlier date.")}
+      const todo=dates.map(d=>({...obj,date:d})).filter(x=>!keys.has(evDupKey(x)));if(!todo.length)bad("title",dates.length>1?"Those events are already on the calendar":"That event is already on the calendar");
+      const ts=Date.now();for(const x of todo)await saveDoc("events",uid("ev"),{...x,author:user.cid||"coach",ts});
+      const skip=dates.length-todo.length;if(dates.length>1)cfg.saved=`Added ${plural(todo.length,"event")}${skip?` (${skip} already there)`:""}`;calAnchor=D(obj.date)}};
+  openSheet(cfg);
+  const k=$("#sf-kind"),ad=$("#sf-allday");if(k&&ad)k.addEventListener("change",()=>{if(k.value==="off"&&!ad.checked){ad.checked=true;ad.dispatchEvent(new Event("change",{bubbles:true}))}});
+}
 function gameView(date){
   const g=games().find(x=>x.date===date);if(!g||!g.played||!hasBox(g))return `<div class="empty">No box score for this game yet.${isCoach()?' Import one from <a href="#stats">Stats → Import</a>.':""}</div>`;
   const lines_=box(g).filter(l=>KEYS.some(k=>+l[k]>0));const myId=null;
@@ -1379,18 +1553,44 @@ function gameView(date){
 }
 
 /* ================= Roster & player pages ================= */
+let rosterTab=(()=>{const v=LS.get("cpc_roster_tab");return ["V","JV","C","staff"].includes(v)?v:"V"})();
+const staffDir=()=>items("staffdir").filter(x=>x&&String(x.name||"").trim()).sort((a,b)=>((+a.order||0)-(+b.order||0))||String(a.name).localeCompare(String(b.name)));
+const lvChips=lv=>(lv||[]).filter(k=>PLV.some(x=>x[0]===k)).map(k=>`<span class="chip ${k==="V"?"gold":""}">${esc(lvName(k))}</span>`).join("");
 function rosterView(){
-  const ss=seasonStats();const out=players().filter(p=>p.inactive);
-  const card=p=>{const s=ss.find(x=>x.id===p.id)||{};return `<a class="card pcard" data-no="${esc(p.no)}" href="#player-${p.id}"><div class="jersey">${esc(p.no)}</div><div><div class="pname">${esc(pName(p))}${p.inactive?' <span class="chip warn">Inactive</span>':""}</div><div class="pline">${parts(p.pos,p.yr,p.ht)}</div><div class="pline num">${s.gp?`${fmt1(s.ppg)} pts · ${fmt1(s.rpg)} reb · ${fmt1(s.apg)} ast`:"No games yet"}</div></div></a>`};
-  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · ${esc(CONFIG.level)}</div><h1>Roster</h1>${isCoach()?"<p>Tap a player for stats and editing.</p>":""}</div><div class="row">${abtn("addPlayer","","Add player")}</div></div>
-  ${players().length?"":`<div class="empty">No players yet.${isCoach()?" Tap Add player to build the roster.":""}</div>`}<div class="grid g3">${players().filter(p=>!p.inactive).map(card).join("")}</div>
+  const tab=rosterTab;const seg=`<div class="seg rtabs" role="group" aria-label="Roster">${[...PLV,["staff","Staff"]].map(([k,l])=>`<button type="button" data-act="rosterTab" data-v="${k}" class="${tab===k?"on":""}" aria-pressed="${tab===k}">${l}</button>`).join("")}</div>`;
+  if(tab==="staff"){const L=staffDir();
+    const row=(x,i)=>`<div class="srow"><div class="sinfo"><div class="pname">${esc(x.name)}</div><div class="pline">${esc(x.role)}</div><div class="row" style="gap:4px;margin-top:4px">${lvChips(x.levels)}</div></div>${isCoach()?`<div class="row stools"><button class="btn icon" data-act="staffMove" data-id="${esc(x.id)}" data-dir="-1" aria-label="Move ${esc(x.name)} up" ${i===0?"disabled":""}><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10L8 5.5l4.5 4.5"/></svg></button><button class="btn icon" data-act="staffMove" data-id="${esc(x.id)}" data-dir="1" aria-label="Move ${esc(x.name)} down" ${i===L.length-1?"disabled":""}><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6L8 10.5 12.5 6"/></svg></button><button class="btn icon edit" data-act="editStaff" data-id="${esc(x.id)}" aria-label="Edit ${esc(x.name)}">${PEN}</button></div>`:""}</div>`;
+    return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · ${esc(CONFIG.school)}</div><h1>Roster</h1><p>Our coaching staff, all three levels.</p></div><div class="row">${abtn("addStaff","","Add coach")}</div></div>${seg}
+    <div class="card" style="margin-top:14px">${L.length?`<div class="slist">${L.map(row).join("")}</div>`:`<p class="muted" style="margin:0">No coaches listed yet.${isCoach()?" Tap Add coach to build the staff list.":""}</p>`}</div>`}
+  const ss=tab==="V"?seasonStats():[];const mine=allPlayers().filter(p=>lvOf(p)===tab);const out=mine.filter(p=>p.inactive);
+  const card=p=>{const s=ss.find(x=>x.id===p.id)||{};const j=hasNo(p);return `<a class="card pcard" data-no="${j?esc(p.no):""}" href="#player-${p.id}"><div class="jersey ${j?"":"ini"}" aria-hidden="${j?"false":"true"}">${j?esc(p.no):esc(initials(pName(p)))}</div><div><div class="pname">${esc(pName(p))}${p.inactive?' <span class="chip warn">Inactive</span>':""}</div><div class="pline">${parts(p.pos,p.yr,p.ht)||esc(lvName(tab))}</div>${tab==="V"?`<div class="pline num">${s.gp?`${fmt1(s.ppg)} pts · ${fmt1(s.rpg)} reb · ${fmt1(s.apg)} ast`:"No games yet"}</div>`:""}</div></a>`};
+  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · ${esc(lvName(tab))}</div><h1>Roster</h1><p>${plural(mine.length-out.length,"player")}${isCoach()?" · Tap a player to edit him.":""}${tab!=="V"?" Stats are kept for varsity only.":""}</p></div><div class="row">${abtn("addPlayer",`data-lv="${tab}"`,"Add player")}</div></div>${seg}
+  <div style="margin-top:14px">${mine.length?"":`<div class="empty">No ${esc(lvName(tab))} players yet.${isCoach()?" Tap Add player to build the roster.":""}</div>`}<div class="grid g3">${mine.filter(p=>!p.inactive).map(card).join("")}</div></div>
   ${out.length?`<div class="section">${panel("inactive","Inactive / injured",plural(out.length,"player"),`<div class="grid g3">${out.map(card).join("")}</div>`)}</div>`:""}`;
 }
+function staffSheet(x){
+  openSheet({title:x?"Edit "+x.name:"Add coach",intro:"Everyone who signs in, coaches and players, sees the staff list.",fields:[{key:"name",label:"Name",req:true,max:60},{key:"role",label:"Role",req:true,max:100,hint:"Like JV Head Coach"},{key:"levels",label:"Levels",type:"checks",options:PLV,hint:"Pick at least one"}],
+    value:x?{...x,levels:Array.isArray(x.levels)?x.levels:[]}:{levels:rosterTab!=="staff"?[rosterTab]:[]},saved:x?"Coach saved":"Coach added",del:x?["staffdir",x.id]:null,
+    onSave:async v=>{const o=cleanStaff({name:v.name,role:v.role,levels:v.levels});const L=staffDir();
+      const dup=L.find(y=>y.name.toLowerCase()===o.name.toLowerCase()&&(!x||y.id!==x.id));if(dup)throw new Error(dup.name+" is already on the staff list");
+      await saveDoc("staffdir",x?x.id:uid("sd"),{...o,order:x?(+x.order||0):(L.length?Math.max(...L.map(y=>+y.order||0))+1:0)})}});
+}
+function cleanStaff(o){const name=String(o&&o.name||"").replace(/\s+/g," ").trim(),role=String(o&&o.role||"").replace(/\s+/g," ").trim();
+  if(!name)throw new Error("Name is required");if(name.length>60)throw new Error("Name must be 60 characters or fewer: "+name);if(!/[a-z]/i.test(name))throw new Error("Name needs at least one letter");
+  if(!role)throw new Error("Role is required for "+name);if(role.length>100)throw new Error("Role must be 100 characters or fewer for "+name);
+  if(!Array.isArray(o.levels)||o.levels.some(k=>!PLV.some(x=>x[0]===k)))throw new Error('Levels must be a list of "V", "JV", "C" for '+name);
+  const levels=PLV.map(x=>x[0]).filter(k=>o.levels.includes(k));if(!levels.length)throw new Error("Pick at least one level for "+name);return{name,role,levels}}
+/* JV and C-Team players: bio only (no stats are kept below varsity) */
+function playerBio(p){const coach=isCoach();const j=hasNo(p);
+  const kv=[["Level",lvName(lvOf(p))],["Year",p.yr],["Height",p.ht],["Position",p.pos],["Jersey",j?"#"+p.no:""]].filter(([,v])=>v!=null&&String(v).trim()!=="");
+  return `<div class="row" style="margin-bottom:12px"><a class="btn sm" href="#roster">← Roster</a></div><div class="phero">${j?`<div class="pnum">${esc(p.no)}</div>`:""}${coach?`<div class="tools row"><button class="btn sm ghost" data-act="editPlayer" data-id="${esc(p.id)}">${PEN.replace('viewBox','width="13" height="13" viewBox')}Edit</button><button class="btn sm del" data-act="del" data-k="player" data-id="${esc(p.id)}">${TRASH}Delete</button></div>`:""}<div class="eyebrow">${parts(lvName(lvOf(p)),j?"#"+p.no:"",p.pos,p.yr,p.ht)}${p.inactive?" · Inactive / injured":""}</div><h1>${esc(pName(p))}</h1>
+   <div class="kv biokv">${kv.map(([k,v])=>`<div><div class="k">${esc(k)}</div><div class="v">${esc(v)}</div></div>`).join("")}</div></div>`}
 function playerView(pid){
   const p=P(pid);if(!p)return `<div class="empty">Player not found.</div>`;
-  const s=seasonStats().find(x=>x.id===pid);const coach=isCoach();
+  if(lvOf(p)!=="V")return playerBio(p);
+  const s=seasonStats().find(x=>x.id===pid)||{};const coach=isCoach();
   const log=played().filter(hasBox).slice().reverse().map(g=>({g,l:box(g).find(l=>l.id===pid)||{min:0}}));
-  const hero=`<div class="phero"><div class="pnum">${esc(p.no)}</div>${coach?`<div class="tools row"><button class="btn sm ghost" data-act="editPlayer" data-id="${esc(p.id)}">${PEN.replace('viewBox','width="13" height="13" viewBox')}Edit</button><button class="btn sm del" data-act="del" data-k="player" data-id="${esc(p.id)}">${TRASH}Delete</button></div>`:""}<div class="eyebrow">${parts(p.no!=null&&String(p.no)!==""?"#"+esc(p.no):"",p.pos,p.yr,p.ht)}${p.inactive?" · Inactive / injured":""}</div><h1>${esc(pName(p))}</h1>
+  const hero=`<div class="phero"><div class="pnum">${esc(p.no)}</div>${coach?`<div class="tools row"><button class="btn sm ghost" data-act="editPlayer" data-id="${esc(p.id)}">${PEN.replace('viewBox','width="13" height="13" viewBox')}Edit</button><button class="btn sm del" data-act="del" data-k="player" data-id="${esc(p.id)}">${TRASH}Delete</button></div>`:""}<div class="eyebrow">${parts("Varsity",hasNo(p)?"#"+p.no:"",p.pos,p.yr,p.ht)}${p.inactive?" · Inactive / injured":""}</div><h1>${esc(pName(p))}</h1>
    ${s.gp?`<div class="bigstats"><div><b class="num">${fmt1(s.ppg)}</b><span>PPG</span></div><div><b class="num">${fmt1(s.rpg)}</b><span>RPG</span></div><div><b class="num">${fmt1(s.apg)}</b><span>APG</span></div><div><b class="num">${s.fga?(s.ts*100).toFixed(1):"–"}</b><span>TS%</span></div><div><b class="num">${s.gp}</b><span>Games</span></div></div>`:`<p style="margin:0;color:#c9d4df;position:relative">Season stats show up after his first imported box score.</p>`}
    </div>`;
   const logBody=`<div class="tablewrap"><table><thead><tr><th class="l nosort">Game</th><th class="nosort">MIN</th><th class="nosort">PTS</th><th class="nosort">REB</th><th class="nosort">AST</th><th class="nosort">FG</th><th class="nosort">3PT</th></tr></thead><tbody>
@@ -2078,9 +2278,22 @@ const ACT={
   sheetDelete(){if(!sheetCfg||!sheetCfg.del)return;const [k,id,idx]=sheetCfg.del;deleteFlow(k,id,idx)},
   del(d){deleteFlow(d.k,d.id,d.idx)},
   /* players */
-  addPlayer(){playerSheet(null)},editPlayer(d){playerSheet(P(d.id))},
+  addPlayer(d){playerSheet(null,d&&d.lv)},
+  rosterTab(d){rosterTab=["V","JV","C","staff"].includes(d.v)?d.v:"V";LS.set("cpc_roster_tab",rosterTab);render()},
+  addStaff(){if(isCoach())staffSheet(null)},editStaff(d){const x=get("staffdir",d.id);if(x&&isCoach())staffSheet(x)},
+  async staffMove(d){if(!isCoach())return;const L=staffDir();const i=L.findIndex(x=>x.id===d.id);const j=i+(+d.dir||0);if(i<0||j<0||j>=L.length)return;
+    const a=L.slice();[a[i],a[j]]=[a[j],a[i]];for(let k=0;k<a.length;k++){if(+a[k].order!==k){const {id,...rest}=a[k];await saveDoc("staffdir",id,{...rest,order:k})}}render();
+    setTimeout(()=>{const b=document.querySelector(`[data-act="staffMove"][data-id="${CSS.escape(d.id)}"][data-dir="${d.dir}"]`);if(b&&!b.disabled)b.focus();else{const o=document.querySelector(`[data-act="staffMove"][data-id="${CSS.escape(d.id)}"]:not([disabled])`);o&&o.focus()}},30)},editPlayer(d){playerSheet(P(d.id))},
   /* games */
   addGame(d){gameSheet(null,d&&d.opp)},morePosts(){feedN+=8;render()},
+  /* calendar */
+  addEvent(){if(isCoach())eventSheet(null)},editEvent(d){const e=get("events",d.id);if(e&&isCoach())eventSheet(e)},
+  calView(d){calView=d.v==="month"?"month":"week";render()},
+  calNav(d){const k=+d.dir||0;if(calView==="week")calAnchor=addDays(mondayOf(calAnchor),7*k);else calAnchor=new Date(calAnchor.getFullYear(),calAnchor.getMonth()+k,1,12);render()},
+  calToday(){calAnchor=new Date(TODAY);render();if(calView==="week")setTimeout(()=>{const el=document.getElementById("cd-"+ymd(TODAY));if(el&&el.getBoundingClientRect().top>window.innerHeight*.6)el.scrollIntoView({block:"start"})},40)},
+  calLevel(d){calLevel=LV_FILTERS.some(f=>f[0]===d.v)?d.v:"all";LS.set("cpc_cal_level",calLevel);render()},
+  calFilt(d){calFilt=EV_FILTERS.some(f=>f[0]===d.v)?d.v:"all";render()},
+  calDay(d){if(realDate(d.d))calGo(d.d)},
   addMeet(d){meetSheet(d.id,null)},editMeet(d){meetSheet(d.id,+d.idx)},editGame(d){gameSheet(get("games",d.id))},
   /* opponents */
   addOpp(){openSheet({title:"Add opponent",fields:[{key:"name",label:"School name",req:true},{key:"city",label:"City",half:true},{key:"status",label:"Scouting status",type:"select",options:[["none","Not started"],["progress","In progress"],["ready","Report ready"]],half:true,req:true},{key:"league",label:"League opponent",type:"check"}],value:{},saved:"Opponent added",
@@ -2159,14 +2372,20 @@ const ACT={
   async edDelete(d,el){if(!el.dataset.confirm){el.dataset.confirm="1";el.textContent="Tap again to delete";setTimeout(()=>{if(el.isConnected){delete el.dataset.confirm;el.textContent="Delete play"}},3000);return}
     await removeDoc("plays",ed.id);ed=null;curPlay=null;render();toast("Play deleted")}
 };
-function playerSheet(p){
-  openSheet({title:p?"Edit "+pName(p):"Add player",fields:[{key:"first",label:"First name",req:true,half:true},{key:"last",label:"Last name",req:true,half:true},{key:"no",label:"Jersey #",req:true,half:true,im:"numeric",max:2},{key:"pos",label:"Position",type:"select",options:POS,half:true,req:true},{key:"yr",label:"Year",type:"select",options:YRS,req:true},{key:"ht",label:"Height",type:"height"},{key:"inactive",label:"Inactive / injured (keeps his history, hides him from season stats and leaders)",type:"check"}],
-    value:p?{...p,no:String(p.no??"")}:{},saved:p?"Player saved":"Player added",
+function playerSheet(p,lv){
+  const cur=p?lvOf(p):(["V","JV","C"].includes(lv)?lv:"V");
+  const cfg={title:p?"Edit "+pName(p):"Add player",fields:[{key:"first",label:"First name",req:true,half:true,max:40},{key:"last",label:"Last name",req:true,half:true,max:40},{key:"level",label:"Level",type:"select",options:PLV,req:true,half:true},{key:"no",label:"Jersey #",half:true,im:"numeric",max:2,hint:"Optional"},{key:"pos",label:"Position",type:"select",options:POS,half:true},{key:"yr",label:"Year",type:"select",options:YRS,half:true},{key:"ht",label:"Height",type:"height"},{key:"inactive",label:"Inactive / injured (keeps his history, hides him from season stats and leaders)",type:"check"}],
+    value:p?{...p,no:String(p.no??""),level:cur}:{level:cur},saved:p?"Player saved":"Player added",
     onSave:async v=>{const bad=(k,m)=>{const el=$("#sf-"+k);el&&el.focus();throw new Error(m)};
-      if(!/^\d{1,2}$/.test(v.no))bad("no","Jersey # must be 1 or 2 digits, like 4, 23 or 00");const dup=players().find(x=>String(x.no)===v.no&&(!p||x.id!==p.id));if(dup)bad("no","#"+v.no+" is already "+pName(dup));
+      const level=["V","JV","C"].includes(v.level)?v.level:"V";
+      if(v.no&&!/^\d{1,2}$/.test(v.no))bad("no","Jersey # must be 1 or 2 digits, like 4, 23 or 00");
+      if(v.no){const dup=allPlayers().find(x=>lvOf(x)===level&&String(x.no)===v.no&&(!p||x.id!==p.id));if(dup)bad("no","#"+v.no+" is already "+pName(dup)+" on "+lvName(level))}
       if(!/[a-z]/i.test(v.first)||!/[a-z]/i.test(v.last))bad(/[a-z]/i.test(v.first)?"last":"first","Names need at least one letter");
-      await saveDoc("players",p?p.id:uid("p"),{...(p||{}),...v,inactive:!!v.inactive})},
-    del:p?["player",p.id]:null});
+      const nm=(v.first+" "+v.last).replace(/\s+/g," ").trim().toLowerCase();const twin=allPlayers().find(x=>pName(x).replace(/\s+/g," ").trim().toLowerCase()===nm&&(!p||x.id!==p.id));if(twin)bad("first",pName(twin)+" is already on the "+lvName(lvOf(twin))+" roster");
+      if(p&&lvOf(p)!==level)cfg.saved="Moved to "+lvName(level);
+      await saveDoc("players",p?p.id:uid("p"),{...(p||{}),...v,level,inactive:!!v.inactive});if(!p||lvOf(p)!==level){rosterTab=level;LS.set("cpc_roster_tab",level)}},
+    del:p?["player",p.id]:null};
+  openSheet(cfg);
 }
 function gameSheet(g,preOpp){
   const NEW="__new";const list=opps().slice().sort((a,b)=>a.name.localeCompare(b.name,undefined,{sensitivity:"base"}));
@@ -2279,7 +2498,7 @@ function deleteFlow(kind,id,idx){
   else if(kind==="oppPlayer"){const o=get("opps",id);const pl=o&&o.players[+idx];if(!pl)return;cfg={title:`Remove ${pl.no!=null&&String(pl.no).trim()!==""?"#"+pl.no+" ":""}${pl.name}?`,body:`From ${o.name}'s players to know, with his tendencies and notes.`,button:"Remove player",done:"Player removed",run:()=>{const arr=[...o.players];arr.splice(+idx,1);return saveDoc("opps",id,{...o,players:arr})}}}
   else if(kind==="meet"){const o=get("opps",id);const m=o&&(o.last||[])[+idx];if(!m)return;cfg={title:"Delete this meeting?",body:`${esc(longDate(D(m.date)))}, ${D(m.date).getFullYear()}: ${m.res} ${m.us}–${m.them} will be removed from past meetings.`,button:"Delete meeting",done:"Meeting deleted",run:()=>{const a=[...o.last];a.splice(+idx,1);return saveDoc("opps",id,{...o,last:a})}}}
   else cfg=({note:()=>simple("notes","note",x=>"“"+esc(excerpt(x.text))+"”"),clip:()=>simple("clips","clip",x=>esc(x.label)+" · "+esc(x.t)),post:()=>simple("posts","post",x=>"“"+esc(excerpt(x.text))+"” will disappear from every player's feed."),
-    call:()=>simple("calls","call",x=>esc(x.name.toUpperCase())+": "+esc(x.def)),term:()=>simple("terms","term",x=>esc(x.name)),stand:()=>simple("stand","standings row",x=>esc(oppName(id))+" will be removed from the standings."),lres:()=>simple("lres","result",x=>esc(oppName(x.a))+" "+x.as+", "+esc(oppName(x.b))+" "+x.bs)}[kind]||(()=>null))();
+    call:()=>simple("calls","call",x=>esc(x.name.toUpperCase())+": "+esc(x.def)),term:()=>simple("terms","term",x=>esc(x.name)),stand:()=>simple("stand","standings row",x=>esc(oppName(id))+" will be removed from the standings."),staffdir:()=>simple("staffdir","coach",x=>esc(x.name)+" · "+esc(x.role)+" will be removed from the staff list."),event:()=>simple("events","event",x=>esc(x.title)+" · "+esc(longDate(D(x.date)))+(x.start?" · "+esc(fmtTime(x.start)):"")+(x.who==="coaches"?" (coaches only)":"")),lres:()=>simple("lres","result",x=>esc(oppName(x.a))+" "+x.as+", "+esc(oppName(x.b))+" "+x.bs)}[kind]||(()=>null))();
   if(cfg)confirmDelete(cfg);
 }
 function confirmDelete(cfg){
@@ -2321,7 +2540,7 @@ document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if
 
 /* ================= Admin: Staff & changes (live site only; staff names appear only here) ================= */
 let ADM;function admReset(){ADM={tab:"staff",staff:null,staffBusy:false,staffErr:"",reqs:null,reqsBusy:false,log:[],logDone:false,logBusy:false,logErr:"",logLoaded:false,logGen:ADM?ADM.logGen+1:0,f:{actor:"",coll:"",from:"",to:""},exact:new Set()}}admReset();
-const SECT={games:"Schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"League standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Glossary",calls:"Calls",playsets:"Playbook (hidden list)",posts:"Team feed",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",accounts:"Passwords"};
+const SECT={games:"Schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"League standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Glossary",calls:"Calls",playsets:"Playbook (hidden list)",posts:"Team feed",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",events:"Calendar",staffdir:"Staff directory",accounts:"Passwords"};
 const sectName=c=>SECT[c]||c;
 /* Sections of removed features: their old rows stay in the database but never show in the change log. */
 const GONE_COLLS=["badges","awards"];
@@ -2360,7 +2579,8 @@ function admEff(a){const def=DEFMAP[a.coll]&&DEFMAP[a.coll][a.doc_id];if(!def||a
 function admLabel(a){a=admEff(a);const o=a.old||{},n=a.new||{};let d=a.action==="delete"||(n.deleted&&Object.keys(n).length<=2)?o:(Object.keys(n).length?n:o);const id=a.doc_id;let s="";if(a.builtin)d={...a.builtin,...(d.deleted&&Object.keys(d).length<=2?{}:d)};
   try{switch(a.coll){
     case"games":s=(d.opp?`${vsAt(d)} ${oppName(d.opp)}`:"Game")+(d.date?" · "+shortDate(d.date):"");break;
-    case"players":s=d.first||d.last?`${d.no!=null&&d.no!==""?"#"+d.no+" ":""}${[d.first,d.last].filter(Boolean).join(" ")}`:"";break;
+    case"players":s=d.first||d.last?`${d.no!=null&&d.no!==""?"#"+d.no+" ":""}${[d.first,d.last].filter(Boolean).join(" ")} · ${lvName(lvOf(d))}`:"";break;
+    case"staffdir":s=d.name?"Staff: "+d.name:"";break;
     case"statgames":s="Box score · "+shortDate(id);break;
     case"opps":s=d.name;break;
     case"notes":s=d.text?(d.opp?"Note on "+oppName(d.opp)+": ":"Note: ")+"“"+snip(d.text)+"”":"";break;
@@ -2370,6 +2590,7 @@ function admLabel(a){a=admEff(a);const o=a.old||{},n=a.new||{};let d=a.action===
     case"stand":s="Standings: "+oppName(id);break;
     case"lres":s=d.a&&d.b?`${oppName(d.a)} ${d.as??""}, ${oppName(d.b)} ${d.bs??""}`:"";break;
     case"history":s="Season-by-season history";break;
+    case"events":s=d.title?"Event: "+snip(d.title)+(d.date?" · "+shortDate(d.date):""):"";break;
     case"playsets":s="Basic plays hidden from players";break;
     case"accounts":s="Password";break;
     default:s=d.name||d.title||"";
@@ -2572,6 +2793,15 @@ window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a 
     const ext={event:"event" in patch?patch.event:obj.event,venue:"venue" in patch?patch.venue:obj.venue,type:obj.type};
     await saveDoc("games",g.id,cpcGameExtras(obj,ext));render();return true},
   /* CPC.removeGame("YYYY-MM-DD") -> true | false. Also removes that game's imported box score. */
+  /* CPC.addEvents([{date:"YYYY-MM-DD",start:"HH:MM"|"",end:"HH:MM"|"",title,kind,who:"all"|"coaches",note?}]) checks every event first,
+       then adds them; skips exact duplicates (same date + start + title). Returns {added, skipped} counts. */
+  async addEvents(list){needCoach();if(!Array.isArray(list))throw new Error("addEvents needs an array of events");
+    const clean=list.map(cleanEvent);const keys=new Set(items("events").map(evDupKey));let added=0,skipped=0;const ts=Date.now();
+    for(const e of clean){const k=evDupKey(e);if(keys.has(k)){skipped++;continue}keys.add(k);await saveDoc("events",uid("ev"),{...e,author:user.cid||"coach",ts});added++}
+    render();return{added,skipped}},
+  /* CPC.clearEvents("YYYY-MM-DD","YYYY-MM-DD") removes every calendar event in that range (both ends included). Returns how many. */
+  async clearEvents(fromDate,toDate){needCoach();if(!realDate(fromDate)||!realDate(toDate))throw new Error("clearEvents needs two dates as YYYY-MM-DD");if(toDate<fromDate)throw new Error("toDate must be on or after fromDate");
+    const gone=items("events").filter(e=>e.date>=fromDate&&e.date<=toDate);for(const e of gone)await removeDoc("events",e.id);render();return gone.length},
   async removeGame(date){needCoach();const g=games().find(x=>x.date===date);if(!g)return false;if(store.statgames[g.date])await removeDoc("statgames",g.date);await removeDoc("games",g.id);render();return true},
   /* CPC.updateOpp("Opponent name",{name?,city?,league?}) -> opponent id */
   async updateOpp(name,patch){needCoach();const o=cpcFindOpp(name);if(!o)throw new Error("No opponent named "+name);patch=patch||{};
@@ -2601,14 +2831,22 @@ window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a 
     out.sort((a,b)=>b.season.localeCompare(a.season));await saveDoc("history","seasons",{seasons:out});render();return out.length},
   /* CPC.setStandings(["Team", ...]) -> {added:[names], kept:[names]}. Makes sure each team is a league opponent with a standings row
      (new rows start at 0-0). Skips our own name. Existing rows are left alone. */
-  /* CPC.addPlayers([{first,last,yr:"Fr|So|Jr|Sr",no?,pos?,ht?}]) -> {added:[names],skipped:[names]}. Jersey and position may be left blank for coaches to fill in later. Skips names already on the roster. */
+  /* CPC.addPlayers([{first,last,yr:"Fr|So|Jr|Sr",no?,pos?,ht?,level?:"V"|"JV"|"C"}]) -> {added:[names],skipped:[names]}. Jersey, year and position may be left blank for coaches to fill in later.
+       Skips names already on any roster, and jerseys already used on that level. level defaults to "V". */
   async addPlayers(list){needCoach();if(!Array.isArray(list))throw new Error("Pass a list of players");const out={added:[],skipped:[]};
     for(const x of list){const first=String(x.first||"").trim(),last=String(x.last||"").trim();if(!first||!last)throw new Error("Each player needs a first and last name");
       if(x.yr&&!YRS.includes(x.yr))throw new Error("Year must be Fr, So, Jr or Sr: "+first+" "+last);const no=x.no==null?"":String(x.no).trim();if(no&&!/^\d{1,2}$/.test(no))throw new Error("Bad jersey for "+first+" "+last);
       if(x.pos&&!POS.includes(x.pos))throw new Error("Bad position for "+first+" "+last);
-      const nm=(first+" "+last).toLowerCase();if(players().some(p=>pName(p).toLowerCase()===nm)||(no&&players().some(p=>String(p.no)===no))){out.skipped.push(first+" "+last);continue}
-      await saveDoc("players",uid("p"),{first:first.slice(0,40),last:last.slice(0,40),no,pos:x.pos||"",yr:x.yr||"",ht:x.ht||"",inactive:false});out.added.push(first+" "+last)}
+      const level=x.level==null||x.level===""?"V":x.level;if(!["V","JV","C"].includes(level))throw new Error('level must be "V", "JV" or "C": '+first+" "+last);
+      const nm=(first+" "+last).toLowerCase();if(allPlayers().some(p=>pName(p).toLowerCase()===nm)||(no&&allPlayers().some(p=>lvOf(p)===level&&String(p.no)===no))){out.skipped.push(first+" "+last);continue}
+      await saveDoc("players",uid("p"),{first:first.slice(0,40),last:last.slice(0,40),no,pos:x.pos||"",yr:x.yr||"",ht:x.ht||"",level,inactive:false});out.added.push(first+" "+last)}
     render();return out},
+  /* CPC.removePlayer("First Last") removes the player with exactly that full name (any level). Returns true if one was removed. */
+  async removePlayer(name){needCoach();const nm=String(name||"").replace(/\s+/g," ").trim();if(!nm)return false;const p=allPlayers().find(x=>pName(x)===nm);if(!p)return false;await removeDoc("players",p.id);render();return true},
+  /* CPC.setStaffDir([{name,role,levels:["V","JV","C"]}]) replaces the public staff directory, in list order. Returns how many were saved. */
+  async setStaffDir(list){needCoach();if(!Array.isArray(list))throw new Error("setStaffDir needs an array");const clean=list.map(cleanStaff);
+    const seen=new Set();for(const c of clean){const k=c.name.toLowerCase();if(seen.has(k))throw new Error(c.name+" is listed twice");seen.add(k)}
+    for(const x of items("staffdir"))await removeDoc("staffdir",x.id);for(let i=0;i<clean.length;i++)await saveDoc("staffdir",uid("sd"),{...clean[i],order:i});render();return clean.length},
   async setStandings(names){needCoach();if(!Array.isArray(names))throw new Error("setStandings needs an array of team names");const out={added:[],kept:[]};const seen=new Set();
     for(const raw of names){const nm=String(raw||"").replace(/\s+/g," ").trim();if(!nm)continue;const k=nm.toLowerCase();
       if(/^(cpc|cpc eagles|cedar park christian|cedar park christian eagles|cedar park christian \(bothell\))$/.test(k)||seen.has(k))continue;seen.add(k);
