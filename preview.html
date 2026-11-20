@@ -6,7 +6,12 @@
 <title>CPC Eagles Basketball Hub</title>
 <meta name="description" content="Cedar Park Christian varsity basketball: schedule, scouting, playbook and stats.">
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#0c1624">
+<meta name="theme-color" content="#0b1522">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Eagles">
+<meta name="format-detection" content="telephone=no">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -167,7 +172,7 @@ a.pcard:hover{transform:translateY(-2px);border-color:var(--gold)}
 .scheme dd{margin:0}
 .oplayer{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surface-2)}
 .oplayer .top{display:flex;gap:10px;align-items:baseline}
-.oplayer .jersey{font-size:26px;width:auto}
+.oplayer .jersey{font-size:26px;width:auto;max-width:72px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .statline{display:flex;gap:14px;margin:6px 0;font-size:12px;color:var(--muted)}
 .statline b{display:block;font-family:var(--display);font-size:19px;color:var(--ink);font-weight:600;line-height:1}
 .tend{margin:4px 0 0;padding-left:18px;font-size:13.5px}
@@ -238,9 +243,9 @@ input:disabled{opacity:.45}
 .loginerr{color:#f2b7a8;font-size:13px;min-height:1em}
 .fine{margin-top:16px;font-size:12px;color:#9fb0c2}
 .pp-only{display:none}
-.loginform .lgseg{display:flex;background:rgba(0,0,0,.28);border-color:rgba(194,176,138,.3)}.loginform .lgseg button{flex:1;min-height:40px;font-size:14px;color:#c3cfdb}.loginform .lgseg button.on{background:rgba(194,176,138,.28);color:#fff}
+.loginform .lgseg{display:flex;background:rgba(0,0,0,.28);border-color:rgba(194,176,138,.3)}.loginform .lgseg button{flex:1;min-height:44px;font-size:14px;color:#c3cfdb}.loginform .lgseg button.on{background:rgba(194,176,138,.28);color:#fff}
 .loginform .lgh{font-size:22px;color:#fff;text-transform:none}.loginform .lgp{margin:0;color:#c3cfdb}
-.lglinks{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px}.lglinks .linkbtn{font-size:13px;min-height:40px;text-align:left}
+.lglinks{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px}.lglinks .linkbtn{font-size:13px;min-height:44px;text-align:left}
 /* Admin: staff & change log */
 .staffrow,.logrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 4px;border-top:1px solid var(--line)}
 .staffrow:first-child,.logrow:first-child{border-top:none}
@@ -379,8 +384,8 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 .hs{font-family:var(--display);font-size:24px;font-weight:700;color:var(--gold-ink);line-height:1.1;white-space:nowrap;flex:none}
 .tplrow.nomini{grid-template-columns:1fr}
 .meetseason+.meetseason{margin-top:12px}
-@media (max-width:820px){.gchips{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-left:-2px;padding:2px 2px 6px}.gchips::-webkit-scrollbar{display:none}.gchip{min-height:40px}
-  .glist{grid-template-columns:1fr}.gsearch{width:100%}.gsearch input{flex:1;width:auto}.talk{padding:18px 16px}.verse blockquote{font-size:19px}.histgrid{grid-template-columns:1fr}.ggroup>summary{min-height:52px}}
+@media (max-width:820px){.gchips{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-left:-2px;padding:2px 2px 6px}.gchips::-webkit-scrollbar{display:none}.gchip{min-height:44px}
+  .glist{grid-template-columns:1fr}.gsearch{width:100%;min-width:0}.gsearch input{flex:1;width:auto;min-width:0}.head>.row{min-width:0;max-width:100%}.talk{padding:18px 16px}.verse blockquote{font-size:19px}.histgrid{grid-template-columns:1fr}.ggroup>summary{min-height:52px}}
 .banner{margin:0 0 14px;display:flex;background:var(--gold-bg);border:1px solid rgba(194,176,138,.35);border-radius:12px;padding:10px 12px;font-size:13px;align-items:center;gap:10px}
 
 .fade{animation:fadeup .22s ease both}
@@ -413,15 +418,15 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
   .tabbar .ic{width:23px;height:23px}
   .tabbar .on{color:var(--gold-2)} .tabbar .on .ic{color:var(--gold-2)}
   main{padding:16px 14px calc(96px + var(--safe-b))}
-  th{padding:12px 10px}.btn{min-height:44px}.btn.sm{min-height:40px;padding:8px 12px}.btn.icon{width:44px;height:44px}.seg button{min-height:40px}.panel>summary{min-height:52px}.li .opp{display:inline-block;padding:9px 0;min-height:40px;box-sizing:border-box}
-  label.check{min-height:40px;align-items:center}.btn.sm{min-width:40px}.eye{min-height:40px}.controls input[type=range],.pvbar input[type=range]{height:40px}
-  td a,a.ts,.ts-wrap a,.linkbtn,main a.small{display:inline-flex;align-items:center;min-height:40px;min-width:40px}.note .by a,.li .small a{display:inline-block;padding:11px 4px;margin:-11px -4px}a.ts{justify-content:center}.sheet .seg button{min-height:40px}
+  th{padding:12px 10px}.btn{min-height:44px}.btn.sm{min-height:44px;padding:8px 12px}.btn.icon{width:44px;height:44px}.seg button{min-height:44px}.panel>summary{min-height:52px}.li .opp{display:inline-block;padding:9px 0;min-height:44px;box-sizing:border-box}
+  label.check{min-height:44px;align-items:center}.btn.sm{min-width:44px}.eye{min-height:44px}.controls input[type=range],.pvbar input[type=range]{height:40px}
+  td a,a.ts,.ts-wrap a,.linkbtn,main a.small{display:inline-flex;align-items:center;min-height:44px;min-width:44px}.note .by a,.li .small a{display:inline-block;padding:11px 4px;margin:-11px -4px}a.ts{justify-content:center}.sheet .seg button{min-height:44px}
   h1{font-size:28px}
   .phero h1{font-size:34px}.phero .pnum{font-size:170px}
   .bigstats{gap:18px}.bigstats b{font-size:30px}
   .g2,.g3,.split,.pbwrap{grid-template-columns:1fr}
   .kv{grid-template-columns:repeat(3,minmax(0,1fr))}
-  input[type=text],input[type=search],input[type=url],input[type=email],input[type=password],input[type=number],input[type=date],select,textarea{font-size:16px}
+  input[type=text],input[type=search],input[type=url],input[type=email],input[type=password],input[type=number],input[type=date],input[type=time],input[type=datetime-local],input[type=tel],select,textarea{font-size:16px}
   .sheet{left:0;right:0;top:auto;bottom:0;transform:none;width:100%;max-height:92vh;border-radius:20px 20px 0 0;animation:slideup .22s ease}
   @keyframes slideup{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
   .plist{display:flex;gap:6px;overflow-x:auto;padding:8px}
@@ -443,7 +448,7 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 .slist .srow{display:flex;align-items:center;gap:12px;padding:12px 2px;border-top:1px solid var(--line)}.slist .srow:first-child{border-top:none}
 .srow .sinfo{flex:1;min-width:0}.srow .pline{overflow-wrap:anywhere}.stools{flex:none;gap:6px}.stools .btn[disabled]{opacity:.35}
 .biokv{position:relative;margin-top:12px}.biokv .v{font-family:var(--display);font-size:22px;font-weight:600}
-@media (max-width:820px){.rtabs{width:100%;flex-wrap:nowrap}.rtabs button{flex:1;min-height:40px;padding:6px 4px}.slist .srow{align-items:flex-start}.stools .btn.icon{width:34px;height:34px}}
+@media (max-width:820px){.rtabs{width:100%;flex-wrap:nowrap}.rtabs button{flex:1;min-height:44px;padding:6px 4px}.slist .srow{align-items:flex-start}}
 /* Home: next game per level */
 .ngh{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-family:var(--body);font-weight:700}
 .ngstack{display:flex;flex-direction:column;gap:14px;min-width:0}.ngcard h3{margin:6px 0 2px;font-size:20px}.ngcard .linkbtn{min-height:28px;padding:0}
@@ -451,14 +456,18 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 .schtabs{margin:0 0 14px}.schtabs a{border:none;background:transparent;padding:6px 12px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--muted);text-decoration:none;min-height:30px;display:inline-flex;align-items:center;justify-content:center}.schtabs a.on{background:var(--surface-3);color:#fff}
 .linkish{background:none;border:none;padding:0;color:inherit;font:inherit;font-weight:600;cursor:pointer;text-align:left}.linkish:hover{color:var(--accent-text)}
 .lvnote{margin-top:2px;overflow-wrap:anywhere}
-@media (max-width:820px){.schtabs a{flex:1;min-height:40px;padding:6px 4px}}
+@media (max-width:820px){.schtabs a{flex:1;min-height:44px;padding:6px 4px}}
+.thsort{background:none;border:none;padding:0;margin:0;font:inherit;color:inherit;text-transform:inherit;letter-spacing:inherit;cursor:pointer;min-height:24px}.thsort:focus-visible{outline:2px solid var(--gold-2);outline-offset:2px;border-radius:3px}
+.post p,.note p,.evnote,.pnm,.pname,.evtitle,h1,h2,h3,.oppcard h3,.ngcard h3{overflow-wrap:anywhere}
+.mlv{font-size:9.5px;font-weight:700;color:var(--muted);border:1px solid var(--line);border-radius:3px;padding:0 3px;flex:none;line-height:13px}
+.ngsite{font-family:var(--body);font-size:14px;font-weight:600;color:var(--muted)}
 /* Calendar */
 .calsegs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .lvtag{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:0 5px;border-radius:4px;border:1px solid var(--line);color:#c4cfdc;background:var(--surface-2);line-height:16px}
 .ev.lvgame{background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:8px;margin:3px 0}.ev.lvgame+.ev{border-top-color:transparent}.ev.lvgame .evtitle{color:#fff}
 .mi.lvgame{background:var(--surface-3);border-radius:5px;padding:0 4px}
 .checks{display:flex;gap:6px 16px;flex-wrap:wrap}
-@media (max-width:820px){.calsegs{width:100%}.calsegs .seg{width:100%;flex-wrap:nowrap}.calsegs .seg button{flex:1;min-height:38px;padding:6px 4px}}
+@media (max-width:820px){.calsegs{width:100%}.calsegs .seg{width:100%;flex-wrap:nowrap}.calsegs .seg button{flex:1;min-height:44px;padding:6px 4px}}
 .caltools{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
 .calnav{display:flex;align-items:center;gap:6px}.callabel{display:flex;flex-direction:column;align-items:center;min-width:132px;text-align:center;line-height:1.2}.callabel b{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:.01em}
 .cweek{padding:6px 16px}.cday+.cday{border-top:1px solid var(--line)}.cday{padding:10px 0 6px}.cday.past .cdh{opacity:.7}.cday.past>.list{opacity:.78}
@@ -492,6 +501,50 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 .todaycard{margin-bottom:14px}.todaycard .list{margin-top:-4px}.tmore{display:inline-block;margin:6px 0 0 4px;font-weight:600}
 .tnexts{display:flex;flex-wrap:wrap;gap:8px 24px;border-top:1px solid var(--line);margin-top:8px;padding-top:10px}
 .tnext{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 8px;font-size:13.5px}.tnext a{font-weight:600}.tnext .eyebrow{font-size:10.5px}
+/* ===== Polish pass (2026-11-21) ===== */
+/* 1. Real translucent chrome (iOS Safari < 18 needs the -webkit- prefix) */
+@media (max-width:820px){
+  .topbar{background:rgba(11,21,34,.72);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-bottom-color:rgba(34,56,90,.7)}
+  .tabbar{background:rgba(11,21,34,.82);-webkit-backdrop-filter:saturate(180%) blur(20px);backdrop-filter:saturate(180%) blur(20px);border-top-color:rgba(34,56,90,.7)}
+  .topbar,.tabbar{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+  main{padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+}
+.sheet-back,.cfm-back{-webkit-backdrop-filter:blur(2px)}
+/* 2. Press states that respond on touch-down; hover lifts only where hover exists */
+.btn,.tabbar a,.tabbar button,.seg button,.schtabs a,.gchip,.tool,.prole,.tplrow,.plist button{transition:transform .16s cubic-bezier(.2,.8,.2,1),background-color .15s,border-color .15s,opacity .15s}
+.btn:active,.seg button:active,.schtabs a:active,.gchip:active,.tool:active,.tplrow:active{transform:scale(.96)}
+.tabbar a:active .ic,.tabbar button:active .ic{transform:scale(.86)}
+.tabbar .ic{transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+a.pcard:active,a.oppcard:active,.ev:active,.mcell:active,.panel>summary:active,.ggroup>summary:active,.nav a:active{background-color:var(--surface-2)}
+@media (hover:none){a.pcard:hover,.oppcard:hover{transform:none;border-color:var(--line)}.btn:hover{border-color:var(--line)}.btn.gold:hover{background:var(--gold);border-color:var(--gold)}.btn.edit:hover{border-color:rgba(194,176,138,.35)}}
+/* 3. Sheets: grabber, contained scroll, dynamic viewport height */
+.sheet-body{overscroll-behavior:contain}
+@media (max-width:820px){
+  .sheet{max-height:92dvh;touch-action:pan-y}
+  .sheet::before{content:"";position:absolute;top:6px;left:50%;width:36px;height:5px;margin-left:-18px;border-radius:3px;background:rgba(194,176,138,.35)}
+  .sheet-head{touch-action:none;cursor:grab}
+  @keyframes slideup{from{transform:translateY(100%)}to{transform:none}}
+  .sheet{animation:slideup .34s cubic-bezier(.32,.72,0,1)}
+}
+.sheet-ghost{position:fixed;inset:0;z-index:59;pointer-events:none}
+.sheet-ghost .sheet-back{animation:fadeout .22s ease forwards}
+.sheet-ghost .sheet{animation:popout .18s ease forwards}
+@media (max-width:820px){.sheet-ghost .sheet{animation:slidedown .26s cubic-bezier(.32,.72,0,1) forwards}}
+@keyframes fadeout{to{opacity:0}}
+@keyframes popout{to{opacity:0;transform:translate(-50%,-48%) scale(.98)}}
+@keyframes slidedown{to{transform:translateY(100%)}}
+html.sheet-open{overflow:hidden}
+/* 4. Toast: hug content on one line instead of wrapping at 50% width */
+.toast{width:max-content}
+/* 5. Labels that should never break at their hyphen */
+.nw{white-space:nowrap}
+/* 6. Small type polish */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.evt,.li .date,.li .right,.callabel b,.mnum,.ts,.hs{font-variant-numeric:tabular-nums}
+/* 7. Standalone iPad (rail layout) clears the status bar */
+.rail{padding-top:calc(18px + var(--safe-t))}
+/* 8. More sheet: iOS-style list rows, current page marked */
+@media (max-width:820px){.sheet .nav a{min-height:50px;font-size:16px;padding:12px}.sheet .nav a.on{box-shadow:inset 3px 0 0 var(--gold-2)}}
 </style>
 </head>
 <body>
@@ -575,7 +628,16 @@ const CHEV='<svg class="chev" viewBox="0 0 16 16" fill="none" stroke="currentCol
 const PEN='<svg viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2.5l2 2L5 11H3V9z"/></svg>';
 const PLUS='<svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M6 1.5v9M1.5 6h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
 
-const TODAY=(()=>{const d=new Date();d.setHours(0,0,0,0);return d})();
+/* "Today" is the team's day in Pacific time, whatever time zone the device is in. TODAY is local midnight of that Pacific date,
+   so it compares with D("YYYY-MM-DD") and ymd() like before. It rolls over at midnight: see refreshToday(). */
+const PT_FMT=(()=>{try{return new Intl.DateTimeFormat("en-CA",{timeZone:"America/Los_Angeles",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",hourCycle:"h23"})}catch(e){return null}})();
+function ptParts(){const n=new Date();if(PT_FMT){try{const o={};PT_FMT.formatToParts(n).forEach(x=>o[x.type]=x.value);return{y:+o.year,m:+o.month,d:+o.day,hm:String(+o.hour%24).padStart(2,"0")+":"+o.minute}}catch(e){}}
+  return{y:n.getFullYear(),m:n.getMonth()+1,d:n.getDate(),hm:String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0")}}
+const ptToday=()=>{const p=ptParts();return new Date(p.y,p.m-1,p.d)};
+const ptNowHM=()=>ptParts().hm;
+let TODAY=ptToday();
+/* Returns true when the Pacific date changed since TODAY was set; moves the calendar back to the new week. */
+function refreshToday(){const t=ptToday();if(t.getTime()===TODAY.getTime())return false;TODAY=t;try{calAnchor=new Date(TODAY)}catch(e){}return true}
 const NFHS_SCHOOL=CONFIG.nfhs;
 
 /* ================= Default data (coaches can edit all of it) ================= */
@@ -984,6 +1046,10 @@ async function sbRecheckRole(){const u0=user;let r;try{const {data,error}=await 
   if(user!==u0||!user)return;
   if(r!=="admin"&&r!=="coach"){let sess=null;try{const {data}=await SB.auth.getSession();sess=data&&data.session}catch(e){}const em=user.email;user=null;sbClear();closeSheet(true);await sbNoRole(sess,em,"");user=null;render();return}
   if(r!==user.role){user={...user,role:r};requestRender()}}
+/* Day rollover: check on focus, when the tab becomes visible, and every minute while it's visible */
+const dayCheck=()=>{if(refreshToday()&&user)requestRender()};
+window.addEventListener("focus",dayCheck);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")dayCheck()});
+setInterval(()=>{if(document.visibilityState!=="hidden")dayCheck()},60000);
 if(SB){window.addEventListener("focus",sbRefetchSoon);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")sbRefetchSoon()})}
 async function sbBoot(){
   user=null;
@@ -1073,7 +1139,9 @@ const inSeason=s=>{const [lo,hi]=seasonRange();return realDate(s)&&s>=lo&&s<=hi}
 const lastSeason=()=>{const y=parseInt(CONFIG.season,10);return{lo:`${y-1}-08-01`,hi:`${y}-07-31`,label:`${y-1}–${String(y).slice(2)}`}};
 const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const SITE_L={home:"Home",away:"Away",neutral:"Neutral"};
-const scoreTxt=g=>`${g.us}–${g.them}${g.ot?" (OT)":""}`;
+/* Stored numbers are printed through N() so a bad value can never inject markup */
+const N=x=>{const n=Number(x);return Number.isFinite(n)?n:0};
+const scoreTxt=g=>`${N(g.us)}–${N(g.them)}${g.ot?" (OT)":""}`;
 /* Height: stored as 6'2". Legacy free text that doesn't parse is shown as typed. */
 function parseHt(s){s=String(s??"").trim();if(!s)return null;const m=/^(\d)\s*(?:'|’|ft\.?|feet|-)\s*(\d{1,2})?\s*(?:"|”|''|in\.?|inches)?$/i.exec(s);if(!m)return null;const f=+m[1],i=+(m[2]||0);return f>=4&&f<=7&&i<=11?[f,i]:null}
 /* "Posted by": coach ids from CONFIG.coaches; last choice remembered on this device */
@@ -1091,7 +1159,7 @@ const KEYS=["min","pts","reb","ast","stl","blk","to","fgm","fga","tpm","tpa","ft
 const W=p=>({w:p.w??.45,r3:p.r3??.3,reb:p.reb??.8,ast:p.ast??.5});
 /* Box scores (statgames) are keyed by game date. On a date with several games the first game keeps the date key and the others use their game id. */
 function boxKey(g){if(store.statgames[g.id])return g.id;const sd=sameDay(g);return sd.length<=1||sd[0].id===g.id?g.date:g.id}
-const box=g=>{const imp=store.statgames[boxKey(g)];return imp&&Array.isArray(imp.lines)?imp.lines:[]};
+const box=g=>{const imp=store.statgames[boxKey(g)];return imp&&Array.isArray(imp.lines)?imp.lines.map(l=>{const o={id:String(l&&l.id)};KEYS.forEach(k=>o[k]=N(l&&l[k]));return o}):[]};
 const hasBox=g=>{const imp=store.statgames[boxKey(g)];return !!(imp&&Array.isArray(imp.lines)&&imp.lines.length)};
 function seasonStats(){
   const T={};players().forEach(p=>{T[p.id]={id:p.id,gp:0};KEYS.forEach(k=>T[p.id][k]=0)});
@@ -1136,7 +1204,7 @@ const abtn=(act,attrs="",label="Add")=>isCoach()?`<button class="btn sm edit" da
 function whoLabel(){if(SB&&user&&user.role==="admin")return["Admin","Signed in with your admin account"];if(SB&&isCoach())return["Coach",user.email===CONFIG.supabase.coachEmail?"Signed in with the shared coach login":"Signed in with your coach account"];return isCoach()?["Coach","Signed in with the coach login"]:["Eagles player","Signed in with the player login"]}
 const pwBtnLabel=()=>SB?"My password":"Passwords";
 function render(){
-  pendingRender=false;const app=$("#app");
+  refreshToday();pendingRender=false;const app=$("#app");
   const msgScreen=(msg,btns)=>`<div class="login"><div class="loginbox" style="text-align:center">${MARK(84)}<p class="lead" style="margin-top:16px" role="status">${msg}</p>${btns?`<div class="row" style="justify-content:center;gap:10px;margin-top:16px">${btns}</div>`:""}</div></div>`;
   if(SB_FATAL){app.innerHTML=msgScreen("Couldn't load the team site. Check your connection and refresh.",`<button class="btn gold" data-act="sbReload">Refresh</button>`);return}
   if(SB&&sbBooting){app.innerHTML=msgScreen("Loading the team hub…");return}
@@ -1145,15 +1213,15 @@ function render(){
   if(SB&&sbFailed){app.innerHTML=msgScreen("Couldn't load the team data. Check your connection and try again.",`<button class="btn gold" data-act="sbRetry">Retry</button><button class="btn" data-act="signout">Sign out</button>`);return}
   if(SB&&!sbLoaded){app.innerHTML=msgScreen("Loading the team hub…");return}
   let r=route();if(!allowed(r)){r="home";if(location.hash&&location.hash!=="#home")history.replaceState(null,"","#home")}
-  const [nm,rl]=whoLabel();
+  const [nm,rl]=whoLabel();const fresh=r!==render._r;render._r=r;
   const on=k=>r===k||(k==="scouting"&&r.startsWith("opp-"))||(k==="roster"&&r.startsWith("player-"))||(k==="schedule"&&(r.startsWith("game-")||r.startsWith("schedule/")));
   const moreOn=!TABS.some(on);
   app.innerHTML=`  <header class="topbar">${MARK(26)}<span class="t1">CPC EAGLES</span><span class="sp"></span><span class="sync small"></span></header>
   <div class="shell"><aside class="rail"><a class="brand" href="#home">${MARK()}<div><div class="t1">CPC EAGLES</div><div class="t2">${esc(CONFIG.level)} · ${esc(CONFIG.season)}</div></div></a>
-  <nav class="nav" aria-label="Main">${ROUTES[user.role].map(k=>`<a href="#${k}" class="${on(k)?"on":""}">${ico(k)}${LABEL[k]}</a>`).join("")}</nav>
+  <nav class="nav" aria-label="Main">${ROUTES[user.role].map(k=>`<a href="#${k}" class="${on(k)?"on":""}" ${on(k)?'aria-current="page"':""}>${ico(k)}${LABEL[k]}</a>`).join("")}</nav>
   <div class="me"><div><div class="who">${esc(nm)}</div><div class="role">${esc(rl)}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn sm" data-act="logins">${pwBtnLabel()}</button>`:""}<button class="btn sm" data-act="signout">Sign out</button></div></div></aside>
-  <main id="main" class="fade">${tipFor(r)}${view(r)}</main></div>
-  <nav class="tabbar" aria-label="Main">${TABS.map(k=>`<a href="#${k}" class="${on(k)?"on":""}">${ico(k)}${LABEL[k]}</a>`).join("")}<button class="${moreOn?"on":""}" data-act="more">${ico("more")}More</button></nav>`;
+  <main id="main" class="${fresh?"fade":""}">${tipFor(r)}${view(r)}</main></div>
+  <nav class="tabbar" aria-label="Main">${TABS.map(k=>`<a href="#${k}" class="${on(k)?"on":""}" ${on(k)?'aria-current="page"':""}>${ico(k)}${LABEL[k]}</a>`).join("")}<button class="${moreOn?"on":""}" data-act="more">${ico("more")}More</button></nav>`;
   paintSync();
   $$("details.panel").forEach(d=>d.addEventListener("toggle",()=>{d.open?openSet.add(d.dataset.panel):openSet.delete(d.dataset.panel)}));
   bindView(r);
@@ -1182,7 +1250,7 @@ function loginView(){
   const st=loginStage;if(!st.u)st.u=lastTab();
   const body=st.step==="create"?`<p class="small" style="margin:0;color:#c3cfdb"><b style="color:#fff">First-time setup.</b> Create the two team passwords. Coaches use the coach password; every player uses the player password.</p>${pwField("lg-new","Coach password (at least "+CONFIG.minPassword.coach+" characters)","new-password")}${pwField("lg-new2","Coach password again","new-password")}${pwField("lg-pl","Player password (at least "+CONFIG.minPassword.player+" characters)","new-password")}<div class="loginerr" id="lg-err" aria-live="polite"></div><button class="btn gold" type="submit">Save passwords and sign in</button><button class="btn" type="button" id="lg-back">Back</button>`
    :`<label class="f" for="lg-user">Login<select id="lg-user" autocomplete="username"><option value="player" ${st.u==="coach"?"":"selected"}>Player</option><option value="coach" ${st.u==="coach"?"selected":""}>Coach</option></select></label>${pwField("lg-pass","Password","current-password")}<div class="loginerr" id="lg-err" aria-live="polite"></div><button class="btn gold" type="submit">Sign in</button>`;
-  return `<div class="login"><div class="loginbox">${MARK(84)}<h1>Eagles Basketball Hub</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${esc(CONFIG.level)}</p>
+  return `<div class="login"><div class="loginbox">${MARK(84)}<h1>Eagles Basketball Hub</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${CONFIG.level.split(" · ").map(x=>`<span class="nw">${esc(x)}</span>`).join(" · ")}</p>
   <form class="loginform" id="loginform" autocomplete="on" novalidate>${body}</form>
   <p class="fine">Players: get the team password from your coach.${SB?"":" Coaches can change both passwords anytime."}</p></div></div>`;
 }
@@ -1226,7 +1294,7 @@ function sbLoginView(){
     ${coach?emailField(st.email):""}${pwField("lg-pass","Password","current-password")}${errBox}<button class="btn gold" type="submit">Sign in</button>
     ${coach?`<div class="lglinks"><button type="button" class="linkbtn" id="lg-signup">First time? Create your coach account</button><button type="button" class="linkbtn" id="lg-forgot">Forgot password?</button></div>`:""}`;
     if(coach)fine="Coaches: create your account once. The site admin approves it."}
-  return `<div class="login"><div class="loginbox">${MARK(84)}<h1>Eagles Basketball Hub</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${esc(CONFIG.level)}</p>
+  return `<div class="login"><div class="loginbox">${MARK(84)}<h1>Eagles Basketball Hub</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${CONFIG.level.split(" · ").map(x=>`<span class="nw">${esc(x)}</span>`).join(" · ")}</p>
   <form class="loginform" id="loginform" autocomplete="on" novalidate>${body}</form>${fine?`<p class="fine">${fine}</p>`:""}</div></div>`;
 }
 function sbAuthErr(e,coach){const st=e&&e.status,c=(e&&e.code)||"",m=String((e&&e.message)||"");
@@ -1349,19 +1417,19 @@ function openSheet(cfg){
 function escClose(e){if(e.key==="Escape"&&!$("#cfmroot"))requestClose()}
 const sheetDirty=()=>!!(sheetCfg&&$("#sheetform")&&formState()!==sheetInit);
 function requestClose(){if(sheetDirty())confirmDiscard(()=>closeSheet());else closeSheet()}
-function closeSheet(silent,viaPop){if(!$("#sheetroot").firstChild)return;if(ed&&ed.previewing){stopPlayback();ed.previewing=false}$("#sheetroot").innerHTML="";sheetCfg=null;document.removeEventListener("keydown",escClose);if(!silent&&!viaPop&&history.state&&history.state.sheet){suppressPop++;history.back()}const lf=lastFocus;lastFocus=null;const sel=lf&&lf.dataset&&lf.dataset.act?`[data-act="${lf.dataset.act}"]${lf.dataset.id?`[data-id="${lf.dataset.id}"]`:""}`:null;setTimeout(()=>{let t=lf&&lf.isConnected?lf:(sel?document.querySelector(sel):null);if(t)try{t.focus()}catch(e){}},60);if(!silent){if(pendingRender){pendingRender=false;render()}else render()}}
+function closeSheet(silent,viaPop){if(!$("#sheetroot").firstChild)return;if(ed&&ed.previewing){stopPlayback();ed.previewing=false}window.ghostSheet&&ghostSheet();$("#sheetroot").innerHTML="";sheetCfg=null;document.removeEventListener("keydown",escClose);if(!silent&&!viaPop&&history.state&&history.state.sheet){suppressPop++;history.back()}const lf=lastFocus;lastFocus=null;const sel=lf&&lf.dataset&&lf.dataset.act?`[data-act="${lf.dataset.act}"]${lf.dataset.id?`[data-id="${lf.dataset.id}"]`:""}`:null;setTimeout(()=>{let t=lf&&lf.isConnected?lf:(sel?document.querySelector(sel):null);if(t)try{t.focus()}catch(e){}},60);if(!silent){if(pendingRender){pendingRender=false;render()}else render()}}
 
 /* ================= Shared view bits ================= */
 function gameRow(g){
   const o=O(g.opp);const isNext=g===nextGame()||(nextGame()&&g.id===nextGame().id);
   const right=g.played?`<span class="num"><span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b></span>`:g.d<TODAY?`<span class="chip warn">Needs final score</span>`:(isNext?`<span class="nextcell"><span class="chip gold">Up next</span>${fmtTime(g.time)?`<span class="muted small num">${esc(fmtTime(g.time))}</span>`:""}</span>`:`<span class="muted small num">${esc(fmtTime(g.time))}</span>`);
-  return `<div class="li ${isNext?"upnext":""}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${gTitle(g,o)}</a><div class="small muted">${dow(g.d)} · ${esc(siteText(g,o))} · ${isExh(g)?EXH_CHIP:g.lg?"League":"Non-league"} · ${g.played?(hasBox(g)?`<a href="${gameLink(g)}">Box score</a>`:"Final"):`<a href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch</a>`}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
+  return `<div class="li ${isNext?"upnext":""}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${gTitle(g,o)}</a><div class="small muted">${dow(g.d)} · ${esc(siteText(g,o))} · ${isExh(g)?EXH_CHIP:g.lg?"League":'<span class="nw">Non-league</span>'} · ${g.played?(hasBox(g)?`<a href="${gameLink(g)}">Box score</a>`:"Final"):`<a href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch</a>`}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
 }
 /* Home: next game for each level. Varsity from the Schedule (rich card); JV and C-Team from Calendar events of kind "game". */
 function lvNextCard(k){const t=ymd(TODAY);const e=items("events").filter(x=>x&&x.kind==="game"&&realDate(x.date)&&x.date>=t&&x.who!=="coaches"&&evTeams(x).includes(k)).sort(evCmp)[0];
   const nm=lvName(k);if(!e)return `<div class="card ngcard"><div class="eyebrow">${esc(nm)} · Next game</div><p class="muted" style="margin:6px 0 0">No ${esc(nm)} games scheduled</p><a class="small" href="#schedule/${k.toLowerCase()}">${esc(nm)} schedule</a></div>`;
-  const d=D(e.date);const days=Math.round((d-TODAY)/864e5-.5);const title=String(e.title).replace(/^(JV|C-?Team|C)\s*:\s*/i,"");
-  return `<div class="card ngcard"><div class="eyebrow">${esc(nm)} · Next game</div><h3>${esc(title)}</h3><div class="small muted">${esc(dow(d))}, ${esc(mon(d))} ${d.getDate()}${e.start?" · "+esc(fmtTime(e.start)):""}</div><div class="row" style="margin-top:8px"><span class="chip">${days<=0?"Today":days===1?"Tomorrow":days+" days away"}</span><a class="small" href="#schedule/${k.toLowerCase()}">${esc(nm)} schedule</a></div></div>`}
+  const d=D(e.date);const days=Math.round((d-TODAY)/864e5-.5);const gi=lvGameInfo(e);
+  return `<div class="card ngcard"><div class="eyebrow">${esc(nm)} · Next game</div><h3>${esc(gi.name)}${gi.site?` <span class="ngsite">· ${esc(gi.site)}</span>`:""}</h3><div class="small muted">${esc(dow(d))}, ${esc(mon(d))} ${d.getDate()}${e.start?" · "+esc(fmtTime(e.start)):""}</div>${gi.exh?`<div style="margin-top:6px"><span class="chip gold">${esc(gi.exh)}</span></div>`:""}<div class="row" style="margin-top:8px"><span class="chip">${days<=0?"Today":days===1?"Tomorrow":days+" days away"}</span><a class="small" href="#schedule/${k.toLowerCase()}">${esc(nm)} schedule</a></div></div>`}
 function nextGames(){return `<section class="nextgames" aria-label="Next game for each level"><h2 class="ngh">Next game</h2><div class="grid split">${nextHero()}<div class="ngstack">${lvNextCard("JV")}${lvNextCard("C")}</div></div></section>`}
 function nextHero(){
   const g=nextGame();if(!g)return `<div class="card hero"><div class="eyebrow">Varsity · Next game</div><h2>No games scheduled</h2>${abtn("addGame","","Add a game")}</div>`;
@@ -1371,11 +1439,11 @@ function nextHero(){
   return `<div class="card hero"><div class="eyebrow">Varsity · Next game · ${gKind(g)}</div><h2>${gTitle(g,o)}</h2>
   <div class="meta">${[longDate(g.d),fmtTime(g.time),siteOf(g)==="home"?CONFIG.homeGym:siteOf(g)==="neutral"?(g.venue?"Neutral · "+g.venue:"Neutral site"):(o.city||"Away")].filter(Boolean).map(esc).join(" · ")}</div>
   ${heroPill(g,days)}${lm?`<span class="pill">Last met<b class="num">${lm.res} ${lm.us}–${lm.them}</b>${esc(lm.when)}</span>`:""}
-  <div class="actions"><a class="btn gold" href="#opp-${esc(g.opp)}">Open scouting report</a><a class="btn ghost" href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch on NFHS</a>${isCoach()?st:""}</div></div>`;
+  <div class="actions">${scoutHidden(o)?"":`<a class="btn gold" href="#opp-${esc(g.opp)}">Open scouting report</a>`}<a class="btn ghost" href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch on NFHS</a>${isCoach()&&!scoutHidden(o)?st:""}</div></div>`;
 }
 function heroPill(g,days){
   if(days>=2)return `<span class="pill"><b class="num">${days}</b>days away</span>`;if(days===1)return `<span class="pill"><b>Tomorrow</b></span>`;
-  const t=parseTime(g.time);const n=new Date();const now=String(n.getHours()).padStart(2,"0")+":"+String(n.getMinutes()).padStart(2,"0");const timed=/^\d\d:\d\d$/.test(t||"");
+  const t=parseTime(g.time);const now=ptNowHM();const timed=/^\d\d:\d\d$/.test(t||"");
   if(timed&&t<=now)return `<span class="pill"><b>Today</b>${isCoach()?"· enter the score":"· final score coming"}</span>`;
   return `<span class="pill"><b>${timed&&t<"16:00"?"Today":"Tonight"}</b></span>`}
 function noteHtml(n,act){
@@ -1442,7 +1510,7 @@ function homeView0(){
   }
   const g=nextGame();const o=g?O(g.opp):null;
   return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.team)} · ${longDate(TODAY)}</div><h1>Let's go, Eagles</h1></div>${chips}</div>${talkCard()}${todayCard()}
-  ${nextGames()}${o?`<div class="section">${panel("keys",`Varsity keys vs ${esc(o.name)}`,"",o.keys&&o.keys.length?`<ol>${o.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ol>`:'<p class="muted" style="margin:0">Coaches are still building this report.</p>',"keys")}</div>`:""}
+  ${nextGames()}${o&&!scoutHidden(o)?`<div class="section">${panel("keys",`Varsity keys vs ${esc(o.name)}`,"",o.keys&&o.keys.length?`<ol>${o.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ol>`:'<p class="muted" style="margin:0">Coaches are still building this report.</p>',"keys")}</div>`:""}
   <div class="section">${panel("feed","Team feed","From your coaches · all levels",feedBody())}${panel("team-stats","Varsity team stats","",teamStatsBody())}</div>`;
 }
 
@@ -1533,7 +1601,7 @@ function calWeekBody(){const m=mondayOf(calAnchor);const all=[...Array(7).keys()
 function calMonthBody(){const first=new Date(calAnchor.getFullYear(),calAnchor.getMonth(),1,12);const last=new Date(first.getFullYear(),first.getMonth()+1,0,12);
   const g0=mondayOf(first);const n=Math.ceil(((last-g0)/864e5+1)/7)*7;const cells=[...Array(n).keys()].map(i=>addDays(g0,i));
   const idx=calItems(ymd(cells[0]),ymd(cells[n-1]));const inM=d=>d.getMonth()===first.getMonth();
-  const mi=x=>x.t==="game"?`<span class="mi game">${esc(vsAt(x.g))} ${esc(O(x.g.opp).name)}</span>`:`<span class="mi ${x.e.kind==="off"?"off":""} ${x.e.kind==="game"?"lvgame":""}">${kindDot(x.e.kind)}${x.e.start?`<span class="num mt">${esc(fmtTime(x.e.start).replace(":00","").replace(" AM","a").replace(" PM","p"))}</span>`:""}${esc(x.e.title)}</span>`;
+  const mi=x=>x.t==="game"?`<span class="mi game">${esc(vsAt(x.g))} ${esc(O(x.g.opp).name)}</span>`:`<span class="mi ${x.e.kind==="off"?"off":""} ${x.e.kind==="game"?"lvgame":""}">${kindDot(x.e.kind)}${evTeams(x.e).length?`<span class="mlv">${evTeams(x.e).length===LV_KEYS.length?"All":evTeams(x.e).join("·")}</span>`:""}${x.e.start?`<span class="num mt">${esc(fmtTime(x.e.start).replace(":00","").replace(" AM","a").replace(" PM","p"))}</span>`:""}${esc(x.e.title)}</span>`;
   const grid=`<div class="mgrid" role="grid" aria-label="${esc(first.toLocaleDateString("en-US",{month:"long",year:"numeric"}))}">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(w=>`<div class="mwd" role="columnheader">${w}</div>`).join("")}${cells.map(d=>{const s=ymd(d);const L=idx[s]||[];
     return `<button type="button" class="mcell ${inM(d)?"":"out"} ${s===ymd(TODAY)?"today":""} ${s<ymd(TODAY)?"past":""}" data-act="calDay" data-d="${s}" aria-label="${esc(longDate(d))}: ${L.length?plural(L.length,"item"):"nothing scheduled"}"><span class="mnum num">${d.getDate()}</span>${L.slice(0,3).map(mi).join("")}${L.length>3?`<span class="mmore">+${L.length-3} more</span>`:""}</button>`}).join("")}</div>`;
   const t=ymd(TODAY);const cur=first.getMonth()===TODAY.getMonth()&&first.getFullYear()===TODAY.getFullYear();
@@ -1558,7 +1626,7 @@ function todayCard(){const t=ymd(TODAY);const lv=calLevel;const ok=e=>lvPass(lv,
   const gToday=lvPass(lv,["V"])?games().filter(g=>g.date===t):[];gToday.forEach(g=>{const tm=parseTime(g.time);L.push({t:"game",key:/^\d\d:\d\d$/.test(tm||"")?tm:"99:99",g})});L.sort((a,b)=>a.key.localeCompare(b.key));
   const MAX=4;const shown=L.slice(0,MAX);
   const nextEv=!L.length?evs().filter(e=>e.date>t&&e.kind!=="off"&&ok(e)).sort(evCmp)[0]:null;
-  const nevLine=nextEv?`<div class="tnext"><span class="eyebrow">Next up</span><span>${kindDot(nextEv.kind)}${esc(nextEv.title)}</span><span class="muted small">${esc(dow(D(nextEv.date)))}, ${esc(mon(D(nextEv.date)))} ${D(nextEv.date).getDate()}${nextEv.start?" · "+esc(fmtTime(nextEv.start)):""}</span></div>`:"";
+  const nevLine=nextEv?`<div class="tnext"><span class="eyebrow">Next up</span><span>${kindDot(nextEv.kind)}${esc(nextEv.title)}</span>${lvTags(evTeams(nextEv))}<span class="muted small">${esc(dow(D(nextEv.date)))}, ${esc(mon(D(nextEv.date)))} ${D(nextEv.date).getDate()}${nextEv.start?" · "+esc(fmtTime(nextEv.start)):""}</span></div>`:"";
   return `<div class="card todaycard"><div class="cardhead"><h2>Today & next up</h2><span class="row">${lv!=="all"?`<span class="chip">${esc(LV_FILTERS.find(f=>f[0]===lv)[1])}</span>`:""}<a class="small" href="#calendar">Calendar</a></span></div>
   <div class="list">${shown.map(x=>evRow(x,true)).join("")||'<p class="muted small cnone">No team events today.</p>'}</div>${L.length>MAX?`<a class="small tmore" href="#calendar">+${L.length-MAX} more today</a>`:""}
   ${nevLine?`<div class="tnexts">${nevLine}</div>`:""}</div>`}
@@ -1672,11 +1740,11 @@ function statsView(){
   const cols=[["l","Player","name"],["","GP","gp"],["","MIN","mpg"],["","PTS","ppg"],["","REB","rpg"],["","AST","apg"],["","STL","spg"],["","TO","tpg"],["","FG%","fgp"],["","3P%","tpp"],["","FT%","ftp"],["","eFG%","efg"],["","TS%","ts"]];
   const rows=ss.filter(x=>!(P(x.id)||{}).inactive).sort((a,b)=>(statSort.k==="name"?statSort.d*String(P(a.id).last).localeCompare(String(P(b.id).last)):statSort.d*(a[statSort.k]-b[statSort.k]))||noCmp(P(a.id),P(b.id)));
   const myId=null;
-  const tabs=`<div class="seg" role="tablist">${[["players","Players"],["games","Game log"]].concat(isCoach()?[["import","Import"]]:[]).map(([k,l])=>`<button data-tab="${k}" class="${statTab===k?"on":""}">${l}</button>`).join("")}</div>`;
+  const tabs=`<div class="seg" role="tablist">${[["players","Players"],["games","Game log"]].concat(isCoach()?[["import","Import"]]:[]).map(([k,l])=>`<button type="button" role="tab" aria-selected="${statTab===k}" data-tab="${k}" class="${statTab===k?"on":""}">${l}</button>`).join("")}</div>`;
   let body="";
   if(statTab==="players"){
-    body=`<div class="tablewrap"><table><thead><tr>${cols.map(([c,h,k])=>`<th class="${c} ${statSort.k===k?"sorted":""}" data-sort="${k}">${h}${statSort.k===k?(statSort.d<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>
-    ${rows.length?"":`<tr><td colspan="13" class="l muted" style="white-space:normal">No varsity players yet.</td></tr>`}${rows.map(s=>{const p=P(s.id);if(!s.gp)return `<tr class="${s.id===myId?"me-row":""}"><td class="l"><span class="muted num">${p.no!=null&&String(p.no)!==""?"#"+p.no:""}</span> <a href="#player-${p.id}">${esc(pName(p))}</a></td><td class="num">0</td>${'<td class="num muted">–</td>'.repeat(11)}</tr>`;return `<tr class="${s.id===myId?"me-row":""}"><td class="l"><span class="muted num">${p.no!=null&&String(p.no)!==""?"#"+p.no:""}</span> <a href="#player-${p.id}">${esc(pName(p))}</a></td><td class="num">${s.gp}</td><td class="num">${fmt1(s.mpg)}</td><td class="num us">${fmt1(s.ppg)}</td><td class="num">${fmt1(s.rpg)}</td><td class="num">${fmt1(s.apg)}</td><td class="num">${fmt1(s.spg)}</td><td class="num">${fmt1(s.tpg)}</td><td class="num">${pct(s.fgm,s.fga)}</td><td class="num">${pct(s.tpm,s.tpa)}</td><td class="num">${pct(s.ftm,s.fta)}</td><td class="num">${s.fga?(s.efg*100).toFixed(1)+"%":"–"}</td><td class="num">${s.fga?(s.ts*100).toFixed(1)+"%":"–"}</td></tr>`}).join("")}</tbody></table></div>
+    body=`<div class="tablewrap"><table><thead><tr>${cols.map(([c,h,k])=>`<th class="${c} ${statSort.k===k?"sorted":""}" ${statSort.k===k?`aria-sort="${statSort.d<0?"descending":"ascending"}"`:""}><button type="button" class="thsort" data-sort="${k}">${h}${statSort.k===k?(statSort.d<0?" ↓":" ↑"):""}</button></th>`).join("")}</tr></thead><tbody>
+    ${rows.length?"":`<tr><td colspan="13" class="l muted" style="white-space:normal">No varsity players yet.</td></tr>`}${rows.map(s=>{const p=P(s.id);if(!s.gp)return `<tr class="${s.id===myId?"me-row":""}"><td class="l"><span class="muted num">${p.no!=null&&String(p.no)!==""?"#"+esc(p.no):""}</span> <a href="#player-${p.id}">${esc(pName(p))}</a></td><td class="num">0</td>${'<td class="num muted">–</td>'.repeat(11)}</tr>`;return `<tr class="${s.id===myId?"me-row":""}"><td class="l"><span class="muted num">${p.no!=null&&String(p.no)!==""?"#"+esc(p.no):""}</span> <a href="#player-${p.id}">${esc(pName(p))}</a></td><td class="num">${s.gp}</td><td class="num">${fmt1(s.mpg)}</td><td class="num us">${fmt1(s.ppg)}</td><td class="num">${fmt1(s.rpg)}</td><td class="num">${fmt1(s.apg)}</td><td class="num">${fmt1(s.spg)}</td><td class="num">${fmt1(s.tpg)}</td><td class="num">${pct(s.fgm,s.fga)}</td><td class="num">${pct(s.tpm,s.tpa)}</td><td class="num">${pct(s.ftm,s.fta)}</td><td class="num">${s.fga?(s.efg*100).toFixed(1)+"%":"–"}</td><td class="num">${s.fga?(s.ts*100).toFixed(1)+"%":"–"}</td></tr>`}).join("")}</tbody></table></div>
     <p class="small muted" style="margin:10px 0 0">Per-game averages. Tap a column to sort. Swipe sideways on a phone.</p>`;
   }else if(statTab==="games"){body=played().length?`<div class="list">${played().slice().reverse().map(gameRow).join("")}</div>`:'<p class="muted" style="margin:0">No varsity games played yet.</p>'}
   else{body=`<div class="grid g2"><div class="form"><h3>Upload a varsity box score</h3><p class="muted small" style="margin:0">Varsity games and players only; JV and C-Team stats aren't kept. One row per player, with the game date. Paste rows copied from Sheets or Excel, or choose a .csv file. Only the game date and jersey number columns are required; missing stat columns count as 0. Importing a date replaces that game's stats.</p>
@@ -1713,7 +1781,7 @@ function parseCSV(text){
 }
 
 /* ================= Scouting ================= */
-const teamHist=()=>{const d=get("history","seasons");return d&&Array.isArray(d.seasons)?d.seasons.slice().sort((a,b)=>String(b.season).localeCompare(String(a.season))):[]};
+const teamHist=()=>{const d=get("history","seasons");return d&&Array.isArray(d.seasons)?d.seasons.map(x=>({...x,w:N(x.w),l:N(x.l),lw:N(x.lw),ll:N(x.ll)})).sort((a,b)=>String(b.season).localeCompare(String(a.season))):[]};
 const seasonTxt=x=>String(x||"").replace("-","–");
 function histCard(){const h=teamHist().slice(0,2);if(!h.length)return"";
   return `<div class="card histcard"><div class="cardhead"><h2>Our last two seasons</h2>${ebtn("editHist")}</div><div class="grid g2 histgrid">${h.map(x=>`<div class="hist"><div class="hs num">${esc(seasonTxt(x.season))}</div><div><div class="num"><b>${x.w}–${x.l}</b> <span class="muted">overall</span> · <b>${x.lw}–${x.ll}</b> <span class="muted">league</span></div>${x.finish||x.coach?`<div class="small muted">${parts(x.finish,x.coach?"Coach "+x.coach:"")}</div>`:""}${x.notes?`<div class="small muted">${esc(x.notes)}</div>`:""}</div></div>`).join("")}</div></div>`}
@@ -1721,6 +1789,8 @@ function histCard(){const h=teamHist().slice(0,2);if(!h.length)return"";
 const exhOnly=o=>{const gs=games().filter(g=>g.opp===o.id);return gs.length>0&&gs.every(isExh)};
 const hasScout=o=>!!((o.keys||[]).length||(o.players||[]).length||(o.last||[]).length||items("notes").some(n=>n.opp===o.id)||items("clips").some(c=>c.opp===o.id)||Object.values(o.coach||{}).some(v=>String(v||"").trim()));
 let scoutExhOpen=false;
+/* Exhibition-only opponents are off the Scouting list; players can't reach them at all, coaches only when there's content */
+const scoutHidden=o=>!!o&&exhOnly(o)&&(!isCoach()||!hasScout(o));
 function scoutingView(){
   const all=opps().map(o=>({o,next:nextFor(o.id)})).sort((a,b)=>(a.next?a.next.d:9e15)-(b.next?b.next.d:9e15));
   const list=all.filter(x=>!exhOnly(x.o));const exh=isCoach()?all.filter(x=>exhOnly(x.o)&&hasScout(x.o)):[];
@@ -1747,11 +1817,11 @@ function oppView(id){
   const notesBody=T(abtn("addNote",`data-opp="${esc(id)}"`,"Add note"))+(notes.length?notes.map(n=>noteHtml(n,"editNote")).join(""):'<p class="muted" style="margin:0">No notes yet.</p>');
   const pm=(o.last||[]).map((l,i)=>({...l,i,res:+l.us>+l.them?"W":"L"})).filter(l=>inPast2(l.date)).sort((a,b)=>b.date.localeCompare(a.date));
   const pmW=pm.filter(l=>l.res==="W").length;
-  const meetRow=l=>`<div class="meet"><div class="spread"><span class="row" style="gap:8px"><span class="chip ${l.res==="W"?"good":"bad"}">${l.res}</span><b class="num">${l.us}–${l.them}</b><span class="small muted">${mon(D(l.date))} ${D(l.date).getDate()}, ${D(l.date).getFullYear()}${l.site?" · "+SITE_L[l.site]:""}</span></span><span class="row">${l.src?`<span class="chip good verified">${esc(l.src)}</span>`:""}${coach?`<button class="btn icon edit" data-act="editMeet" data-id="${esc(id)}" data-idx="${l.i}" aria-label="Edit meeting">${PEN}</button>`:""}</span></div>${l.note?`<p class="small muted" style="margin:4px 0 0">${esc(l.note)}</p>`:""}</div>`;
+  const meetRow=l=>`<div class="meet"><div class="spread"><span class="row" style="gap:8px"><span class="chip ${l.res==="W"?"good":"bad"}">${esc(l.res)}</span><b class="num">${N(l.us)}–${N(l.them)}</b><span class="small muted">${mon(D(l.date))} ${D(l.date).getDate()}, ${D(l.date).getFullYear()}${l.site?" · "+SITE_L[l.site]:""}</span></span><span class="row">${l.src?`<span class="chip good verified">${esc(l.src)}</span>`:""}${coach?`<button class="btn icon edit" data-act="editMeet" data-id="${esc(id)}" data-idx="${l.i}" aria-label="Edit meeting">${PEN}</button>`:""}</span></div>${l.note?`<p class="small muted" style="margin:4px 0 0">${esc(l.note)}</p>`:""}</div>`;
   const lastBody=T(abtn("addMeet",`data-id="${esc(id)}"`,"Add meeting"))+(pm.length?pastSeasons().map(ps=>{const rows=pm.filter(l=>seasonOf(l.date)===ps.label);if(!rows.length)return"";const w=rows.filter(l=>l.res==="W").length;return `<div class="meetseason"><div class="tplgroup">${esc(ps.label)} · <span class="num">${w}–${rows.length-w}</span></div>${rows.map(meetRow).join("")}</div>`}).join(""):'<p class="muted" style="margin:0">No meetings in the last two seasons.</p>');
   const mine=games().filter(g=>g.opp===id);const mrec=mine.filter(g=>g.played&&!isExh(g));
   const seasonBody=T(abtn("addGame",`data-opp="${esc(id)}"`,"Add game"))+(mine.length?mine.map(g=>`<div class="spread" style="padding:7px 0;border-top:1px solid var(--line)"><span>${dow(g.d)}, ${mon(g.d)} ${g.d.getDate()} · ${vsAt(g)} ${esc(o.name)}${siteOf(g)==="neutral"?" (neutral)":""}${g.venue?" · "+esc(g.venue):""}${g.lg&&!isExh(g)?" · League":""}${isExh(g)?" "+EXH_CHIP+(g.event?" "+esc(g.event):""):""}</span><span class="num" style="white-space:nowrap">${g.played?`<span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b>`:g.d<TODAY?'<span class="chip warn">Needs final score</span>':esc(fmtTime(g.time)||"Time TBA")}</span></div>`).join(""):'<p class="muted" style="margin:0">No games against them this season.</p>');
-  return `<div class="head"><div><div class="eyebrow">Varsity scouting · ${o.league?"League":"Non-league"}${o.city?" · "+esc(o.city):""}${stand?` · ${stand.lw}–${stand.ll} league`:""}</div><h1>${esc(o.name)}</h1><p>${next?`Next meeting ${longDate(next.d)}, ${({home:"at home",away:"away",neutral:"at a neutral site"})[siteOf(next)]}.`:"No games scheduled."}</p></div><div class="row"><button class="btn sm" data-act="printReport" data-id="${esc(id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-2"/><rect x="6" y="14" width="12" height="7"/></svg>Print report</button>${ebtn("editOpp",`data-id="${esc(id)}"`,"Edit team")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="opp" data-id="${esc(id)}">${TRASH}Delete</button>`:""}<a class="btn sm" href="#scouting">All opponents</a></div></div>
+  return `<div class="head"><div><div class="eyebrow">Varsity scouting · ${o.league?"League":"Non-league"}${o.city?" · "+esc(o.city):""}${stand?` · ${N(stand.lw)}–${N(stand.ll)} league`:""}</div><h1>${esc(o.name)}</h1><p>${next?`Next meeting ${longDate(next.d)}, ${({home:"at home",away:"away",neutral:"at a neutral site"})[siteOf(next)]}.`:"No games scheduled."}</p></div><div class="row"><button class="btn sm" data-act="printReport" data-id="${esc(id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-2"/><rect x="6" y="14" width="12" height="7"/></svg>Print report</button>${ebtn("editOpp",`data-id="${esc(id)}"`,"Edit team")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="opp" data-id="${esc(id)}">${TRASH}Delete</button>`:""}<a class="btn sm" href="#scouting">All opponents</a></div></div>
   ${panel("this-season","This season",mine.length?plural(mine.length,"game")+(mrec.length?` · ${mrec.filter(g=>g.res==="W").length}–${mrec.filter(g=>g.res==="L").length}`:""):"No games",seasonBody)}
   ${panel("keys","Keys to the game",keys.length?plural(keys.length,"key"):"",keysBody,"keys")}
   ${panel("players-know","Players to know",opl.length?plural(opl.length,"player"):"",playersBody)}
@@ -1767,7 +1837,7 @@ function reportHTML(id,forPlayers){
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(o.name)} varsity scouting report</title><style>body{font:12pt/1.45 -apple-system,Segoe UI,Arial,sans-serif;color:#111;max-width:760px;margin:24px auto;padding:0 16px}h1{font:700 26pt Arial Narrow,Arial;margin:0;text-transform:uppercase}h2{font:700 14pt Arial;border-bottom:2px solid #ab8c59;padding-bottom:3px;margin:20px 0 8px;text-transform:uppercase}.m{color:#555}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:5px 7px;text-align:left;vertical-align:top}ol li{font-weight:600;margin:3px 0}@media print{body{margin:0}}</style></head><body>
   <div class="m">${esc(CONFIG.team)} varsity scouting report · printed ${new Date().toLocaleDateString()}</div><h1>${esc(o.name)}</h1><div class="m">${next?`${vsAt(next)} ${esc(o.name)} · ${longDate(next.d)}${next.time?" · "+esc(fmtTime(next.time)):""}${siteOf(next)==="neutral"?" · Neutral":""}`:""}</div>
   ${(o.keys||[]).length?`<h2>Keys to the game</h2><ol>${o.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ol>`:""}
-  ${(o.players||[]).length?`<h2>Players to know</h2><table><tr><th>#</th><th>Player</th><th>PPG</th><th>RPG</th><th>APG</th><th>Tendencies</th></tr>${o.players.map(p=>`<tr><td>${esc(p.no)}</td><td><b>${esc(p.name)}</b><br><span class="m">${esc([p.pos,p.yr,p.ht].filter(Boolean).join(" · "))}</span></td><td>${p.ppg??"–"}</td><td>${p.rpg??"–"}</td><td>${p.apg??"–"}</td><td>${(p.tend||[]).map(esc).join("<br>")}${p.info?`<br><i>${esc(p.info)}</i>`:""}</td></tr>`).join("")}</table>`:""}
+  ${(o.players||[]).length?`<h2>Players to know</h2><table><tr><th>#</th><th>Player</th><th>PPG</th><th>RPG</th><th>APG</th><th>Tendencies</th></tr>${o.players.map(p=>`<tr><td>${esc(p.no)}</td><td><b>${esc(p.name)}</b><br><span class="m">${esc([p.pos,p.yr,p.ht].filter(Boolean).join(" · "))}</span></td><td>${esc(p.ppg??"–")}</td><td>${esc(p.rpg??"–")}</td><td>${esc(p.apg??"–")}</td><td>${(p.tend||[]).map(esc).join("<br>")}${p.info?`<br><i>${esc(p.info)}</i>`:""}</td></tr>`).join("")}</table>`:""}
   ${c.offense||c.defense||c.press||c.sets||c.name?`<h2>Their coach &amp; schemes</h2><table>${[["Coach",[c.name,c.tenure,c.record].filter(Boolean).join(" · ")],["Offense",c.offense],["Defense",c.defense],["Press",c.press],["Sets",c.sets]].filter(r=>r[1]).map(r=>`<tr><th style="width:90px">${r[0]}</th><td>${esc(r[1])}</td></tr>`).join("")}</table>`:""}
   ${clips.length?`<h2>Film</h2><table>${clips.map(x=>`<tr><td style="width:90px"><b>${esc(x.t)}</b></td><td>${esc(x.label)}</td></tr>`).join("")}</table>`:""}
   ${notes.length?`<h2>${isC?"Scouting notes":"Notes from your coaches"}</h2>${notes.map(n=>`<p>${esc(n.text)}</p>`).join("")}`:""}
@@ -1781,7 +1851,7 @@ function leagueView(){
   return `<div class="head"><div><div class="eyebrow">Varsity · ${esc(CONFIG.league)} · ${esc(CONFIG.season)}</div><h1>League</h1><p>${isCoach()?"Varsity league standings. Edit any team or result; our row updates from the varsity Schedule.":"Varsity league standings and recent results."}</p></div><div class="row">${abtn("addStand","","Add team")}${abtn("addLres","","Add result")}</div></div>
   <div class="grid split"><div class="card"><h2 style="margin-bottom:10px">Standings</h2><div class="tablewrap"><table><thead><tr><th class="l nosort">#</th><th class="l nosort">Team</th><th class="nosort">League</th><th class="nosort">Pct</th><th class="nosort">Overall</th><th class="nosort">GB</th>${isCoach()?'<th class="nosort"></th>':""}</tr></thead><tbody>${S.length?"":`<tr><td colspan="7" class="l muted" style="white-space:normal">No standings yet.</td></tr>`}
   ${S.map((s,i)=>{const gb=top?((top.lw-s.lw)+(s.ll-top.ll))/2:0;const n=s.lw+s.ll;return `<tr class="${s.id==="cpc"?"me-row":""}"><td class="l num">${i+1}</td><td class="l">${s.id==="cpc"?"<b>CPC Eagles</b> <span class=\"muted small\">Varsity</span>":`<a href="#opp-${esc(s.id)}">${esc(oppName(s.id))}</a>`}</td><td class="num">${s.lw}–${s.ll}</td><td class="num">${n?(s.lw/n).toFixed(3).replace(/^0/,""):"–"}</td><td class="num">${s.w}–${s.l}</td><td class="num">${gb?gb.toFixed(1):"–"}</td>${isCoach()?`<td>${s.id==="cpc"?"":`<button class="btn icon edit" data-act="editStand" data-id="${esc(s.id)}" aria-label="Edit row">${PEN}</button>`}</td>`:""}</tr>`}).join("")}</tbody></table></div></div>
-  <div class="card"><h2 style="margin-bottom:6px">Recent results</h2>${R.map(r=>`<div class="spread" style="padding:8px 0;border-top:1px solid var(--line)"><span class="small muted" style="width:44px">${mon(D(r.date))} ${D(r.date).getDate()}</span><span style="flex:1">${r.a==="cpc"?"<b>CPC</b>":esc(oppName(r.a))} <b class="num">${r.as}</b>, ${r.b==="cpc"?"<b>CPC</b>":esc(oppName(r.b))} <span class="num">${r.bs}</span></span>${isCoach()?`<button class="btn icon edit" data-act="editLres" data-id="${esc(r.id)}" aria-label="Edit result">${PEN}</button>`:""}</div>`).join("")||'<p class="muted">No results yet.</p>'}</div></div>`;
+  <div class="card"><h2 style="margin-bottom:6px">Recent results</h2>${R.map(r=>`<div class="spread" style="padding:8px 0;border-top:1px solid var(--line)"><span class="small muted" style="width:44px">${mon(D(r.date))} ${D(r.date).getDate()}</span><span style="flex:1">${r.a==="cpc"?"<b>CPC</b>":esc(oppName(r.a))} <b class="num">${N(r.as)}</b>, ${r.b==="cpc"?"<b>CPC</b>":esc(oppName(r.b))} <span class="num">${N(r.bs)}</span></span>${isCoach()?`<button class="btn icon edit" data-act="editLres" data-id="${esc(r.id)}" aria-label="Edit result">${PEN}</button>`:""}</div>`).join("")||'<p class="muted">No results yet.</p>'}</div></div>`;
 }
 
 /* ================= Glossary & calls ================= */
@@ -1840,8 +1910,8 @@ function playGroups(list,side){const order=CATS[side]||[];const ix=c=>{const i=o
 let pbSide=null;
 const PEYE='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>';
 const PEYE_OFF='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.7A6.6 6.6 0 0 1 8 3.5C12 3.5 14.5 8 14.5 8a12 12 0 0 1-1.9 2.5M4.3 4.9C2.6 6.1 1.5 8 1.5 8S4 12.5 8 12.5c1.2 0 2.3-.4 3.2-.9M6.6 6.6a2 2 0 0 0 2.8 2.8M2 2l12 12"/></svg>';
-const visBtn=(p,small)=>{const h=isHidden(p);return small?`<button type="button" class="eye ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}" aria-pressed="${!h}" aria-label="Visible to players: ${esc(p.name)}" title="${h?"Hidden from players. Tap to show.":"Visible to players. Tap to hide."}">${h?PEYE_OFF:PEYE}</button>`
-  :`<button type="button" class="btn sm eyeb ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}" aria-pressed="${!h}">${h?PEYE_OFF:PEYE}Visible to players</button>`};
+const visBtn=(p,small)=>{const h=isHidden(p);return small?`<button type="button" class="eye ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}" aria-label="${h?"Show "+esc(p.name)+" to players":"Hide "+esc(p.name)+" from players"}" title="${h?"Hidden from players. Tap to show.":"Visible to players. Tap to hide."}">${h?PEYE_OFF:PEYE}</button>`
+  :`<span class="chip ${h?"warn":"good"}">${h?"Hidden from players":"Visible to players"}</span><button type="button" class="btn sm eyeb ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}">${h?PEYE:PEYE_OFF}${h?"Show to players":"Hide from players"}</button>`};
 const SPEEDS={slow:.5,normal:1,fast:1.8};const SPEED_KEY="cpc_pb_speed";const STEP_SECONDS=2.2;
 const savedSpeed=(()=>{try{const v=localStorage.getItem(SPEED_KEY);return SPEEDS[v]?v:"normal"}catch(e){return"normal"}})();
 let curPlay=null;let pb={t:0,playing:false,sel:null,speed:SPEEDS[savedSpeed],speedKey:savedSpeed,raf:0,last:0,seg:-2};let ed=null;let drag=null;
@@ -1986,7 +2056,7 @@ function viewerView(){
     <div class="controls"><button class="btn icon" data-act="pbPrev" aria-label="Previous step"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2h2v10H3zM12 2v10L5.5 7z" fill="currentColor"/></svg></button><button class="btn gold icon" id="pbplay" data-act="pbPlay" aria-label="Play or pause">${PLAY}</button><button class="btn icon" data-act="pbNext" aria-label="Next step"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M9 2h2v10H9zM2 2v10l6.5-5z" fill="currentColor"/></svg></button>
     <span class="stepl" id="stepl">Step 1 of ${N}</span><input type="range" id="scrub" min="0" max="${N-1}" step="0.01" value="${pb.t}" aria-label="Scrub through the play">
     ${speedSeg()}</div>${(play.phases||[]).some(ph=>ph&&ph.cap)?'<div class="pbcap" id="pbcap" aria-live="polite"></div>':""}</div>
-   <div><div class="spread" style="margin-bottom:10px;align-items:flex-start"><div><div class="eyebrow">${SIDE_L[sideOf(play)]} · ${esc(play.cat||"Other")} · ${isFull(play)?"Full court":"Half court"}</div><h2 style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2>${isBasic(play)||isCoach()?`<div class="row" style="gap:6px;margin-top:6px">${isCoach()?visBtn(play,false):""}${isBasic(play)?'<span class="chip basic">Basic</span>':""}${isCoach()&&isHidden(play)?'<span class="chip warn">Hidden from players</span>':""}</div>`:""}</div>
+   <div><div class="spread" style="margin-bottom:10px;align-items:flex-start"><div><div class="eyebrow">${SIDE_L[sideOf(play)]} · ${esc(play.cat||"Other")} · ${isFull(play)?"Full court":"Half court"}</div><h2 style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2>${isBasic(play)||isCoach()?`<div class="row" style="gap:6px;margin-top:6px">${isCoach()?visBtn(play,false):""}${isBasic(play)?'<span class="chip basic">Basic</span>':""}</div>`:""}</div>
     <div class="row">${ebtn("editPlay",`data-id="${esc(play.id)}"`,"Edit play")}${isCoach()?`<button class="btn sm" data-act="dupPlay" data-id="${esc(play.id)}">Duplicate play</button>`:""}${isCoach()?`<button class="btn sm del" data-act="del" data-k="play" data-id="${esc(play.id)}" aria-label="Delete play">${TRASH}</button>`:""}</div></div>
     ${panel("play-roles",dv?"Defenders & jobs":"Positions & roles",pb.sel?"Following "+pLabel(play,pb.sel):"Tap one to follow it",`<div class="legend">${["1","2","3","4","5"].map(id=>`<button class="prole ${pb.sel===id?"on":""}" data-act="pbSel" data-v="${id}"><span class="badge ${dv?"dbadge":""}">${pLabel(play,id)}</span><span><b>${dv?"Defender X"+id:"Position "+id}</b><span>${esc(play.roles&&play.roles[id]||"No role written yet.")}</span></span></button>`).join("")}</div>`)}
     ${panel("play-notes","Notes & reads",play.notes?"":"None yet",play.notes?`<p style="margin:0;white-space:pre-wrap">${esc(play.notes)}</p>`:'<p class="muted" style="margin:0">No notes yet.</p>')}</div></div>`;
@@ -2234,7 +2304,7 @@ function builderView(){
     ${ed.id&&DEFMAP.plays[ed.id]?'<p class="small muted" style="margin:0">This is a Basic play from the built-in library. Saving keeps your version for the team.</p>':""}
     <label class="f" for="pe-name">Play name<input type="text" id="pe-name" value="${esc(p.name)}" required></label>
     <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--muted)">Side<div class="seg" role="group" aria-label="Side">${["offense","defense"].map(s=>`<button type="button" data-act="edSide" data-v="${s}" class="${sd===s?"on":""}" aria-pressed="${sd===s}">${SIDE_L[s]}</button>`).join("")}</div></div>
-    <div class="grid g2" style="gap:10px"><label class="f" for="pe-cat">Category<select id="pe-cat" required><option value="" disabled ${p.cat?"":"selected"}>—</option>${cats.map(c=>`<option ${p.cat===c?"selected":""}>${c}</option>`).join("")}</select></label>
+    <div class="grid g2" style="gap:10px"><label class="f" for="pe-cat">Category<select id="pe-cat" required><option value="" disabled ${p.cat?"":"selected"}>—</option>${cats.map(c=>`<option value="${esc(c)}" ${p.cat===c?"selected":""}>${esc(c)}</option>`).join("")}</select></label>
      <div class="f" style="display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--muted)">Court<div class="seg" role="group" aria-label="Court"><button type="button" data-act="edCourt" data-v="half" class="${isFull(p)?"":"on"}">Half</button><button type="button" data-act="edCourt" data-v="full" class="${isFull(p)?"on":""}">Full</button></div></div></div>
     <label class="check" for="pe-vis"><input type="checkbox" id="pe-vis" ${p.draft?"":"checked"}><span>Visible to players <span class="small muted" style="font-weight:500">Turn off to keep it coaches-only.</span></span></label>
     <details ${ed.rolesOpen?"open":""} id="roledet"><summary style="cursor:pointer;font-weight:700;color:var(--accent-text);font-size:13px">Roles & reads (optional)</summary><div class="form" style="margin-top:10px">
@@ -2328,7 +2398,7 @@ const ACT={
   sbRetry(){if(SB&&user)sbLoad()},
   sbReload(){location.reload()},
   async signout(){openSet.delete("past-games");stopPlayback();ed=null;pbSide=null;curPlay=null;closeSheet(true);if(SB){try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear()}user=null;LS.set(CONFIG.sessionKey,null);history.replaceState(null,"","#");render();toast("Signed out")},
-  more(){const items_=ROUTES[user.role].filter(k=>!TABS.includes(k));lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href);document.addEventListener("keydown",escClose);$("#sheetroot").innerHTML=`<div class="sheet-back" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="More"><div class="sheet-head"><h2>More</h2><button class="btn icon" data-act="closeSheet" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="sheet-body"><nav class="nav">${items_.map(k=>`<a href="#${k}">${ico(k)}${LABEL[k]}</a>`).join("")}</nav><div class="me" style="margin-top:14px"><div><div class="who">${esc(whoLabel()[0])}</div><div class="role">${esc(whoLabel()[1])}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn" data-act="logins">${pwBtnLabel()}</button>`:""}<button class="btn" data-act="signout">Sign out</button></div></div></div></div>`;paintSync()},
+  more(){const items_=ROUTES[user.role].filter(k=>!TABS.includes(k));lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href);document.addEventListener("keydown",escClose);$("#sheetroot").innerHTML=`<div class="sheet-back" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="More"><div class="sheet-head"><h2>More</h2><button class="btn icon" data-act="closeSheet" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="sheet-body"><nav class="nav">${items_.map(k=>{const cur=route()===k||route().split("/")[0]===k||(k==="scouting"&&route().startsWith("opp-"))||(k==="roster"&&route().startsWith("player-"))||(k==="schedule"&&route().startsWith("game-"));return `<a href="#${k}" data-act="moreGo" data-k="${k}" class="${cur?"on":""}" ${cur?'aria-current="page"':""}>${ico(k)}${LABEL[k]}</a>`}).join("")}</nav><div class="me" style="margin-top:14px"><div><div class="who">${esc(whoLabel()[0])}</div><div class="role">${esc(whoLabel()[1])}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn" data-act="logins">${pwBtnLabel()}</button>`:""}<button class="btn" data-act="signout">Sign out</button></div></div></div></div>`;paintSync()},
   logins(){if(!isCoach())return;closeSheet(true);
     if(SB)return openSheet({title:"My password",intro:"Change the password you use to sign in."+(user.email===CONFIG.supabase.coachEmail?" This is the shared coach login, so anyone still using it will need the new one.":"")+(isAdmin()?"<br>To change the player password, go to Staff &amp; changes → Player login.":""),fields:[{key:"cur",label:"Current password",type:"password",req:true},{key:"c1",label:"New password",type:"password",req:true,hint:`At least ${COACH_MIN} characters`},{key:"c2",label:"New password again",type:"password",req:true}],value:{},saved:"Password updated",
       onSave:async v=>{if(v.c1.length<COACH_MIN)throw new Error(`Use at least ${COACH_MIN} characters`);if(v.c1!==v.c2)throw new Error("The new passwords don't match");if(v.c1===v.cur)throw new Error("Pick a new password, not the current one");
@@ -2340,6 +2410,8 @@ const ACT={
       if(v.pl&&v.pl.length<CONFIG.minPassword.player)throw new Error(`Player password needs at least ${CONFIG.minPassword.player} characters`);if(v.pl&&v.pl===(v.c1||v.cur))throw new Error("Use a different password for players");
       if(v.c1)await setPassword("coach",v.c1);if(v.pl)await setPassword("player",v.pl)}})},
   closeSheet(){requestClose()},
+  /* A link in the More sheet replaces the sheet's history entry, so Back goes to the page before */
+  moreGo(d){if(ed&&ed.dirty)return confirmDiscard(()=>{ed=null;ACT.moreGo(d)},"Leave without saving?","Your unsaved play will be lost.");history.replaceState(null,"","#"+d.k);ed=null;window.dispatchEvent(new HashChangeEvent("hashchange"))},/* replaceState fires no hashchange: dispatch one so routing and per-tab scroll memory both run */
   printReport(d){const go=forPlayers=>ACT.doPrint(d,forPlayers);if(!isCoach())return go(true);
     openSheet({title:"Print scouting report",intro:"The players' copy leaves out coaches-only notes.",fields:[{key:"who",label:"Print for",type:"seg",options:[["players","Players"],["coaches","Coaches"]],req:true}],value:{who:"players"},button:"Print",saved:"Opening print",onSave:v=>{setTimeout(()=>go(v.who==="players"),400)}})},
   async doPrint(d,forPlayers){
@@ -2561,18 +2633,18 @@ function deleteFlow(kind,id,idx){
   if(!isCoach())return;let cfg;
   const simple=(c,label,what)=>{const x=get(c,id);if(!x)return null;return{title:"Delete this "+label+"?",body:what(x),button:"Delete "+label,done:label[0].toUpperCase()+label.slice(1)+" deleted",run:()=>removeDoc(c,id)}};
   if(kind==="player"){const p=P(id);if(!p)return;const imp=Object.values(store.statgames).filter(g=>g&&Array.isArray(g.lines)&&g.lines.some(l=>l.id===id)).length;
-    cfg={title:`Delete ${pName(p)}?`,body:`${p.no!=null&&String(p.no)!==""?"#"+p.no:""} will be removed from the roster, stats and team totals.`,impacts:[imp&&`His lines in ${plural(imp,"imported box score")} will be hidden`].filter(Boolean),type:p.last,button:"Delete player",done:pName(p)+" deleted",
+    cfg={title:`Delete ${pName(p)}?`,body:`${p.no!=null&&String(p.no)!==""?"#"+esc(p.no):""} will be removed from the roster, stats and team totals.`,impacts:[imp&&`His lines in ${plural(imp,"imported box score")} will be hidden`].filter(Boolean),type:p.last,button:"Delete player",done:pName(p)+" deleted",
       run:async()=>{await removeDoc("players",id)},after:()=>{if(/^#player-/.test(location.hash))location.hash="roster"}}}
   else if(kind==="opp"){const o=get("opps",id);if(!o)return;const gs=games().filter(g=>g.opp===id),ns=items("notes").filter(x=>x.opp===id),cs=items("clips").filter(x=>x.opp===id),st=get("stand",id),lr=items("lres").filter(r=>r.a===id||r.b===id);
     cfg={title:`Delete ${o.name}?`,body:"Their whole scouting report is removed for every coach and player.",impacts:[ns.length&&plural(ns.length,"scouting note"),cs.length&&plural(cs.length,"film clip"),(o.players||[]).length&&plural(o.players.length,"player to know"),st&&"Their row in the standings",lr.length&&plural(lr.length,"league result")].filter(Boolean),
       check:gs.length?`Also delete ${plural(gs.length,"game")} against ${esc(o.name)} from our schedule${gs.some(g=>g.played)?", including results that count toward our record":""}. Games can't point to an opponent that no longer exists.`:null,type:o.name,button:"Delete opponent",done:o.name+" deleted",
       run:async()=>{for(const g of gs){const k=boxKey(g);if(store.statgames[k])await removeDoc("statgames",k);await removeDoc("games",g.id)}for(const x of ns)await removeDoc("notes",x.id);for(const x of cs)await removeDoc("clips",x.id);for(const r of lr)await removeDoc("lres",r.id);if(st)await removeDoc("stand",id);await removeDoc("opps",id)},after:()=>{location.hash="scouting"}}}
   else if(kind==="game"){const g=games().find(x=>x.id===id);if(!g)return;const o=O(g.opp);const bk=boxKey(g);const imp=store.statgames[bk];
-    cfg={title:`Delete ${vsAt(g)} ${o.name}?`,body:`${longDate(g.d)} will be removed from the schedule.`,impacts:[g.played&&`The final score (${g.us}–${g.them}) is deleted and our record changes`,imp&&"Its imported box score is deleted"].filter(Boolean),button:"Delete game",done:"Game deleted",
+    cfg={title:`Delete ${vsAt(g)} ${o.name}?`,body:`${longDate(g.d)} will be removed from the schedule.`,impacts:[g.played&&`The final score (${scoreTxt(g)}) is deleted and our record changes`,imp&&"Its imported box score is deleted"].filter(Boolean),button:"Delete game",done:"Game deleted",
       run:async()=>{if(imp)await removeDoc("statgames",bk);await removeDoc("games",id)},after:()=>{if(location.hash.startsWith("#game-"))location.hash="schedule"}}}
   else if(kind==="play"){const p=get("plays",id);if(!p)return;cfg={title:`Delete ${p.name}?`,body:"It's removed from the playbook for every coach and player."+(isBasic(p)?" It's a Basic play from the built-in library; an admin can bring it back later from the change log.":"")+(isHidden(p)?"":" To keep it but take it away from players, turn off Visible to players instead."),impacts:[plural(p.phases.length,"step")+" of diagram work",p.notes&&"Its roles, notes and reads"].filter(Boolean),button:"Delete play",done:p.name+" deleted",run:()=>removeDoc("plays",id),after:()=>{ed=null;curPlay=null}}}
-  else if(kind==="oppPlayer"){const o=get("opps",id);const pl=o&&o.players[+idx];if(!pl)return;cfg={title:`Remove ${pl.no!=null&&String(pl.no).trim()!==""?"#"+pl.no+" ":""}${pl.name}?`,body:`From ${o.name}'s players to know, with his tendencies and notes.`,button:"Remove player",done:"Player removed",run:()=>{const arr=[...o.players];arr.splice(+idx,1);return saveDoc("opps",id,{...o,players:arr})}}}
-  else if(kind==="meet"){const o=get("opps",id);const m=o&&(o.last||[])[+idx];if(!m)return;cfg={title:"Delete this meeting?",body:`${esc(longDate(D(m.date)))}, ${D(m.date).getFullYear()}: ${m.res} ${m.us}–${m.them} will be removed from past meetings.`,button:"Delete meeting",done:"Meeting deleted",run:()=>{const a=[...o.last];a.splice(+idx,1);return saveDoc("opps",id,{...o,last:a})}}}
+  else if(kind==="oppPlayer"){const o=get("opps",id);const pl=o&&o.players[+idx];if(!pl)return;cfg={title:`Remove ${pl.no!=null&&String(pl.no).trim()!==""?"#"+pl.no+" ":""}${pl.name}?`,body:`From ${esc(o.name)}'s players to know, with his tendencies and notes.`,button:"Remove player",done:"Player removed",run:()=>{const arr=[...o.players];arr.splice(+idx,1);return saveDoc("opps",id,{...o,players:arr})}}}
+  else if(kind==="meet"){const o=get("opps",id);const m=o&&(o.last||[])[+idx];if(!m)return;cfg={title:"Delete this meeting?",body:`${esc(longDate(D(m.date)))}, ${D(m.date).getFullYear()}: ${esc(m.res)} ${N(m.us)}–${N(m.them)} will be removed from past meetings.`,button:"Delete meeting",done:"Meeting deleted",run:()=>{const a=[...o.last];a.splice(+idx,1);return saveDoc("opps",id,{...o,last:a})}}}
   else cfg=({note:()=>simple("notes","note",x=>"“"+esc(excerpt(x.text))+"”"),clip:()=>simple("clips","clip",x=>esc(x.label)+" · "+esc(x.t)),post:()=>simple("posts","post",x=>"“"+esc(excerpt(x.text))+"” will disappear from every player's feed."),
     call:()=>simple("calls","call",x=>esc(x.name.toUpperCase())+": "+esc(x.def)),term:()=>simple("terms","term",x=>esc(x.name)),stand:()=>simple("stand","standings row",x=>esc(oppName(id))+" will be removed from the standings."),staffdir:()=>simple("staffdir","coach",x=>esc(x.name)+" · "+esc(x.role)+" will be removed from the staff list."),event:()=>simple("events","event",x=>esc(x.title)+" · "+esc(longDate(D(x.date)))+(x.start?" · "+esc(fmtTime(x.start)):"")+(x.who==="coaches"?" (coaches only)":"")),lres:()=>simple("lres","result",x=>esc(oppName(x.a))+" "+x.as+", "+esc(oppName(x.b))+" "+x.bs)}[kind]||(()=>null))();
   if(cfg)confirmDelete(cfg);
@@ -2819,7 +2891,7 @@ function bindView(r){
       go.onclick=async()=>{importMsg="";try{const {games:gs,errs,warns}=parseCSV($("#csvtext").value);const ds=Object.keys(gs);
         if(!ds.length){forceImport=false;$("#csvmsg").innerHTML=`<span style="color:var(--bad)">${errs.map(esc).join("<br>")||"Nothing to import."}</span>`;return}
         const gOf=k=>games().find(x=>x.id===k);const nice=k=>{const g=gOf(k);return esc(mon(g.d)+" "+g.d.getDate()+(sameDay(g).length>1?" vs "+O(g.opp).name:""))};
-        const checks=ds.flatMap(d=>{const g=gOf(d);const sum=gs[d].reduce((a,l)=>a+l.pts,0);const out=[];if(sum!==+g.us)out.push(`${nice(d)}: player points add to ${sum}, but the final was ${g.us}.`);
+        const checks=ds.flatMap(d=>{const g=gOf(d);const sum=gs[d].reduce((a,l)=>a+l.pts,0);const out=[];if(sum!==+g.us)out.push(`${nice(d)}: player points add to ${sum}, but the final was ${N(g.us)}.`);
           gs[d].filter(l=>l.fgm>l.fga||l.tpm>l.tpa||l.ftm>l.fta||l.tpm>l.fgm||l.pts!==2*(l.fgm-l.tpm)+3*l.tpm+l.ftm).forEach(l=>{const p=P(l.id);out.push(`${nice(d)}: #${esc(p.no)} ${esc(pName(p))}'s shooting numbers don't add up to his points.`)});return out});
         const issues=[...errs.map(esc),...checks,...warns.map(esc)];
         if(issues.length&&!forceImport){forceImport=true;$("#csvmsg").innerHTML=`<span style="color:var(--warn)">${issues.join("<br>")}</span><br>${plural(ds.length,"game")} can be imported${errs.length?`; ${plural(errs.length,"problem row")} would be skipped`:""}. Fix the file, or tap <b>Import</b> again to import anyway.`;return}
@@ -2890,6 +2962,9 @@ window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a 
     const r=await CPC.addGames(list.map(x=>({...x,date})));
     let oppRemoved=false;if(from&&get("opps",from.id)&&!games().some(g=>g.opp===from.id)&&!hasScout(from)&&!get("stand",from.id)&&!items("lres").some(x=>x.a===from.id||x.b===from.id)){await removeDoc("opps",from.id);oppRemoved=true}
     render();return{removed,added:r.added.length,skipped:r.skipped.length,oppRemoved}},
+  /* One-time fix: label the JV games on Nov 25, 2026 as Jamboree games (adds "Jamboree" to the note). Safe to run twice. Returns how many changed. */
+  async tagJVJamboree(){needCoach();let n=0;for(const e of items("events").filter(x=>x.date==="2026-11-25"&&x.kind==="game"&&evTeams(x).includes("JV"))){const note=String(e.note||"").trim();if(/jamboree/i.test(note))continue;
+      const {id,...rest}=e;await saveDoc("events",id,{...rest,note:note?(note+" · Jamboree").slice(0,300):"Jamboree"});n++}render();return n},
   /* One-time fix: the Nov 25 Jamboree is two exhibitions (Issaquah 5:00 PM, Cascade 5:20 PM), not one "Issaquah & Cascade" game. */
   migrateJamboree(){return CPC.splitGame("2026-11-25","Issaquah & Cascade",[{opp:"Issaquah",time:"17:00",site:"neutral",type:"exh",event:"Jamboree",venue:"TBD"},{opp:"Cascade",time:"17:20",site:"neutral",type:"exh",event:"Jamboree",venue:"TBD"}])},
   /* CPC.updateOpp("Opponent name",{name?,city?,league?}) -> opponent id */
@@ -2978,6 +3053,40 @@ function cpcGameExtras(obj,src){const o={...obj};const exh=src.type==="exh";
   const ven=String(src.venue||"").replace(/\s+/g," ").trim();if(ven.length>60)throw new Error("Venue must be 60 characters or fewer");
   if(exh){o.type="exh";o.lg=false;if(ev)o.event=ev;else delete o.event}else{delete o.type;delete o.event}
   if(o.site==="neutral"&&ven)o.venue=ven;else delete o.venue;return o}
+/* ===== Polish pass: scroll memory, sheet exit + drag-to-dismiss ===== */
+(function(){
+  const RM=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* Per-route scroll memory (like iOS tabs); a new page starts at the top. Tapping the active tab scrolls to top. */
+  const Y={};let cur=location.hash.slice(1)||"home";
+  window.addEventListener("hashchange",()=>{const nx=location.hash.slice(1)||"home";const top=r=>r.split(/[\/-]/)[0];
+    const y=(top(nx)===top(cur)&&nx.includes("/")&&cur.includes("/"))?scrollY:(Y[nx]||0); /* level toggles keep position */
+    cur=nx;requestAnimationFrame(()=>scrollTo(0,y))},true);
+  window.addEventListener("scroll",()=>{Y[cur]=scrollY},{passive:true});
+  document.addEventListener("click",e=>{const a=e.target.closest(".tabbar a.on,.rail .nav a.on");if(a&&a.getAttribute("href")===location.hash){e.preventDefault();scrollTo({top:0,behavior:RM()?"auto":"smooth"})}});
+  /* Lock page scroll while a sheet is open */
+  const root=document.getElementById("sheetroot");
+  new MutationObserver(()=>document.documentElement.classList.toggle("sheet-open",!!root.firstChild)).observe(root,{childList:true});
+  /* Called from closeSheet() just before it empties #sheetroot: a clone animates out so app logic stays synchronous */
+  window.ghostSheet=()=>{const skip=window.__noGhost;window.__noGhost=false;if(skip||RM()||!root.querySelector(".sheet"))return;
+    const g=root.cloneNode(true);g.querySelectorAll("[id],[for],[form],[name]").forEach(e=>{e.removeAttribute("id");e.removeAttribute("for");e.removeAttribute("form");e.removeAttribute("name")});g.removeAttribute("id");g.className="sheet-ghost";g.setAttribute("aria-hidden","true");g.inert=true;
+    const sh=root.querySelector(".sheet"),gs=g.querySelector(".sheet");if(sh.style.transform)gs.style.transform=sh.style.transform;
+    document.body.appendChild(g);setTimeout(()=>g.remove(),320)};
+  /* Drag the sheet header down to dismiss: 1:1 tracking, velocity projection, spring back */
+  let d=null;
+  root.addEventListener("pointerdown",e=>{if(innerWidth>820||e.button>0)return;const h=e.target.closest(".sheet-head");if(!h||e.target.closest("button,a,input,select"))return;
+    const s=h.closest(".sheet");d={s,y0:e.clientY,y:0,t:performance.now(),v:0,id:e.pointerId};s.style.animation="none";s.style.transition="none";h.setPointerCapture(e.pointerId)});
+  root.addEventListener("pointermove",e=>{if(!d||e.pointerId!==d.id)return;const now=performance.now();let y=e.clientY-d.y0;if(y<0)y=-Math.sqrt(-y)*2; /* rubber-band upward */
+    const dt=Math.max(1,now-d.t);d.v=.8*((y-d.y)/dt)+.2*d.v;d.y=y;d.t=now;d.s.style.transform=`translateY(${y}px)`});
+  const end=e=>{if(!d||e.pointerId!==d.id)return;const {s,y,v}=d;d=null;const H=s.offsetHeight;const proj=y+v*(.99/(1-.99)); /* decay 0.99/ms */
+    if(y>8&&proj>H*.4&&!sheetDirty()){spring(s,y,H,v,()=>{window.__noGhost=true;requestClose()})}
+    else{spring(s,y,0,v,()=>{s.style.transform="";});if(y>8&&proj>H*.4)requestClose()}};
+  root.addEventListener("pointerup",end);root.addEventListener("pointercancel",end);
+  function spring(el,from,to,v0,done){if(RM()){el.style.transform=`translateY(${to}px)`;return done()}
+    const k=380,c=2*Math.sqrt(k); /* critically damped, mass 1 */ let x=from-to,v=v0*1000,last=performance.now();
+    const step=now=>{const dt=Math.min(.032,(now-last)/1000);last=now;const a=-k*x-c*v;v+=a*dt;x+=v*dt;el.style.transform=`translateY(${to+x}px)`;
+      if(Math.abs(x)<.5&&Math.abs(v)<20){el.style.transform=`translateY(${to}px)`;return done()}requestAnimationFrame(step)};requestAnimationFrame(step)}
+})();
+
 render();initDb();
 })();
 </script>
