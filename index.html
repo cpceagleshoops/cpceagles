@@ -1105,7 +1105,7 @@ function winStreak(){const p=counted();if(!p.length)return"";const last=p[p.leng
 /* ================= Session, routing, nav ================= */
 let user=LOCAL_OK?LS.get(CONFIG.sessionKey):null;
 const ROUTES={coach:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary"],admin:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary","admin"],player:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary"]};
-const TABS=["home","schedule","scouting","playbook"];
+const TABS=["home","calendar","roster","playbook"];
 const route=()=>location.hash.slice(1)||"home";
 function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(/^schedule\/(v|jv|c)$/.test(r))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin();return (ROUTES[user.role]||[]).includes(r)}
 window.addEventListener("popstate",()=>{if(suppressPop>0){suppressPop--;return}if($("#cfmroot")){$("#cfmroot").remove()}if($("#sheetroot").firstChild){if(sheetDirty()){history.pushState({sheet:1},"",location.href);confirmDiscard(()=>closeSheet())}else closeSheet(false,true)}});
