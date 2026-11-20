@@ -448,6 +448,10 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 .ngh{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-family:var(--body);font-weight:700}
 .ngstack{display:flex;flex-direction:column;gap:14px;min-width:0}.ngcard h3{margin:6px 0 2px;font-size:20px}.ngcard .linkbtn{min-height:28px;padding:0}
 .nextgames{margin-bottom:14px}.exhlink{margin-top:16px}
+.schtabs{margin:0 0 14px}.schtabs a{border:none;background:transparent;padding:6px 12px;border-radius:7px;font-size:12.5px;font-weight:600;color:var(--muted);text-decoration:none;min-height:30px;display:inline-flex;align-items:center;justify-content:center}.schtabs a.on{background:var(--surface-3);color:#fff}
+.linkish{background:none;border:none;padding:0;color:inherit;font:inherit;font-weight:600;cursor:pointer;text-align:left}.linkish:hover{color:var(--accent-text)}
+.lvnote{margin-top:2px;overflow-wrap:anywhere}
+@media (max-width:820px){.schtabs a{flex:1;min-height:40px;padding:6px 4px}}
 /* Calendar */
 .calsegs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .lvtag{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:0 5px;border-radius:4px;border:1px solid var(--line);color:#c4cfdc;background:var(--surface-2);line-height:16px}
@@ -457,7 +461,9 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 @media (max-width:820px){.calsegs{width:100%}.calsegs .seg{width:100%;flex-wrap:nowrap}.calsegs .seg button{flex:1;min-height:38px;padding:6px 4px}}
 .caltools{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
 .calnav{display:flex;align-items:center;gap:6px}.callabel{display:flex;flex-direction:column;align-items:center;min-width:132px;text-align:center;line-height:1.2}.callabel b{font-family:var(--display);font-size:19px;font-weight:600;letter-spacing:.01em}
-.cweek{padding:6px 16px}.cday+.cday{border-top:1px solid var(--line)}.cday{padding:10px 0 6px}.cday.past .cdh{opacity:.7}
+.cweek{padding:6px 16px}.cday+.cday{border-top:1px solid var(--line)}.cday{padding:10px 0 6px}.cday.past .cdh{opacity:.7}.cday.past>.list{opacity:.78}
+.calpasthint{margin:6px 0 4px;font-size:12.5px}.calpasthint .linkbtn,.calpast .linkbtn{background:none;border:none;padding:0;font:inherit;color:var(--gold-2);font-weight:600;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.calpast{margin-top:14px}.calpast .pbody{padding:0 16px 10px}.calpast .cday{padding:10px 0 6px}.calpast .cday+.cday{border-top:1px solid var(--line)}.calpast .list{opacity:.9}
 .cdh{display:flex;align-items:center;gap:8px;margin:0 0 4px;font-size:13px}.cdh b{font-family:var(--display);font-size:16px;text-transform:uppercase;letter-spacing:.04em;font-weight:600}
 .cday.istoday .cdh b{color:var(--gold-ink)}
 .cnone{margin:2px 0 6px}
@@ -475,7 +481,7 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 .mgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
 .mwd{background:var(--surface-2);padding:6px 8px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .mcell{background:var(--surface);min-height:104px;padding:6px 6px 8px;border:none;color:inherit;font:inherit;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-width:0}
-.mcell:hover{background:var(--surface-2)}.mcell.out{background:var(--bg)}.mcell.out>*{opacity:.5}
+.mcell:hover{background:var(--surface-2)}.mcell.out{background:var(--bg)}.mcell.out>*{opacity:.5}.mcell.past:not(.out)>*{opacity:.6}.mcell.past:hover>*{opacity:.9}
 .mnum{font-size:12.5px;font-weight:700;color:var(--muted);align-self:flex-start;padding:0 5px;border-radius:999px;margin-bottom:2px}.mcell.today .mnum{background:var(--gold);color:#0b1522}
 .mi{display:flex;align-items:center;gap:3px;font-size:11.5px;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;color:#d5dde7}.mi .mt{color:var(--muted);flex:none}
 .mi.game{background:var(--gold-bg);color:var(--gold-ink);font-weight:700;border-radius:5px;padding:0 4px;display:block}.mi.off{color:var(--muted)}
@@ -1101,7 +1107,7 @@ let user=LOCAL_OK?LS.get(CONFIG.sessionKey):null;
 const ROUTES={coach:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary"],admin:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary","admin"],player:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary"]};
 const TABS=["home","schedule","scouting","playbook"];
 const route=()=>location.hash.slice(1)||"home";
-function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin();return (ROUTES[user.role]||[]).includes(r)}
+function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(/^schedule\/(v|jv|c)$/.test(r))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin();return (ROUTES[user.role]||[]).includes(r)}
 window.addEventListener("popstate",()=>{if(suppressPop>0){suppressPop--;return}if($("#cfmroot")){$("#cfmroot").remove()}if($("#sheetroot").firstChild){if(sheetDirty()){history.pushState({sheet:1},"",location.href);confirmDiscard(()=>closeSheet())}else closeSheet(false,true)}});
 window.addEventListener("hashchange",()=>{stopPlayback();ed=null;closeSheet(true);render()});
 const IC={
@@ -1140,7 +1146,7 @@ function render(){
   if(SB&&!sbLoaded){app.innerHTML=msgScreen("Loading the team hub…");return}
   let r=route();if(!allowed(r)){r="home";if(location.hash&&location.hash!=="#home")history.replaceState(null,"","#home")}
   const [nm,rl]=whoLabel();
-  const on=k=>r===k||(k==="scouting"&&r.startsWith("opp-"))||(k==="roster"&&r.startsWith("player-"))||(k==="schedule"&&r.startsWith("game-"));
+  const on=k=>r===k||(k==="scouting"&&r.startsWith("opp-"))||(k==="roster"&&r.startsWith("player-"))||(k==="schedule"&&(r.startsWith("game-")||r.startsWith("schedule/")));
   const moreOn=!TABS.some(on);
   app.innerHTML=`  <header class="topbar">${MARK(26)}<span class="t1">CPC EAGLES</span><span class="sp"></span><span class="sync small"></span></header>
   <div class="shell"><aside class="rail"><a class="brand" href="#home">${MARK()}<div><div class="t1">CPC EAGLES</div><div class="t2">${esc(CONFIG.level)} · ${esc(CONFIG.season)}</div></div></a>
@@ -1153,7 +1159,7 @@ function render(){
   bindView(r);
 }
 function view(r){
-  if(r==="home")return homeView();if(r==="schedule")return scheduleView();if(r==="calendar")return calendarView();if(r==="roster")return rosterView();if(r==="stats")return statsView();
+  if(r==="home")return homeView();if(r==="schedule"||r.startsWith("schedule/"))return scheduleView(r.split("/")[1]);if(r==="calendar")return calendarView();if(r==="roster")return rosterView();if(r==="stats")return statsView();
   if(r==="scouting")return scoutingView();if(r.startsWith("opp-"))return oppView(r.slice(4));if(r==="league")return leagueView();
   if(r==="playbook")return playbookView();if(r==="glossary")return glossaryView();if(r.startsWith("player-"))return playerView(r.slice(7));
 if(r.startsWith("game-"))return gameView(r.slice(5));if(r==="admin")return adminView();return homeView();
@@ -1289,15 +1295,15 @@ function bindSbLogin(){
 
 /* ================= First-time tips (coaches) ================= */
 const TIPS={
-  home:"<b>Welcome.</b> Everything here can be changed. Look for <b>Edit</b> and <b>Add</b> buttons on any page. Coach Talk and the Team feed go to every player in the program (Varsity, JV and C-Team). Schedule, Stats, Scouting and League are varsity only.",
+  home:"<b>Welcome.</b> Everything here can be changed. Look for <b>Edit</b> and <b>Add</b> buttons on any page. Coach Talk, the Team feed, Schedule, Calendar and Roster cover the whole program (Varsity, JV and C-Team). Stats, Scouting and League are varsity only.",
   roster:"<b>Roster:</b> switch between Varsity, JV, C-Team and Staff at the top. Tap <b>Add player</b> on a level, or tap a player to edit him. Stats are kept for varsity only.",
   calendar:"<b>Calendar:</b> tap <b>Add event</b> for practices, lifts, film and team events. Games come from the Schedule on their own. Pick <b>Coaches only</b> to keep an event off the players' calendar.",
-  schedule:"<b>Varsity schedule:</b> tap <b>Add game</b>, or the pencil on any game. Enter the final score after the game to update the varsity record. JV and C-Team games go on the Calendar.",
+  schedule:"<b>Schedule:</b> switch between Varsity, JV and C-Team at the top. Tap <b>Add game</b>, or the pencil on any game. Enter varsity final scores to update the record; JV and C-Team games also show on the Calendar.",
   scouting:"<b>Varsity scouting:</b> add an opponent, then open it to fill in keys, players to know, their coach, film timestamps and notes. Notes can stay coaches-only or be shared with players.",
   playbook:"<b>Playbook (all levels):</b> tap <b>New play</b> and pick Offense or Defense. Drag players to where they start, tap <b>Add step</b> for each action, then use Pass and Screen. Preview before you save.",
   stats:"<b>Varsity stats:</b> import a box score from a spreadsheet under <b>Import</b>. Season stats and leaders update on their own."
 };
-function tipFor(r){if(!isCoach())return"";const t=TIPS[r];const seen=LS.get("cpc_tips_seen")||{};if(!t||seen[r])return"";return `<div class="tip" role="note"><span class="grow">${t}</span><button class="btn sm" data-act="tipOk" data-v="${r}">Got it</button></div>`}
+function tipFor(r){if(!isCoach())return"";r=r.split("/")[0];const t=TIPS[r];const seen=LS.get("cpc_tips_seen")||{};if(!t||seen[r])return"";return `<div class="tip" role="note"><span class="grow">${t}</span><button class="btn sm" data-act="tipOk" data-v="${r}">Got it</button></div>`}
 
 /* ================= Edit sheet (Edit → Save, with toast) ================= */
 let sheetCfg=null,sheetInit="",lastFocus=null,suppressPop=0;
@@ -1353,9 +1359,9 @@ function gameRow(g){
 }
 /* Home: next game for each level. Varsity from the Schedule (rich card); JV and C-Team from Calendar events of kind "game". */
 function lvNextCard(k){const t=ymd(TODAY);const e=items("events").filter(x=>x&&x.kind==="game"&&realDate(x.date)&&x.date>=t&&x.who!=="coaches"&&evTeams(x).includes(k)).sort(evCmp)[0];
-  const nm=lvName(k);if(!e)return `<div class="card ngcard"><div class="eyebrow">${esc(nm)} · Next game</div><p class="muted" style="margin:6px 0 0">No games scheduled</p></div>`;
+  const nm=lvName(k);if(!e)return `<div class="card ngcard"><div class="eyebrow">${esc(nm)} · Next game</div><p class="muted" style="margin:6px 0 0">No ${esc(nm)} games scheduled</p><a class="small" href="#schedule/${k.toLowerCase()}">${esc(nm)} schedule</a></div>`;
   const d=D(e.date);const days=Math.round((d-TODAY)/864e5-.5);const title=String(e.title).replace(/^(JV|C-?Team|C)\s*:\s*/i,"");
-  return `<div class="card ngcard"><div class="eyebrow">${esc(nm)} · Next game</div><h3>${esc(title)}</h3><div class="small muted">${esc(dow(d))}, ${esc(mon(d))} ${d.getDate()}${e.start?" · "+esc(fmtTime(e.start)):""}</div><div class="row" style="margin-top:8px"><span class="chip">${days<=0?"Today":days===1?"Tomorrow":days+" days away"}</span><button type="button" class="linkbtn" data-act="calOpen" data-d="${e.date}">On the calendar</button></div></div>`}
+  return `<div class="card ngcard"><div class="eyebrow">${esc(nm)} · Next game</div><h3>${esc(title)}</h3><div class="small muted">${esc(dow(d))}, ${esc(mon(d))} ${d.getDate()}${e.start?" · "+esc(fmtTime(e.start)):""}</div><div class="row" style="margin-top:8px"><span class="chip">${days<=0?"Today":days===1?"Tomorrow":days+" days away"}</span><a class="small" href="#schedule/${k.toLowerCase()}">${esc(nm)} schedule</a></div></div>`}
 function nextGames(){return `<section class="nextgames" aria-label="Next game for each level"><h2 class="ngh">Next game</h2><div class="grid split">${nextHero()}<div class="ngstack">${lvNextCard("JV")}${lvNextCard("C")}</div></div></section>`}
 function nextHero(){
   const g=nextGame();if(!g)return `<div class="card hero"><div class="eyebrow">Varsity · Next game</div><h2>No games scheduled</h2>${abtn("addGame","","Add a game")}</div>`;
@@ -1441,10 +1447,32 @@ function homeView0(){
 }
 
 /* ================= Schedule & box score ================= */
-function scheduleView(){
+/* Schedule: Varsity from the games collection; JV and C-Team from Calendar events of kind "game" */
+const SCH_LV={v:"V",jv:"JV",c:"C"};
+let schedLevel=(()=>{try{const v=localStorage.getItem("cpc_sched_level");return ["V","JV","C"].includes(v)?v:"V"}catch(e){return"V"}})();
+function scheduleView(slug){
+  if(slug&&SCH_LV[slug]&&SCH_LV[slug]!==schedLevel){schedLevel=SCH_LV[slug];try{localStorage.setItem("cpc_sched_level",schedLevel)}catch(e){}}
+  const lv=schedLevel;
+  const seg=`<div class="seg rtabs schtabs" role="group" aria-label="Level">${PLV.map(([k,l])=>`<a href="#schedule/${k.toLowerCase()}" role="button" class="${lv===k?"on":""}" aria-pressed="${lv===k}" data-sched="${k}">${l}</a>`).join("")}</div>`;
+  return lv==="V"?varsitySchedule(seg):levelSchedule(lv,seg)}
+/* "JV: LaConner @ CPC" -> {name:"vs LaConner", site:"Home"}; "CPC @ Blaine" -> "@ Blaine", Away */
+function lvGameInfo(e){let t=String(e.title||"").replace(/^(JV|C-?Team|C)\s*:\s*/i,"").trim();let site="";const us=/^(cpc|cedar park( christian)?|eagles)$/i;
+  const m=t.match(/^(.+?)\s+@\s+(.+)$/);
+  if(m){const a=m[1].trim(),b=m[2].trim();if(us.test(b)){t="vs "+a;site="Home"}else if(us.test(a)){t="@ "+b;site="Away"}}
+  else if(/^@\s*/.test(t))site="Away";
+  const exh=/jamboree|exhibition|scrimmage|tournament|classic/i.test(t+" "+(e.note||""))?((t+" "+(e.note||"")).match(/jamboree/i)?"Jamboree":"Exhibition"):"";
+  return{name:t,site,exh}}
+const lvGames=lv=>evs().filter(e=>e.kind==="game"&&evTeams(e).includes(lv)).sort(evCmp);
+function lvGameRow(e,isNext){const d=D(e.date);const i=lvGameInfo(e);
+  return `<div class="li ${isNext?"upnext":""}"><div class="date">${mon(d)}<b>${d.getDate()}</b></div><div><button type="button" class="opp linkish" data-act="evOpen" data-id="${esc(e.id)}">${esc(i.name)}</button><div class="small muted">${parts(dow(d),i.site)}${i.exh?` · <span class="chip gold">${esc(i.exh)}</span>`:""}${e.who==="coaches"&&isCoach()?' · <span class="chip">Coaches only</span>':""}${e.note?`<div class="lvnote">${esc(e.note)}</div>`:""}</div></div><div class="right">${isNext?`<span class="nextcell"><span class="chip gold">Up next</span>${e.start?`<span class="muted small num">${esc(fmtTime(e.start))}</span>`:""}</span>`:`<span class="muted small num">${e.start?esc(fmtTime(e.start)):"TBA"}</span>`}${isCoach()?`<button class="btn icon edit" data-act="editEvent" data-id="${esc(e.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`}
+function levelSchedule(lv,seg){const nm=lvName(lv);const t=ymd(TODAY);const L=lvGames(lv);const now=L.filter(e=>e.date>=t),past=L.filter(e=>e.date<t).reverse();
+  return `<div class="head"><div><div class="eyebrow">${esc(nm)} schedule · ${plural(L.length,"game")}</div><h1>Schedule</h1><p>${esc(nm)} games for ${esc(CONFIG.season)}. They also show on the <a href="#calendar">Calendar</a>.</p><p class="small muted" style="margin-top:4px">Results and stats are tracked for varsity only.</p></div><div class="row">${abtn("addLvGame",`data-lv="${lv}"`,"Add game")}</div></div>${seg}
+  <div class="card"><h2 style="margin-bottom:6px">Upcoming</h2><div class="list">${now.map((e,i)=>lvGameRow(e,i===0)).join("")||`<p class="muted">No upcoming ${esc(nm)} games.${isCoach()?" Tap Add game to add one.":""}</p>`}</div></div>
+  ${past.length?`<div class="section">${panel("past-"+lv,`Past games (${past.length})`,"Newest first",`<div class="list">${past.map(e=>lvGameRow(e,false)).join("")}</div>`)}</div>`:""}`}
+function varsitySchedule(seg){
   const rec=record();const now=games().filter(g=>g.d>=TODAY);const past=games().filter(g=>g.d<TODAY).reverse();const ns=needsScore();
   if(isCoach()&&ns.length)openSet.add("past-games");
-  return `<div class="head"><div><div class="eyebrow">Varsity schedule · ${esc(CONFIG.season)}</div><h1>Schedule</h1><p>Varsity ${rec.w}–${rec.l} · League ${rec.lw}–${rec.ll}. Every varsity game streams on NFHS Network.</p><p class="small muted" style="margin-top:4px">JV and C-Team games are on the <a href="#calendar">Calendar</a>.</p></div><div class="row">${abtn("addGame","","Add game")}<a class="btn sm" href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Eagles on NFHS</a></div></div>
+  return `<div class="head"><div><div class="eyebrow">Varsity schedule · ${esc(CONFIG.season)}</div><h1>Schedule</h1><p>Varsity ${rec.w}–${rec.l} · League ${rec.lw}–${rec.ll}. Every varsity game streams on NFHS Network.</p></div><div class="row">${abtn("addGame","","Add game")}<a class="btn sm" href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Eagles on NFHS</a></div></div>${seg}
   <div class="card"><h2 style="margin-bottom:6px">Upcoming</h2><div class="list">${now.map(gameRow).join("")||'<p class="muted">No upcoming varsity games.</p>'}</div></div>
   ${past.length?`<div class="section">${panel("past-games",`Past games (${past.length})`,isCoach()&&ns.length?`<span class="chip warn">${ns.length===1?"1 needs":ns.length+" need"} a final score</span>`:"Newest first",`<div class="list">${past.map(gameRow).join("")}</div>${isCoach()?'<p class="small muted" style="margin:10px 0 0">To enter a final score, tap the pencil on a game.</p>':""}`)}</div>`:""}`;
 }
@@ -1483,28 +1511,47 @@ function evRow(x,compact){
   const time=e.start?`<b>${esc(fmtTime(e.start))}</b>${e.end?`<span>${esc(fmtTime(e.end))}</span>`:""}`:`<b>${off?"Off":"All day"}</b>`;
   return `<div class="ev ${off?"off":""} ${gm?"lvgame":""}"><div class="evt num">${time}</div><div class="evb"><div class="evtitle">${esc(e.title)}</div><div class="evmeta">${lvTags(evTeams(e))}${gm?"":kindDot(e.kind)}${esc(kindLabel(e))}${coachOnly&&isCoach()?'<span class="chip">Coaches only</span>':""}</div>${e.note&&!compact?`<p class="evnote">${esc(e.note)}</p>`:""}</div>${isCoach()?`<div class="evr"><button class="btn icon edit" data-act="editEvent" data-id="${esc(e.id)}" aria-label="Edit ${esc(e.title)}">${PEN}</button></div>`:""}</div>`}
 const dayHead=d=>{const s=ymd(d);const today=s===ymd(TODAY);return `<div class="cdh" id="cd-${s}"><b>${d.toLocaleDateString("en-US",{weekday:"long"})}</b><span class="muted">${mon(d)} ${d.getDate()}</span>${today?'<span class="chip gold">Today</span>':""}</div>`};
-function calWeekBody(){const m=mondayOf(calAnchor);const days=[...Array(7).keys()].map(i=>addDays(m,i));const idx=calItems(ymd(days[0]),ymd(days[6]));
-  return `<div class="card cweek">${days.map(d=>{const s=ymd(d);const L=idx[s]||[];return `<section class="cday ${s===ymd(TODAY)?"istoday":""} ${d<TODAY?"past":""}">${dayHead(d)}<div class="list">${L.map(x=>evRow(x)).join("")||`<p class="muted small cnone">${calFilt==="all"?"No team events":"Nothing here"}</p>`}</div></section>`}).join("")}</div>`}
+/* Past events archive: days before today leave the list views of the current week/month and live in a collapsed
+   "Past events (n)" panel (newest day first). Today stays in the main view all day. Fully past weeks/months still show
+   their days (dimmed) when you navigate back, so nothing is unreachable. Filters (level + type) apply to the archive too. */
+const CAL_PAST="cal-past";
+const calYest=()=>ymd(addDays(TODAY,-1));
+const calPastHint=n=>n?`<p class="muted calpasthint">${n===1?"1 earlier day":n+" earlier days"} ${calView==="week"?"this week":"this month"} moved to <button type="button" class="linkbtn" data-act="calPast">Past events</button>.</p>`:"";
+const calPastHead=d=>{const s=ymd(d);return `<div class="cdh" id="cpd-${s}"><b>${d.toLocaleDateString("en-US",{weekday:"long"})}</b><span class="muted">${mon(d)} ${d.getDate()}${d.getFullYear()!==TODAY.getFullYear()?", "+d.getFullYear():""}</span></div>`};
+let calPastWho;
+function calPastPanel(){if(user!==calPastWho){calPastWho=user;openSet.delete(CAL_PAST)}/* starts collapsed for each sign-in */const idx=calItems("0000-01-01",calYest());const days=Object.keys(idx).filter(k=>idx[k].length).sort().reverse();
+  const n=days.reduce((a,k)=>a+idx[k].length,0);if(!n)return "";
+  const body=days.map(k=>`<section class="cday past">${calPastHead(D(k))}<div class="list">${idx[k].map(x=>evRow(x,true)).join("")}</div></section>`).join("");
+  return `<div class="calpast">${panel(CAL_PAST,`Past events (${n})`,`${plural(days.length,"day")} · newest first`,body)}</div>`}
+/* Scroll to a day: past days of the current week live in the archive */
+function calScrollTo(d){const inArch=d<ymd(TODAY)&&!document.getElementById("cd-"+d);if(inArch){const p=$(`details[data-panel="${CAL_PAST}"]`);if(p&&!p.open){openSet.add(CAL_PAST);p.open=true}}
+  const el=document.getElementById((inArch?"cpd-":"cd-")+d);if(el)el.scrollIntoView({block:"start"})}
+function calWeekBody(){const m=mondayOf(calAnchor);const all=[...Array(7).keys()].map(i=>addDays(m,i));const t=ymd(TODAY);
+  const cur=ymd(all[0])<=t&&t<=ymd(all[6]);const days=cur?all.filter(d=>ymd(d)>=t):all;const idx=calItems(ymd(all[0]),ymd(all[6]));
+  const hidden=cur?all.filter(d=>ymd(d)<t&&(idx[ymd(d)]||[]).length).length:0;
+  return `<div class="card cweek">${calPastHint(hidden)}${days.map(d=>{const s=ymd(d);const L=idx[s]||[];return `<section class="cday ${s===t?"istoday":""} ${s<t?"past":""}">${dayHead(d)}<div class="list">${L.map(x=>evRow(x)).join("")||`<p class="muted small cnone">${calFilt==="all"?"No team events":"Nothing here"}</p>`}</div></section>`}).join("")}</div>`}
 function calMonthBody(){const first=new Date(calAnchor.getFullYear(),calAnchor.getMonth(),1,12);const last=new Date(first.getFullYear(),first.getMonth()+1,0,12);
   const g0=mondayOf(first);const n=Math.ceil(((last-g0)/864e5+1)/7)*7;const cells=[...Array(n).keys()].map(i=>addDays(g0,i));
   const idx=calItems(ymd(cells[0]),ymd(cells[n-1]));const inM=d=>d.getMonth()===first.getMonth();
   const mi=x=>x.t==="game"?`<span class="mi game">${esc(vsAt(x.g))} ${esc(O(x.g.opp).name)}</span>`:`<span class="mi ${x.e.kind==="off"?"off":""} ${x.e.kind==="game"?"lvgame":""}">${kindDot(x.e.kind)}${x.e.start?`<span class="num mt">${esc(fmtTime(x.e.start).replace(":00","").replace(" AM","a").replace(" PM","p"))}</span>`:""}${esc(x.e.title)}</span>`;
   const grid=`<div class="mgrid" role="grid" aria-label="${esc(first.toLocaleDateString("en-US",{month:"long",year:"numeric"}))}">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(w=>`<div class="mwd" role="columnheader">${w}</div>`).join("")}${cells.map(d=>{const s=ymd(d);const L=idx[s]||[];
-    return `<button type="button" class="mcell ${inM(d)?"":"out"} ${s===ymd(TODAY)?"today":""}" data-act="calDay" data-d="${s}" aria-label="${esc(longDate(d))}: ${L.length?plural(L.length,"item"):"nothing scheduled"}"><span class="mnum num">${d.getDate()}</span>${L.slice(0,3).map(mi).join("")}${L.length>3?`<span class="mmore">+${L.length-3} more</span>`:""}</button>`}).join("")}</div>`;
-  const ds=cells.filter(inM).filter(d=>(idx[ymd(d)]||[]).length);
-  const list=`<div class="mlist">${ds.length?ds.map(d=>`<section class="card cday ${ymd(d)===ymd(TODAY)?"istoday":""}">${dayHead(d)}<div class="list">${idx[ymd(d)].map(x=>evRow(x,true)).join("")}</div></section>`).join(""):`<div class="card"><p class="muted" style="margin:0">Nothing on the calendar this month.</p></div>`}</div>`;
+    return `<button type="button" class="mcell ${inM(d)?"":"out"} ${s===ymd(TODAY)?"today":""} ${s<ymd(TODAY)?"past":""}" data-act="calDay" data-d="${s}" aria-label="${esc(longDate(d))}: ${L.length?plural(L.length,"item"):"nothing scheduled"}"><span class="mnum num">${d.getDate()}</span>${L.slice(0,3).map(mi).join("")}${L.length>3?`<span class="mmore">+${L.length-3} more</span>`:""}</button>`}).join("")}</div>`;
+  const t=ymd(TODAY);const cur=first.getMonth()===TODAY.getMonth()&&first.getFullYear()===TODAY.getFullYear();
+  const dsAll=cells.filter(inM).filter(d=>(idx[ymd(d)]||[]).length);const ds=cur?dsAll.filter(d=>ymd(d)>=t):dsAll;const hidden=dsAll.length-ds.length;
+  const list=`<div class="mlist">${hidden?`<div class="card" style="padding:8px 14px">${calPastHint(hidden)}</div>`:""}${ds.length?ds.map(d=>`<section class="card cday ${ymd(d)===t?"istoday":""} ${ymd(d)<t?"past":""}">${dayHead(d)}<div class="list">${idx[ymd(d)].map(x=>evRow(x,true)).join("")}</div></section>`).join(""):`<div class="card"><p class="muted" style="margin:0">${hidden?"Nothing else on the calendar this month.":"Nothing on the calendar this month."}</p></div>`}</div>`;
   return grid+list}
 function calendarView(){
   const wk=calView==="week";const m=mondayOf(calAnchor),sun=addDays(m,6);
   const label=wk?(m.getMonth()===sun.getMonth()?`${mon(m)} ${m.getDate()} – ${sun.getDate()}`:`${mon(m)} ${m.getDate()} – ${mon(sun)} ${sun.getDate()}`):calAnchor.toLocaleDateString("en-US",{month:"long",year:"numeric"});
   const isNow=wk?ymd(m)===ymd(mondayOf(TODAY)):calAnchor.getMonth()===TODAY.getMonth()&&calAnchor.getFullYear()===TODAY.getFullYear();
   const ARR=d=>`<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-  return `<div class="head"><div><div class="eyebrow">All levels · ${esc(CONFIG.season)} · Practices, games & team events</div><h1>Calendar</h1><p>${isCoach()?"Varsity, JV and C-Team. Varsity games come from the varsity Schedule; JV and C-Team games are added here. Coaches-only events stay off the players' calendar.":"Varsity, JV and C-Team practices, games and team events, all in one place. Check the level tags on each row."}</p></div><div class="row">${abtn("addEvent","","Add event")}</div></div>
+  return `<div class="head"><div><div class="eyebrow">All levels · ${esc(CONFIG.season)} · Practices, games & team events</div><h1>Calendar</h1><p>${isCoach()?"Varsity, JV and C-Team. Varsity games come from the Schedule. JV and C-Team games added here or on the Schedule show in both places. Coaches-only events stay off the players' calendar.":"Varsity, JV and C-Team practices, games and team events, all in one place. Check the level tags on each row."}</p></div><div class="row">${abtn("addEvent","","Add event")}</div></div>
   <div class="caltools"><div class="calsegs"><div class="seg" role="group" aria-label="View">${[["week","Week"],["month","Month"]].map(([v,l])=>`<button type="button" data-act="calView" data-v="${v}" class="${calView===v?"on":""}" aria-pressed="${calView===v}">${l}</button>`).join("")}</div>
    <div class="seg lvseg" role="group" aria-label="Level">${LV_FILTERS.map(([v,l])=>`<button type="button" data-act="calLevel" data-v="${v}" class="${calLevel===v?"on":""}" aria-pressed="${calLevel===v}">${l}</button>`).join("")}</div></div>
    <div class="calnav"><button class="btn icon" data-act="calNav" data-dir="-1" aria-label="Previous ${wk?"week":"month"}">${ARR("M10 3.5L5.5 8 10 12.5")}</button><div class="callabel" aria-live="polite"><b>${esc(label)}</b>${isNow?`<span class="muted small">${wk?"This week":"This month"}</span>`:""}</div><button class="btn icon" data-act="calNav" data-dir="1" aria-label="Next ${wk?"week":"month"}">${ARR("M6 3.5L10.5 8 6 12.5")}</button><button class="btn sm" data-act="calToday" ${isNow&&(!wk||true)?"":""}>Today</button></div></div>
   <div class="gchips" role="group" aria-label="Show">${EV_FILTERS.map(([v,l])=>`<button type="button" class="gchip ${calFilt===v?"on":""}" data-act="calFilt" data-v="${v}" aria-pressed="${calFilt===v}">${l}</button>`).join("")}</div>
-  ${wk?calWeekBody():calMonthBody()}`;
+  ${wk?calWeekBody():calMonthBody()}
+  ${calPastPanel()}`;
 }
 /* Home: today's events (players see only "Everyone" events) plus the next game */
 function todayCard(){const t=ymd(TODAY);const lv=calLevel;const ok=e=>lvPass(lv,evTeams(e));const L=evs().filter(e=>e.date===t&&ok(e)).sort(evCmp).map(e=>({t:"ev",key:e.start||"",e}));
@@ -1515,7 +1562,7 @@ function todayCard(){const t=ymd(TODAY);const lv=calLevel;const ok=e=>lvPass(lv,
   return `<div class="card todaycard"><div class="cardhead"><h2>Today & next up</h2><span class="row">${lv!=="all"?`<span class="chip">${esc(LV_FILTERS.find(f=>f[0]===lv)[1])}</span>`:""}<a class="small" href="#calendar">Calendar</a></span></div>
   <div class="list">${shown.map(x=>evRow(x,true)).join("")||'<p class="muted small cnone">No team events today.</p>'}</div>${L.length>MAX?`<a class="small tmore" href="#calendar">+${L.length-MAX} more today</a>`:""}
   ${nevLine?`<div class="tnexts">${nevLine}</div>`:""}</div>`}
-function calGo(d){calAnchor=D(d);calView="week";render();setTimeout(()=>{const el=document.getElementById("cd-"+d);if(el)el.scrollIntoView({block:"start"})},40)}
+function calGo(d){calAnchor=D(d);calView="week";render();setTimeout(()=>calScrollTo(d),40)}
 /* Validate one event; throws with a readable message. Returns the clean doc (without author/ts). */
 function cleanEvent(o){if(!o||typeof o!=="object")throw new Error("Bad event");const t=String(o.title??"").replace(/\s+/g," ").trim();const nm=t||"(no title)";
   if(!realDate(o.date))throw new Error(nm+": date must be YYYY-MM-DD");if(!inSeason(o.date))throw new Error(nm+": "+o.date+" isn't in the "+CONFIG.season+" season");
@@ -1529,10 +1576,10 @@ function cleanEvent(o){if(!o||typeof o!=="object")throw new Error("Bad event");c
   let teams;if(o.teams==null)teams=who==="coaches"?[]:LV_KEYS.slice();else{if(!Array.isArray(o.teams)||o.teams.some(x=>!LV_KEYS.includes(x)))throw new Error(nm+': teams must be a list of "V", "JV", "C"');teams=LV_KEYS.filter(k=>o.teams.includes(k))}
   if(!teams.length&&who!=="coaches")throw new Error(nm+": pick at least one level (V, JV or C) unless it's coaches only");
   const out={date:o.date,start:st,end:en,title:t,kind,who,teams};if(note)out.note=note;return out}
-function eventSheet(e){
-  const value=e?{...e,allday:!e.start}:{date:ymd(calView==="week"&&mondayOf(calAnchor)>TODAY?mondayOf(calAnchor):TODAY),allday:false,kind:"practice",who:"all",teams:calLevel==="all"?LV_KEYS.slice():[calLevel]};
-  if(e)value.teams=evTeams(e);
-  const cfg={title:e?"Edit event":"Add event",intro:e?"":"Games go on the Schedule, not here.",
+function eventSheet(e,preset){
+  const value=e?{...e,allday:!e.start}:{date:ymd(calView==="week"&&mondayOf(calAnchor)>TODAY?mondayOf(calAnchor):TODAY),allday:false,kind:"practice",who:"all",teams:calLevel==="all"?LV_KEYS.slice():[calLevel],...(preset||{})};
+  if(e)value.teams=evTeams(e);let oddOk=null;const gameMode=!e&&preset&&preset.kind==="game";
+  const cfg={title:e?(e.kind==="game"?"Edit game":"Edit event"):gameMode?`Add ${lvName(preset.teams[0])} game`:"Add event",intro:e?"":gameMode?`Shows on the ${esc(lvName(preset.teams[0]))} schedule and the Calendar. For the title, use the opponent, like “vs Eastlake” or “CPC @ Blaine”.`:"Varsity games go on the Schedule. JV and C-Team games can go here or on the Schedule.",
     fields:[{key:"date",label:"Date",type:"date",req:true},{key:"allday",label:"All day",type:"check"},
       {key:"start",label:"Start",type:"time",half:true,when:["allday","false"]},{key:"end",label:"End",type:"time",half:true,hint:"Optional",when:["allday","false"]},
       {key:"title",label:"Title",req:true,max:80},
@@ -1541,13 +1588,14 @@ function eventSheet(e){
       {key:"who",label:"Who sees it",type:"seg",req:true,options:[["all","Everyone"],["coaches","Coaches only"]]},
       {key:"note",label:"Note",type:"textarea",max:300,hint:"Optional, up to 300 characters"},
       ...(e?[]:[{key:"until",label:"Repeat weekly until",type:"date",hint:"Optional. Adds the same event every week through this date"}])],
-    value,saved:e?"Event saved":"Event added",del:e?["event",e.id]:null,
+    value,saved:e?(e.kind==="game"?"Game saved":"Event saved"):gameMode?"Game added":"Event added",del:e?["event",e.id]:null,
     onSave:async v=>{const bad=(k,m)=>{const el=$("#sf-"+k);el&&el.focus();throw new Error(m)};
       if(!realDate(v.date)||!inSeason(v.date))bad("date","Pick a date in the "+CONFIG.season+" season");
       const allday=!!v.allday;const start=allday?"":(v.start||""),end=allday?"":(v.end||"");
       if(!allday&&!start)bad("start","Pick a start time, or turn on All day");
       if(!(v.teams||[]).length&&v.who!=="coaches")bad("teams","Pick at least one level: Varsity, JV or C-Team");
       if(end&&end<=start)bad("end","End time must be after the start");
+      if(v.kind==="game"&&start&&(start<"09:00"||start>"21:30")&&oddOk!==start){oddOk=start;bad("start","Tip-off looks wrong. Did you mean PM? Press Save again to keep "+fmtTime(start)+".")}
       if((v.title||"").length>80)bad("title","Title must be 80 characters or fewer");if((v.note||"").length>300)bad("note","Note must be 300 characters or fewer");
       let obj;try{obj=cleanEvent({date:v.date,start,end,title:v.title,kind:v.kind,who:v.who,note:v.note,teams:v.teams||[]})}catch(err){bad("title",err.message.replace(/^.*?: /,""))}
       const others=evs().filter(x=>!e||x.id!==e.id);const keys=new Set(others.map(evDupKey));
@@ -2305,8 +2353,10 @@ const ACT={
   /* players */
   addPlayer(d){playerSheet(null,d&&d.lv)},editPlayer(d){playerSheet(P(d.id))},
   rosterTab(d){rosterTab=["V","JV","C","staff"].includes(d.v)?d.v:"V";LS.set("cpc_roster_tab",rosterTab);render()},
+  addLvGame(d){if(isCoach()&&["JV","C"].includes(d.lv))eventSheet(null,{kind:"game",teams:[d.lv],who:"all",allday:false,date:ymd(TODAY)})},
+  evOpen(d){const e=get("events",d.id);if(!e)return;if(isCoach())return eventSheet(e);const i=e.kind==="game"?lvGameInfo(e):{name:e.title,site:"",exh:""};const dd=D(e.date);
+    listSheet(e.kind==="game"?evTeams(e).map(lvName).join(" & ")+" game":e.title,`<h3 style="font-size:22px;margin:0 0 6px">${esc(i.name)}</h3><p class="muted" style="margin:0">${esc(longDate(dd))}${e.start?" · "+esc(fmtTime(e.start))+(e.end?" – "+esc(fmtTime(e.end)):""):""}${i.site?" · "+esc(i.site):""}</p>${i.exh?`<p style="margin:8px 0 0"><span class="chip gold">${esc(i.exh)}</span></p>`:""}${e.note?`<p style="margin:10px 0 0;white-space:pre-wrap">${esc(e.note)}</p>`:""}<p class="small muted" style="margin:12px 0 0">Results and stats are tracked for varsity only.</p>`)},
   scoutExh(){scoutExhOpen=!scoutExhOpen;render();const b=$('[data-act="scoutExh"]');b&&b.focus()},
-  calOpen(d){if(!realDate(d.d))return;calAnchor=D(d.d);calView="week";if(location.hash!=="#calendar")location.hash="calendar";else render();setTimeout(()=>{const el=document.getElementById("cd-"+d.d);if(el)el.scrollIntoView({block:"start"})},80)},
   addStaff(){if(isCoach())staffSheet(null)},editStaff(d){const x=get("staffdir",d.id);if(x&&isCoach())staffSheet(x)},
   /* games */
   addGame(d){gameSheet(null,d&&d.opp)},morePosts(){feedN+=8;render()},
@@ -2318,6 +2368,7 @@ const ACT={
   calLevel(d){calLevel=LV_FILTERS.some(f=>f[0]===d.v)?d.v:"all";LS.set("cpc_cal_level",calLevel);render()},
   calFilt(d){calFilt=EV_FILTERS.some(f=>f[0]===d.v)?d.v:"all";render()},
   calDay(d){if(realDate(d.d))calGo(d.d)},
+  calPast(){openSet.add(CAL_PAST);const p=$(`details[data-panel="${CAL_PAST}"]`);if(p){p.open=true;p.scrollIntoView({block:"start"});const s=p.querySelector("summary");s&&s.focus({preventScroll:true})}},
   addMeet(d){meetSheet(d.id,null)},editMeet(d){meetSheet(d.id,+d.idx)},editGame(d){gameSheet(get("games",d.id))},
   /* opponents */
   addOpp(){openSheet({title:"Add opponent",fields:[{key:"name",label:"School name",req:true},{key:"city",label:"City",half:true},{key:"status",label:"Scouting status",type:"select",options:[["none","Not started"],["progress","In progress"],["ready","Report ready"]],half:true,req:true},{key:"league",label:"League opponent",type:"check"}],value:{},saved:"Opponent added",
