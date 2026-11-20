@@ -444,6 +444,10 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 .srow .sinfo{flex:1;min-width:0}.srow .pline{overflow-wrap:anywhere}.stools{flex:none;gap:6px}.stools .btn[disabled]{opacity:.35}
 .biokv{position:relative;margin-top:12px}.biokv .v{font-family:var(--display);font-size:22px;font-weight:600}
 @media (max-width:820px){.rtabs{width:100%;flex-wrap:nowrap}.rtabs button{flex:1;min-height:40px;padding:6px 4px}.slist .srow{align-items:flex-start}.stools .btn.icon{width:34px;height:34px}}
+/* Home: next game per level */
+.ngh{font-size:13px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-family:var(--body);font-weight:700}
+.ngstack{display:flex;flex-direction:column;gap:14px;min-width:0}.ngcard h3{margin:6px 0 2px;font-size:20px}.ngcard .linkbtn{min-height:28px;padding:0}
+.nextgames{margin-bottom:14px}.exhlink{margin-top:16px}
 /* Calendar */
 .calsegs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .lvtag{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:0 5px;border-radius:4px;border:1px solid var(--line);color:#c4cfdc;background:var(--surface-2);line-height:16px}
@@ -532,8 +536,8 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
    - Site-wide settings live in CONFIG just below.
    ===================================================================== */
 const CONFIG={
-  school:"Cedar Park Christian",campus:"Bothell",team:"CPC Eagles",level:"Varsity",
-  season:"2026–27",homeGym:"CPC Bothell Gym",
+  school:"Cedar Park Christian",campus:"Bothell",team:"CPC Eagles",level:"Varsity · JV · C-Team",
+  season:"2026–27",league:"1A Emerald Sound",homeGym:"CPC Bothell Gym",
   nfhs:"https://www.nfhsnetwork.com/schools/cedar-park-christian-school-bothell-wa/basketball",
   coaches:[],
   supabase:{url:"https://bxozzgbpgunuyxkqwmvs.supabase.co",key:"sb_publishable_3TTUPZjfTyRAMPQcGRhnHQ_OeOH0Dss",coachEmail:"coach@cpceagles.app",playerEmail:"cpcteam@cpceagles.app"},
@@ -1022,7 +1026,12 @@ const pUser=p=>(p.first[0]+p.last).toLowerCase().replace(/[^a-z0-9]/g,"");
 const opps=()=>items("opps");
 const O=id=>get("opps",id)||{id,name:"Opponent",city:"",keys:[],players:[],last:[]};
 const oppName=id=>id==="cpc"?"CPC Eagles":O(id).name;
-const games=()=>items("games").map(g=>({...g,d:D(g.date),played:g.us!=null&&g.them!=null&&g.us!==""&&g.them!=="",res:(g.us!=null&&g.them!=null&&g.us!==""&&g.them!=="")?(+g.us>+g.them?"W":"L"):null})).sort((a,b)=>a.d-b.d);
+const games=()=>items("games").map(g=>({...g,d:D(g.date),played:g.us!=null&&g.them!=null&&g.us!==""&&g.them!=="",res:(g.us!=null&&g.them!=null&&g.us!==""&&g.them!=="")?(+g.us>+g.them?"W":"L"):null})).sort((a,b)=>(a.d-b.d)||gTimeKey(a).localeCompare(gTimeKey(b))||String(a.id).localeCompare(String(b.id)));
+/* Several games can share a date (e.g. a jamboree). Same-day games sort by tip-off; TBA last. */
+const gTimeKey=g=>{const t=parseTime(g.time);return /^\d\d:\d\d$/.test(t||"")?t:"99:99"};
+const sameDay=g=>games().filter(x=>x.date===g.date);
+/* Link to a game's page: the date when it's the only game that day (older links keep working), else its id */
+const gameLink=g=>"#game-"+(sameDay(g).length>1?g.id:g.date);
 const played=()=>games().filter(g=>g.played);
 const isExh=g=>!!g&&g.type==="exh";
 /* Games that count: played and not exhibitions (record, standings, season stats) */
@@ -1074,8 +1083,10 @@ const isAdmin=()=>!!SB&&!!user&&user.role==="admin";
 /* ================= Stats engine (from imported box scores only) ================= */
 const KEYS=["min","pts","reb","ast","stl","blk","to","fgm","fga","tpm","tpa","ftm","fta"];
 const W=p=>({w:p.w??.45,r3:p.r3??.3,reb:p.reb??.8,ast:p.ast??.5});
-const box=g=>{const imp=store.statgames[g.date];return imp&&Array.isArray(imp.lines)?imp.lines:[]};
-const hasBox=g=>{const imp=store.statgames[g.date];return !!(imp&&Array.isArray(imp.lines)&&imp.lines.length)};
+/* Box scores (statgames) are keyed by game date. On a date with several games the first game keeps the date key and the others use their game id. */
+function boxKey(g){if(store.statgames[g.id])return g.id;const sd=sameDay(g);return sd.length<=1||sd[0].id===g.id?g.date:g.id}
+const box=g=>{const imp=store.statgames[boxKey(g)];return imp&&Array.isArray(imp.lines)?imp.lines:[]};
+const hasBox=g=>{const imp=store.statgames[boxKey(g)];return !!(imp&&Array.isArray(imp.lines)&&imp.lines.length)};
 function seasonStats(){
   const T={};players().forEach(p=>{T[p.id]={id:p.id,gp:0};KEYS.forEach(k=>T[p.id][k]=0)});
   counted().forEach(g=>box(g).forEach(l=>{const t=T[l.id];if(!t)return;if(l.min>0)t.gp++;KEYS.forEach(k=>t[k]+=+l[k]||0)}));
@@ -1278,13 +1289,13 @@ function bindSbLogin(){
 
 /* ================= First-time tips (coaches) ================= */
 const TIPS={
-  home:"<b>Welcome.</b> Everything here can be changed. Look for <b>Edit</b> and <b>Add</b> buttons on any page. Posts in the Team feed go to every player.",
+  home:"<b>Welcome.</b> Everything here can be changed. Look for <b>Edit</b> and <b>Add</b> buttons on any page. Coach Talk and the Team feed go to every player in the program (Varsity, JV and C-Team). Schedule, Stats, Scouting and League are varsity only.",
   roster:"<b>Roster:</b> switch between Varsity, JV, C-Team and Staff at the top. Tap <b>Add player</b> on a level, or tap a player to edit him. Stats are kept for varsity only.",
   calendar:"<b>Calendar:</b> tap <b>Add event</b> for practices, lifts, film and team events. Games come from the Schedule on their own. Pick <b>Coaches only</b> to keep an event off the players' calendar.",
-  schedule:"<b>Schedule:</b> tap <b>Add game</b>, or the pencil on any game. Enter the final score after the game to update the record.",
-  scouting:"<b>Scouting:</b> add an opponent, then open it to fill in keys, players to know, their coach, film timestamps and notes. Notes can stay coaches-only or be shared with players.",
-  playbook:"<b>Playbook:</b> tap <b>New play</b> and pick Offense or Defense. Drag players to where they start, tap <b>Add step</b> for each action, then use Pass and Screen. Preview before you save.",
-  stats:"<b>Stats:</b> import a box score from a spreadsheet under <b>Import</b>. Season stats and leaders update on their own."
+  schedule:"<b>Varsity schedule:</b> tap <b>Add game</b>, or the pencil on any game. Enter the final score after the game to update the varsity record. JV and C-Team games go on the Calendar.",
+  scouting:"<b>Varsity scouting:</b> add an opponent, then open it to fill in keys, players to know, their coach, film timestamps and notes. Notes can stay coaches-only or be shared with players.",
+  playbook:"<b>Playbook (all levels):</b> tap <b>New play</b> and pick Offense or Defense. Drag players to where they start, tap <b>Add step</b> for each action, then use Pass and Screen. Preview before you save.",
+  stats:"<b>Varsity stats:</b> import a box score from a spreadsheet under <b>Import</b>. Season stats and leaders update on their own."
 };
 function tipFor(r){if(!isCoach())return"";const t=TIPS[r];const seen=LS.get("cpc_tips_seen")||{};if(!t||seen[r])return"";return `<div class="tip" role="note"><span class="grow">${t}</span><button class="btn sm" data-act="tipOk" data-v="${r}">Got it</button></div>`}
 
@@ -1338,14 +1349,20 @@ function closeSheet(silent,viaPop){if(!$("#sheetroot").firstChild)return;if(ed&&
 function gameRow(g){
   const o=O(g.opp);const isNext=g===nextGame()||(nextGame()&&g.id===nextGame().id);
   const right=g.played?`<span class="num"><span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b></span>`:g.d<TODAY?`<span class="chip warn">Needs final score</span>`:(isNext?`<span class="nextcell"><span class="chip gold">Up next</span>${fmtTime(g.time)?`<span class="muted small num">${esc(fmtTime(g.time))}</span>`:""}</span>`:`<span class="muted small num">${esc(fmtTime(g.time))}</span>`);
-  return `<div class="li ${isNext?"upnext":""}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${gTitle(g,o)}</a><div class="small muted">${dow(g.d)} · ${esc(siteText(g,o))} · ${isExh(g)?EXH_CHIP:g.lg?"League":"Non-league"} · ${g.played?(hasBox(g)?`<a href="#game-${g.date}">Box score</a>`:"Final"):`<a href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch</a>`}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
+  return `<div class="li ${isNext?"upnext":""}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${gTitle(g,o)}</a><div class="small muted">${dow(g.d)} · ${esc(siteText(g,o))} · ${isExh(g)?EXH_CHIP:g.lg?"League":"Non-league"} · ${g.played?(hasBox(g)?`<a href="${gameLink(g)}">Box score</a>`:"Final"):`<a href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch</a>`}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
 }
+/* Home: next game for each level. Varsity from the Schedule (rich card); JV and C-Team from Calendar events of kind "game". */
+function lvNextCard(k){const t=ymd(TODAY);const e=items("events").filter(x=>x&&x.kind==="game"&&realDate(x.date)&&x.date>=t&&x.who!=="coaches"&&evTeams(x).includes(k)).sort(evCmp)[0];
+  const nm=lvName(k);if(!e)return `<div class="card ngcard"><div class="eyebrow">${esc(nm)} · Next game</div><p class="muted" style="margin:6px 0 0">No games scheduled</p></div>`;
+  const d=D(e.date);const days=Math.round((d-TODAY)/864e5-.5);const title=String(e.title).replace(/^(JV|C-?Team|C)\s*:\s*/i,"");
+  return `<div class="card ngcard"><div class="eyebrow">${esc(nm)} · Next game</div><h3>${esc(title)}</h3><div class="small muted">${esc(dow(d))}, ${esc(mon(d))} ${d.getDate()}${e.start?" · "+esc(fmtTime(e.start)):""}</div><div class="row" style="margin-top:8px"><span class="chip">${days<=0?"Today":days===1?"Tomorrow":days+" days away"}</span><button type="button" class="linkbtn" data-act="calOpen" data-d="${e.date}">On the calendar</button></div></div>`}
+function nextGames(){return `<section class="nextgames" aria-label="Next game for each level"><h2 class="ngh">Next game</h2><div class="grid split">${nextHero()}<div class="ngstack">${lvNextCard("JV")}${lvNextCard("C")}</div></div></section>`}
 function nextHero(){
-  const g=nextGame();if(!g)return `<div class="card hero"><div class="eyebrow">Schedule</div><h2>No games scheduled</h2>${abtn("addGame","","Add a game")}</div>`;
+  const g=nextGame();if(!g)return `<div class="card hero"><div class="eyebrow">Varsity · Next game</div><h2>No games scheduled</h2>${abtn("addGame","","Add a game")}</div>`;
   const o=O(g.opp);const days=Math.max(0,Math.floor((g.d-TODAY)/864e5));
   const st=o.status==="ready"?'<span class="chip good">Report ready</span>':o.status==="progress"?'<span class="chip warn">Report in progress</span>':'<span class="chip">Not scouted</span>';
   const lm=lastMet(o);
-  return `<div class="card hero"><div class="eyebrow">Next game · ${gKind(g)}</div><h2>${gTitle(g,o)}</h2>
+  return `<div class="card hero"><div class="eyebrow">Varsity · Next game · ${gKind(g)}</div><h2>${gTitle(g,o)}</h2>
   <div class="meta">${[longDate(g.d),fmtTime(g.time),siteOf(g)==="home"?CONFIG.homeGym:siteOf(g)==="neutral"?(g.venue?"Neutral · "+g.venue:"Neutral site"):(o.city||"Away")].filter(Boolean).map(esc).join(" · ")}</div>
   ${heroPill(g,days)}${lm?`<span class="pill">Last met<b class="num">${lm.res} ${lm.us}–${lm.them}</b>${esc(lm.when)}</span>`:""}
   <div class="actions"><a class="btn gold" href="#opp-${esc(g.opp)}">Open scouting report</a><a class="btn ghost" href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch on NFHS</a>${isCoach()?st:""}</div></div>`;
@@ -1361,7 +1378,7 @@ function noteHtml(n,act){
 }
 function teamStatsBody(){
   const t=teamTotals(),n=t.n||1,rec=record(),ss=seasonStats().filter(x=>x.gp&&!(P(x.id)||{}).inactive);
-  if(!t.n)return `<p class="muted" style="margin:0">Team stats show up after the first box score is imported${isCoach()?' (<a href="#stats">Stats → Import</a>)':""}.</p>`;
+  if(!t.n)return `<p class="muted" style="margin:0">Varsity team stats show up after the first box score is imported${isCoach()?' (<a href="#stats">Stats → Import</a>)':""}.</p>`;
   const it=[["PPG",fmt1(rec.ppg)],["Opp PPG",fmt1(rec.opp)],["Net",(rec.ppg>=rec.opp?"+":"")+fmt1(rec.ppg-rec.opp)],["FG%",pct(t.fgm,t.fga)],["3P%",pct(t.tpm,t.tpa)],["FT%",pct(t.ftm,t.fta)],["eFG%",pct(t.fgm+.5*t.tpm,t.fga)],["RPG",fmt1(t.reb/n)],["APG",fmt1(t.ast/n)],["TO/G",fmt1(t.to/n)]];
   const lead=ss.length?[["Points","ppg"],["Rebounds","rpg"],["Assists","apg"]].map(([lab,k])=>{const top=[...ss].sort((a,b)=>b[k]-a[k])[0];const p=P(top.id);return `<span><span class="muted">${lab}:</span> <b>${esc(p.first[0]+". "+p.last)}</b> <span class="num">${fmt1(top[k])}</span></span>`}).join(""):"";
   return `<div class="kv">${it.map(([k,v])=>`<div><div class="k">${k}</div><div class="v num">${v}</div></div>`).join("")}</div><div class="row small section" style="gap:16px">${lead}<a href="#stats" style="margin-left:auto">Full stats</a></div>`;
@@ -1380,15 +1397,15 @@ const dShort=ts=>new Date(ts).toLocaleDateString("en-US",{month:"short",day:"num
 const coachOf=id=>COACHES.find(c=>c.id===id);
 function talkCard(){
   const t=talkNow();const n=pastTalks().length;const pastLink=n?`<button type="button" class="linkbtn" data-act="pastTalks">Past messages (${n})</button>`:"";
-  if(!t){if(!isCoach())return"";return `<section class="talk talk-empty" aria-label="Coach Talk"><div><div class="eyebrow">Coach Talk</div><h2>Share a word with the team</h2><p>A short message and a Bible verse every player sees at the top of Home.</p></div><div class="row">${pastLink}${abtn("editTalk","","Add")}</div></section>`}
-  return `<section class="talk" aria-label="Coach Talk"><div class="talk-top"><span class="eyebrow">Coach Talk</span><span class="talk-date">Updated ${esc(dShort(t.ts||Date.now()))}</span></div>
+  if(!t){if(!isCoach())return"";return `<section class="talk talk-empty" aria-label="Coach Talk"><div><div class="eyebrow">Coach Talk</div><h2>Share a word with the team</h2><p>A short message and a Bible verse every player in the program sees at the top of Home.</p></div><div class="row">${pastLink}${abtn("editTalk","","Add")}</div></section>`}
+  return `<section class="talk" aria-label="Coach Talk"><div class="talk-top"><span class="eyebrow">Coach Talk · All levels</span><span class="talk-date">Updated ${esc(dShort(t.ts||Date.now()))}</span></div>
   <p class="talk-msg">${esc(t.msg)}</p>
   ${t.verse||t.ref?`<figure class="verse"><blockquote>“${esc(t.verse)}”</blockquote><figcaption>${esc(t.ref)}</figcaption></figure>`:""}
   ${pastLink||isCoach()?`<div class="talk-foot">${pastLink||"<span></span>"}${isCoach()?`<span class="row">${ebtn("editTalk")}<button class="btn sm del" data-act="clearTalk">${TRASH}Clear</button></span>`:""}</div>`:""}</section>`;
 }
 function talkSheet(){
   const t=talkNow();
-  openSheet({title:t?"Edit Coach Talk":"Coach Talk",intro:"Every coach and player sees this at the top of Home.",
+  openSheet({title:t?"Edit Coach Talk":"Coach Talk",intro:"Every coach and player in the program (Varsity, JV and C-Team) sees this at the top of Home.",
     fields:[{key:"msg",label:"Message",type:"textarea",req:true,max:600,hint:"Up to 600 characters"},{key:"ref",label:"Verse reference",req:true,max:60,hint:"Book chapter:verse, like Colossians 3:23"},{key:"verse",label:"Verse text",type:"textarea",req:true,max:500,hint:"Up to 500 characters"},...(t?[{key:"keep",label:"Keep the current message in Past messages",type:"check"}]:[])],
     value:t?{...t,keep:true}:{},saved:"Coach Talk saved",
     onSave:async v=>{const bad=(k,m)=>{const el=$("#sf-"+k);el&&el.focus();throw new Error(m)};
@@ -1408,27 +1425,28 @@ function admReqNotice(){if(!isAdmin())return"";if(ADM.reqs===null){if(!ADM.reqsB
 function homeView(){return admReqNotice()+homeView0()}
 function homeView0(){
   const rec=record();const ws=winStreak();
-  const chips=`<div class="row">${ws?`<span class="chip ${ws[0]==="W"?"good":"bad"} num">${ws} streak</span>`:""}<span class="chip gold num">${rec.w}–${rec.l} overall</span><span class="chip num">League ${rec.lw}–${rec.ll}</span></div>`;
+  const chips=`<div class="row">${ws?`<span class="chip ${ws[0]==="W"?"good":"bad"} num">Varsity ${ws} streak</span>`:""}<span class="chip gold num">Varsity ${rec.w}–${rec.l}</span><span class="chip num">League ${rec.lw}–${rec.ll}</span></div>`;
   if(isCoach()){
         const feed=items("notes").sort((a,b)=>b.ts-a.ts).slice(0,4);
     const ns=needsScore();
     return `<div class="head"><div><div class="eyebrow">Coaches' office · ${longDate(TODAY)}</div><h1>Welcome back, Coach</h1></div>${chips}</div>${ns.length?`<a class="banner" href="#schedule" style="text-decoration:none"><span class="chip warn">Action needed</span><span style="flex:1">${ns.length===1?"1 past game needs":ns.length+" past games need"} a final score.</span><b style="color:var(--gold-2)">Enter scores →</b></a>`:""}${talkCard()}${todayCard()}
-    <div class="grid split">${nextHero()}<div class="card"><div class="cardhead"><h2>Coming up</h2><a class="small" href="#schedule">Schedule</a></div><div class="list">${upcoming().slice(1,4).map(gameRow).join("")||'<p class="muted">Nothing else scheduled.</p>'}</div></div></div>
-    <div class="section">${panel("feed","Team feed","Posts go to every player",feedBody())}${panel("team-stats","Team stats",`${plural(teamTotals().n,"game")} imported`,teamStatsBody())}
+    ${nextGames()}
+    <div class="section">${panel("coming","Varsity: coming up",plural(Math.max(0,upcoming().length-1),"more game"),`<div class="list">${upcoming().slice(1,4).map(gameRow).join("")||'<p class="muted" style="margin:0">No other varsity games scheduled.</p>'}</div><p class="small" style="margin:8px 0 0"><a href="#schedule">Varsity schedule</a></p>`)}${panel("feed","Team feed","Posts go to every player in the program",feedBody())}${panel("team-stats","Varsity team stats",`${plural(teamTotals().n,"game")} imported`,teamStatsBody())}
     ${panel("notes-feed","Latest scouting notes",`${feed.length} recent`,feed.map(n=>`<div class="note ${n.vis==="team"?"":"coachonly"}"><div class="by"><a href="#opp-${esc(n.opp)}"><b>${esc(O(n.opp).name)}</b></a><span>${ago(n.ts)}</span>${n.vis==="team"?"":'<span class="chip">Coaches only</span>'}</div><p>${esc(n.text.length>140?n.text.slice(0,138)+"…":n.text)}</p></div>`).join("")||'<p class="muted" style="margin:0">No notes yet.</p>')}</div>`;
   }
   const g=nextGame();const o=g?O(g.opp):null;
   return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.team)} · ${longDate(TODAY)}</div><h1>Let's go, Eagles</h1></div>${chips}</div>${talkCard()}${todayCard()}
-  <div class="grid split">${nextHero()}${o?panel("keys",`Keys vs ${esc(o.name)}`,"",o.keys&&o.keys.length?`<ol>${o.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ol>`:'<p class="muted" style="margin:0">Coaches are still building this report.</p>',"keys"):`<div class="card"><h2 style="margin-bottom:6px">Coming up</h2><div class="list">${upcoming().slice(1,4).map(gameRow).join("")||'<p class="muted">Nothing else scheduled.</p>'}</div></div>`}</div>
-  <div class="section">${panel("feed","Team feed","From your coaches",feedBody())}${panel("team-stats","Team stats","",teamStatsBody())}</div>`;
+  ${nextGames()}${o?`<div class="section">${panel("keys",`Varsity keys vs ${esc(o.name)}`,"",o.keys&&o.keys.length?`<ol>${o.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ol>`:'<p class="muted" style="margin:0">Coaches are still building this report.</p>',"keys")}</div>`:""}
+  <div class="section">${panel("feed","Team feed","From your coaches · all levels",feedBody())}${panel("team-stats","Varsity team stats","",teamStatsBody())}</div>`;
 }
 
 /* ================= Schedule & box score ================= */
 function scheduleView(){
-  const rec=record();
-  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · ${esc(CONFIG.level)}</div><h1>Schedule</h1><p>${rec.w}–${rec.l} overall · ${rec.lw}–${rec.ll} league. Every game streams on NFHS Network.</p></div><div class="row">${abtn("addGame","","Add game")}<a class="btn sm" href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Eagles on NFHS</a></div></div>
-  <div class="grid g2"><div class="card"><h2 style="margin-bottom:6px">Upcoming</h2><div class="list">${upcoming().map(gameRow).join("")||'<p class="muted">No upcoming games.</p>'}</div></div>
-  <div class="card"><h2 style="margin-bottom:6px">Results</h2><div class="list">${[...needsScore().slice().reverse(),...played().slice().reverse()].map(gameRow).join("")||'<p class="muted">No results yet.</p>'}</div>${isCoach()?'<p class="small muted" style="margin:10px 0 0">To enter a final score, tap the pencil on a game.</p>':""}</div></div>`;
+  const rec=record();const now=games().filter(g=>g.d>=TODAY);const past=games().filter(g=>g.d<TODAY).reverse();const ns=needsScore();
+  if(isCoach()&&ns.length)openSet.add("past-games");
+  return `<div class="head"><div><div class="eyebrow">Varsity schedule · ${esc(CONFIG.season)}</div><h1>Schedule</h1><p>Varsity ${rec.w}–${rec.l} · League ${rec.lw}–${rec.ll}. Every varsity game streams on NFHS Network.</p><p class="small muted" style="margin-top:4px">JV and C-Team games are on the <a href="#calendar">Calendar</a>.</p></div><div class="row">${abtn("addGame","","Add game")}<a class="btn sm" href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Eagles on NFHS</a></div></div>
+  <div class="card"><h2 style="margin-bottom:6px">Upcoming</h2><div class="list">${now.map(gameRow).join("")||'<p class="muted">No upcoming varsity games.</p>'}</div></div>
+  ${past.length?`<div class="section">${panel("past-games",`Past games (${past.length})`,isCoach()&&ns.length?`<span class="chip warn">${ns.length===1?"1 needs":ns.length+" need"} a final score</span>`:"Newest first",`<div class="list">${past.map(gameRow).join("")}</div>${isCoach()?'<p class="small muted" style="margin:10px 0 0">To enter a final score, tap the pencil on a game.</p>':""}`)}</div>`:""}`;
 }
 /* ================= Calendar (practices & team events; games come from the Schedule) ================= */
 const EV_KINDS={practice:["Practice","#6fa8dc"],game:["Game","#cfd8e3"],lift:["Lift","#e8836b"],film:["Film","#b48be0"],meeting:["Coaches meeting","#9aacc1"],team:["Team","#4cc08b"],travel:["Travel","#e5b45a"],off:["Off","#62778f"],other:["Other","#8fb8de"]};
@@ -1455,12 +1473,12 @@ function calItems(lo,hi){const f=calFilt,lv=calLevel;const out={};const push=(d,
   if((f==="all"||f==="games")&&lvPass(lv,["V"]))games().filter(g=>g.date>=lo&&g.date<=hi).forEach(g=>{const t=parseTime(g.time);push(g.date,{t:"game",key:/^\d\d:\d\d$/.test(t||"")?t:"99:99",g})});
   Object.values(out).forEach(a=>a.sort((x,y)=>x.key.localeCompare(y.key)||(x.t==="game"?1:0)-(y.t==="game"?1:0)||String(x.e?x.e.title:"").localeCompare(String(y.e?y.e.title:""))));return out}
 const kindDot=k=>{const m=EV_KINDS[k]||EV_KINDS.other;return `<span class="kdot" style="--k:${m[1]}" aria-hidden="true"></span>`};
-const kindLabel=e=>e.kind==="off"?"Off day":(EV_KINDS[e.kind]||EV_KINDS.other)[0];
-function gameHref(g){return g.played&&hasBox(g)?"#game-"+g.date:"#opp-"+g.opp}
+const kindLabel=e=>e.kind==="off"?"Off day":e.kind==="game"?(()=>{const t=evTeams(e);return t.length===LV_KEYS.length?"Game":t.map(lvName).join(" & ")+" game"})():(EV_KINDS[e.kind]||EV_KINDS.other)[0];
+function gameHref(g){return g.played&&hasBox(g)?gameLink(g):"#opp-"+g.opp}
 function evRow(x,compact){
   if(x.t==="game"){const g=x.g,o=O(g.opp);const tm=fmtTime(g.time);
     const res=g.played?`<span class="res ${g.res}">${g.res}</span><b class="num">${scoreTxt(g)}</b>`:"";
-    return `<a class="ev game" href="${gameHref(g)}"><div class="evt"><b>Game</b></div><div class="evb"><div class="evtitle">${gTitle(g,o)}${tm?" · "+esc(tm):""}</div><div class="evmeta">${lvTags(["V"])}${parts("Varsity",siteText(g,o),isExh(g)?"Exhibition":g.lg?"League":"Non-league")}</div></div><div class="evr num">${res}${CHEV}</div></a>`}
+    return `<a class="ev game" href="${gameHref(g)}"><div class="evt"><b>Game</b></div><div class="evb"><div class="evtitle">${gTitle(g,o)}${tm?" · "+esc(tm):""}</div><div class="evmeta">${lvTags(["V"])}${parts(isExh(g)?"Varsity · Exhibition"+(g.event?` (${g.event})`:""):"Varsity game",siteText(g,o),isExh(g)?null:g.lg?"League":"Non-league")}</div></div><div class="evr num">${res}${CHEV}</div></a>`}
   const e=x.e;const off=e.kind==="off";const coachOnly=e.who==="coaches";const gm=e.kind==="game";
   const time=e.start?`<b>${esc(fmtTime(e.start))}</b>${e.end?`<span>${esc(fmtTime(e.end))}</span>`:""}`:`<b>${off?"Off":"All day"}</b>`;
   return `<div class="ev ${off?"off":""} ${gm?"lvgame":""}"><div class="evt num">${time}</div><div class="evb"><div class="evtitle">${esc(e.title)}</div><div class="evmeta">${lvTags(evTeams(e))}${gm?"":kindDot(e.kind)}${esc(kindLabel(e))}${coachOnly&&isCoach()?'<span class="chip">Coaches only</span>':""}</div>${e.note&&!compact?`<p class="evnote">${esc(e.note)}</p>`:""}</div>${isCoach()?`<div class="evr"><button class="btn icon edit" data-act="editEvent" data-id="${esc(e.id)}" aria-label="Edit ${esc(e.title)}">${PEN}</button></div>`:""}</div>`}
@@ -1481,7 +1499,7 @@ function calendarView(){
   const label=wk?(m.getMonth()===sun.getMonth()?`${mon(m)} ${m.getDate()} – ${sun.getDate()}`:`${mon(m)} ${m.getDate()} – ${mon(sun)} ${sun.getDate()}`):calAnchor.toLocaleDateString("en-US",{month:"long",year:"numeric"});
   const isNow=wk?ymd(m)===ymd(mondayOf(TODAY)):calAnchor.getMonth()===TODAY.getMonth()&&calAnchor.getFullYear()===TODAY.getFullYear();
   const ARR=d=>`<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
-  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · Practices, lifts, film & team events</div><h1>Calendar</h1><p>${isCoach()?"Varsity, JV and C-Team. Varsity games come from the Schedule; coaches-only events stay off the players' calendar.":"Practices, team events and games for every level, all in one place."}</p></div><div class="row">${abtn("addEvent","","Add event")}</div></div>
+  return `<div class="head"><div><div class="eyebrow">All levels · ${esc(CONFIG.season)} · Practices, games & team events</div><h1>Calendar</h1><p>${isCoach()?"Varsity, JV and C-Team. Varsity games come from the varsity Schedule; JV and C-Team games are added here. Coaches-only events stay off the players' calendar.":"Varsity, JV and C-Team practices, games and team events, all in one place. Check the level tags on each row."}</p></div><div class="row">${abtn("addEvent","","Add event")}</div></div>
   <div class="caltools"><div class="calsegs"><div class="seg" role="group" aria-label="View">${[["week","Week"],["month","Month"]].map(([v,l])=>`<button type="button" data-act="calView" data-v="${v}" class="${calView===v?"on":""}" aria-pressed="${calView===v}">${l}</button>`).join("")}</div>
    <div class="seg lvseg" role="group" aria-label="Level">${LV_FILTERS.map(([v,l])=>`<button type="button" data-act="calLevel" data-v="${v}" class="${calLevel===v?"on":""}" aria-pressed="${calLevel===v}">${l}</button>`).join("")}</div></div>
    <div class="calnav"><button class="btn icon" data-act="calNav" data-dir="-1" aria-label="Previous ${wk?"week":"month"}">${ARR("M10 3.5L5.5 8 10 12.5")}</button><div class="callabel" aria-live="polite"><b>${esc(label)}</b>${isNow?`<span class="muted small">${wk?"This week":"This month"}</span>`:""}</div><button class="btn icon" data-act="calNav" data-dir="1" aria-label="Next ${wk?"week":"month"}">${ARR("M6 3.5L10.5 8 6 12.5")}</button><button class="btn sm" data-act="calToday" ${isNow&&(!wk||true)?"":""}>Today</button></div></div>
@@ -1491,13 +1509,12 @@ function calendarView(){
 /* Home: today's events (players see only "Everyone" events) plus the next game */
 function todayCard(){const t=ymd(TODAY);const lv=calLevel;const ok=e=>lvPass(lv,evTeams(e));const L=evs().filter(e=>e.date===t&&ok(e)).sort(evCmp).map(e=>({t:"ev",key:e.start||"",e}));
   const gToday=lvPass(lv,["V"])?games().filter(g=>g.date===t):[];gToday.forEach(g=>{const tm=parseTime(g.time);L.push({t:"game",key:/^\d\d:\d\d$/.test(tm||"")?tm:"99:99",g})});L.sort((a,b)=>a.key.localeCompare(b.key));
-  const MAX=4;const shown=L.slice(0,MAX);const ng=upcoming().find(g=>g.date!==t);
+  const MAX=4;const shown=L.slice(0,MAX);
   const nextEv=!L.length?evs().filter(e=>e.date>t&&e.kind!=="off"&&ok(e)).sort(evCmp)[0]:null;
-  const ngLine=ng?`<div class="tnext"><span class="eyebrow">Next varsity game</span><a href="${gameHref(ng)}">${gTitle(ng)}</a><span class="muted small">${esc(dow(ng.d))}, ${esc(mon(ng.d))} ${ng.d.getDate()}${fmtTime(ng.time)?" · "+esc(fmtTime(ng.time)):""}</span></div>`:`<div class="tnext"><span class="eyebrow">Next varsity game</span><span class="muted small">No games scheduled</span></div>`;
   const nevLine=nextEv?`<div class="tnext"><span class="eyebrow">Next up</span><span>${kindDot(nextEv.kind)}${esc(nextEv.title)}</span><span class="muted small">${esc(dow(D(nextEv.date)))}, ${esc(mon(D(nextEv.date)))} ${D(nextEv.date).getDate()}${nextEv.start?" · "+esc(fmtTime(nextEv.start)):""}</span></div>`:"";
   return `<div class="card todaycard"><div class="cardhead"><h2>Today & next up</h2><span class="row">${lv!=="all"?`<span class="chip">${esc(LV_FILTERS.find(f=>f[0]===lv)[1])}</span>`:""}<a class="small" href="#calendar">Calendar</a></span></div>
   <div class="list">${shown.map(x=>evRow(x,true)).join("")||'<p class="muted small cnone">No team events today.</p>'}</div>${L.length>MAX?`<a class="small tmore" href="#calendar">+${L.length-MAX} more today</a>`:""}
-  <div class="tnexts">${nevLine}${ngLine}</div></div>`}
+  ${nevLine?`<div class="tnexts">${nevLine}</div>`:""}</div>`}
 function calGo(d){calAnchor=D(d);calView="week";render();setTimeout(()=>{const el=document.getElementById("cd-"+d);if(el)el.scrollIntoView({block:"start"})},40)}
 /* Validate one event; throws with a readable message. Returns the clean doc (without author/ts). */
 function cleanEvent(o){if(!o||typeof o!=="object")throw new Error("Bad event");const t=String(o.title??"").replace(/\s+/g," ").trim();const nm=t||"(no title)";
@@ -1544,9 +1561,9 @@ function eventSheet(e){
   const k=$("#sf-kind"),ad=$("#sf-allday");if(k&&ad)k.addEventListener("change",()=>{if(k.value==="off"&&!ad.checked){ad.checked=true;ad.dispatchEvent(new Event("change",{bubbles:true}))}});
 }
 function gameView(date){
-  const g=games().find(x=>x.date===date);if(!g||!g.played||!hasBox(g))return `<div class="empty">No box score for this game yet.${isCoach()?' Import one from <a href="#stats">Stats → Import</a>.':""}</div>`;
+  const g=games().find(x=>x.id===date)||games().find(x=>x.date===date&&hasBox(x))||games().find(x=>x.date===date);if(!g||!g.played||!hasBox(g))return `<div class="empty">No varsity box score for this game yet.${isCoach()?' Import one from <a href="#stats">Stats → Import</a>.':""}</div>`;
   const lines_=box(g).filter(l=>KEYS.some(k=>+l[k]>0));const myId=null;
-  return `<div class="head"><div><div class="eyebrow">${longDate(g.d)} · ${gKind(g)}</div><h1>${gTitle(g)} <span class="res ${g.res}" style="font-size:30px;width:auto">${g.res}</span> <span class="num">${scoreTxt(g)}</span></h1></div><div class="row">${ebtn("editGame",`data-id="${esc(g.id)}"`,"Edit game")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="game" data-id="${esc(g.id)}">${TRASH}Delete</button>`:""}<a class="btn sm" href="#schedule">Schedule</a></div></div>
+  return `<div class="head"><div><div class="eyebrow">Varsity box score · ${longDate(g.d)} · ${gKind(g)}</div><h1>${gTitle(g)} <span class="res ${g.res}" style="font-size:30px;width:auto">${g.res}</span> <span class="num">${scoreTxt(g)}</span></h1></div><div class="row">${ebtn("editGame",`data-id="${esc(g.id)}"`,"Edit game")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="game" data-id="${esc(g.id)}">${TRASH}Delete</button>`:""}<a class="btn sm" href="#schedule">Varsity schedule</a></div></div>
   <div class="card"><div class="tablewrap"><table><thead><tr><th class="l nosort">Player</th>${["MIN","PTS","REB","AST","STL","BLK","TO","FG","3PT","FT"].map(h=>`<th class="nosort">${h}</th>`).join("")}</tr></thead><tbody>
   ${lines_.map(l=>{const p=P(l.id);return `<tr class="${l.id===myId?"me-row":""}"><td class="l">${p?`${p.no!=null&&String(p.no)!==""?`<span class="muted num">#${esc(p.no)}</span> `:""}${esc(pName(p))}`:'<span class="muted">Former player</span>'}</td><td class="num">${+l.min||0}</td><td class="num us">${l.pts}</td><td class="num">${l.reb}</td><td class="num">${l.ast}</td><td class="num">${l.stl}</td><td class="num">${l.blk}</td><td class="num">${l.to}</td><td class="num">${l.fgm}-${l.fga}</td><td class="num">${l.tpm}-${l.tpa}</td><td class="num">${l.ftm}-${l.fta}</td></tr>`}).join("")}</tbody>
   <tfoot>${(()=>{const t={};KEYS.forEach(k=>t[k]=box(g).reduce((a,l)=>a+(+l[k]||0),0));return `<tr class="totrow"><td class="l">Team totals</td><td class="num">${t.min}</td><td class="num us">${t.pts}</td><td class="num">${t.reb}</td><td class="num">${t.ast}</td><td class="num">${t.stl}</td><td class="num">${t.blk}</td><td class="num">${t.to}</td><td class="num">${t.fgm}-${t.fga}</td><td class="num">${t.tpm}-${t.tpa}</td><td class="num">${t.ftm}-${t.fta}</td></tr>`})()}</tfoot></table></div></div>`;
@@ -1559,7 +1576,7 @@ const lvChips=lv=>(lv||[]).filter(k=>PLV.some(x=>x[0]===k)).map(k=>`<span class=
 function rosterView(){
   const tab=rosterTab;const seg=`<div class="seg rtabs" role="group" aria-label="Roster">${[...PLV,["staff","Staff"]].map(([k,l])=>`<button type="button" data-act="rosterTab" data-v="${k}" class="${tab===k?"on":""}" aria-pressed="${tab===k}">${l}</button>`).join("")}</div>`;
   if(tab==="staff"){const L=staffDir();
-    const row=(x,i)=>`<div class="srow"><div class="sinfo"><div class="pname">${esc(x.name)}</div><div class="pline">${esc(x.role)}</div><div class="row" style="gap:4px;margin-top:4px">${lvChips(x.levels)}</div></div>${isCoach()?`<div class="row stools"><button class="btn icon" data-act="staffMove" data-id="${esc(x.id)}" data-dir="-1" aria-label="Move ${esc(x.name)} up" ${i===0?"disabled":""}><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10L8 5.5l4.5 4.5"/></svg></button><button class="btn icon" data-act="staffMove" data-id="${esc(x.id)}" data-dir="1" aria-label="Move ${esc(x.name)} down" ${i===L.length-1?"disabled":""}><svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 6L8 10.5 12.5 6"/></svg></button><button class="btn icon edit" data-act="editStaff" data-id="${esc(x.id)}" aria-label="Edit ${esc(x.name)}">${PEN}</button></div>`:""}</div>`;
+    const row=(x,i)=>`<div class="srow"><div class="sinfo"><div class="pname">${esc(x.name)}</div><div class="pline">${esc(x.role)}</div><div class="row" style="gap:4px;margin-top:4px">${lvChips(x.levels)}</div></div>${isCoach()?`<div class="row stools"><button class="btn icon edit" data-act="editStaff" data-id="${esc(x.id)}" aria-label="Edit ${esc(x.name)}">${PEN}</button></div>`:""}</div>`;
     return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · ${esc(CONFIG.school)}</div><h1>Roster</h1><p>Our coaching staff, all three levels.</p></div><div class="row">${abtn("addStaff","","Add coach")}</div></div>${seg}
     <div class="card" style="margin-top:14px">${L.length?`<div class="slist">${L.map(row).join("")}</div>`:`<p class="muted" style="margin:0">No coaches listed yet.${isCoach()?" Tap Add coach to build the staff list.":""}</p>`}</div>`}
   const ss=tab==="V"?seasonStats():[];const mine=allPlayers().filter(p=>lvOf(p)===tab);const out=mine.filter(p=>p.inactive);
@@ -1611,14 +1628,14 @@ function statsView(){
   let body="";
   if(statTab==="players"){
     body=`<div class="tablewrap"><table><thead><tr>${cols.map(([c,h,k])=>`<th class="${c} ${statSort.k===k?"sorted":""}" data-sort="${k}">${h}${statSort.k===k?(statSort.d<0?" ↓":" ↑"):""}</th>`).join("")}</tr></thead><tbody>
-    ${rows.length?"":`<tr><td colspan="13" class="l muted" style="white-space:normal">No players yet.</td></tr>`}${rows.map(s=>{const p=P(s.id);if(!s.gp)return `<tr class="${s.id===myId?"me-row":""}"><td class="l"><span class="muted num">${p.no!=null&&String(p.no)!==""?"#"+p.no:""}</span> <a href="#player-${p.id}">${esc(pName(p))}</a></td><td class="num">0</td>${'<td class="num muted">–</td>'.repeat(11)}</tr>`;return `<tr class="${s.id===myId?"me-row":""}"><td class="l"><span class="muted num">${p.no!=null&&String(p.no)!==""?"#"+p.no:""}</span> <a href="#player-${p.id}">${esc(pName(p))}</a></td><td class="num">${s.gp}</td><td class="num">${fmt1(s.mpg)}</td><td class="num us">${fmt1(s.ppg)}</td><td class="num">${fmt1(s.rpg)}</td><td class="num">${fmt1(s.apg)}</td><td class="num">${fmt1(s.spg)}</td><td class="num">${fmt1(s.tpg)}</td><td class="num">${pct(s.fgm,s.fga)}</td><td class="num">${pct(s.tpm,s.tpa)}</td><td class="num">${pct(s.ftm,s.fta)}</td><td class="num">${s.fga?(s.efg*100).toFixed(1)+"%":"–"}</td><td class="num">${s.fga?(s.ts*100).toFixed(1)+"%":"–"}</td></tr>`}).join("")}</tbody></table></div>
+    ${rows.length?"":`<tr><td colspan="13" class="l muted" style="white-space:normal">No varsity players yet.</td></tr>`}${rows.map(s=>{const p=P(s.id);if(!s.gp)return `<tr class="${s.id===myId?"me-row":""}"><td class="l"><span class="muted num">${p.no!=null&&String(p.no)!==""?"#"+p.no:""}</span> <a href="#player-${p.id}">${esc(pName(p))}</a></td><td class="num">0</td>${'<td class="num muted">–</td>'.repeat(11)}</tr>`;return `<tr class="${s.id===myId?"me-row":""}"><td class="l"><span class="muted num">${p.no!=null&&String(p.no)!==""?"#"+p.no:""}</span> <a href="#player-${p.id}">${esc(pName(p))}</a></td><td class="num">${s.gp}</td><td class="num">${fmt1(s.mpg)}</td><td class="num us">${fmt1(s.ppg)}</td><td class="num">${fmt1(s.rpg)}</td><td class="num">${fmt1(s.apg)}</td><td class="num">${fmt1(s.spg)}</td><td class="num">${fmt1(s.tpg)}</td><td class="num">${pct(s.fgm,s.fga)}</td><td class="num">${pct(s.tpm,s.tpa)}</td><td class="num">${pct(s.ftm,s.fta)}</td><td class="num">${s.fga?(s.efg*100).toFixed(1)+"%":"–"}</td><td class="num">${s.fga?(s.ts*100).toFixed(1)+"%":"–"}</td></tr>`}).join("")}</tbody></table></div>
     <p class="small muted" style="margin:10px 0 0">Per-game averages. Tap a column to sort. Swipe sideways on a phone.</p>`;
-  }else if(statTab==="games"){body=played().length?`<div class="list">${played().slice().reverse().map(gameRow).join("")}</div>`:'<p class="muted" style="margin:0">No games played yet.</p>'}
-  else{body=`<div class="grid g2"><div class="form"><h3>Upload a game's box score</h3><p class="muted small" style="margin:0">One row per player, with the game date. Paste rows copied from Sheets or Excel, or choose a .csv file. Only the game date and jersey number columns are required; missing stat columns count as 0. Importing a date replaces that game's stats.</p>
+  }else if(statTab==="games"){body=played().length?`<div class="list">${played().slice().reverse().map(gameRow).join("")}</div>`:'<p class="muted" style="margin:0">No varsity games played yet.</p>'}
+  else{body=`<div class="grid g2"><div class="form"><h3>Upload a varsity box score</h3><p class="muted small" style="margin:0">Varsity games and players only; JV and C-Team stats aren't kept. One row per player, with the game date. Paste rows copied from Sheets or Excel, or choose a .csv file. Only the game date and jersey number columns are required; missing stat columns count as 0. Importing a date replaces that game's stats.</p>
       <label class="f" for="csvfile">CSV file<input type="file" id="csvfile" accept=".csv,text/csv"></label><label class="f" for="csvtext">Or paste CSV<textarea id="csvtext" ></textarea></label>
       <div class="row"><button class="btn gold" id="csvgo">Import</button></div><div id="csvmsg" class="small" aria-live="polite">${importMsg}</div></div>
-      <div><h3 style="margin-bottom:8px">Template</h3><div class="tablewrap"><table><tbody>${[["game","Game date: 11/21/2026 or 2026-11-21"],["no","Jersey number"],["min","Minutes played"],["pts · reb · ast","Points, rebounds, assists"],["stl · blk · to","Steals, blocks, turnovers"],["fgm · fga","Field goals made / attempted"],["tpm · tpa","3-pointers made / attempted"],["ftm · fta","Free throws made / attempted"]].map(([a,b])=>`<tr><td class="l"><b>${a}</b></td><td class="l" style="white-space:normal">${b}</td></tr>`).join("")}</tbody></table></div></div></div>`}
-  return `<div class="head"><div><div class="eyebrow">${esc(CONFIG.season)} · ${plural(teamTotals().n,"game")} imported</div><h1>Stats</h1><p>${rec.w}–${rec.l} · ${fmt1(rec.ppg)} points per game, allowing ${fmt1(rec.opp)}.</p></div>${tabs}</div><div class="card">${body}</div>`;
+      <div><h3 style="margin-bottom:8px">Template</h3><div class="tablewrap"><table><tbody>${[["game","Game date: 11/21/2026 or 2026-11-21"],["no","Jersey number"],["opp","Opponent name. Only needed when two games share a date"],["min","Minutes played"],["pts · reb · ast","Points, rebounds, assists"],["stl · blk · to","Steals, blocks, turnovers"],["fgm · fga","Field goals made / attempted"],["tpm · tpa","3-pointers made / attempted"],["ftm · fta","Free throws made / attempted"]].map(([a,b])=>`<tr><td class="l"><b>${a}</b></td><td class="l" style="white-space:normal">${b}</td></tr>`).join("")}</tbody></table></div></div></div>`}
+  return `<div class="head"><div><div class="eyebrow">Varsity stats · ${esc(CONFIG.season)} · ${plural(teamTotals().n,"game")} imported</div><h1>Stats</h1><p>Varsity ${rec.w}–${rec.l} · ${fmt1(rec.ppg)} points per game, allowing ${fmt1(rec.opp)}.</p></div>${tabs}</div><div class="card">${body}</div>`;
 }
 function splitRow(line,del){const out=[];let cur="",q=false;for(let i=0;i<line.length;i++){const c=line[i];if(q){if(c==='"'){if(line[i+1]==='"'){cur+='"';i++}else q=false}else cur+=c}else if(c==='"'&&cur.trim()==="")q=true;else if(c===del){out.push(cur.trim());cur=""}else cur+=c}out.push(cur.trim());return out}
 function csvDate(s){s=String(s||"").trim();let m=/^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s),y,mo,d;if(m){y=+m[1];mo=+m[2];d=+m[3]}else if((m=/^(\d{1,2})\/(\d{1,2})\/(\d{4}|\d{2})$/.exec(s))){mo=+m[1];d=+m[2];y=+m[3]+(m[3].length===2?2000:0)}else return null;
@@ -1630,16 +1647,18 @@ function parseCSV(text){
   const PL=players();const gs={},seen={},bad=new Set(),errs=[],blank=[];
   L.slice(1).forEach((ln,i)=>{const r=i+2;const v=splitRow(ln,del);const o={};head.forEach((h,j)=>o[h]=v[j]??"");
     const date=csvDate(o.game);if(!date){errs.push(`Row ${r}: can't read the date “${o.game}”. Use 11/21/2026 or 2026-11-21.`);return}
-    const nice=mon(D(date))+" "+D(date).getDate();const g=games().find(x=>x.date===date);
+    const nice=mon(D(date))+" "+D(date).getDate();const day=games().filter(x=>x.date===date);let g=day[0];
     if(!g){errs.push(`Row ${r}: there's no game on ${nice} on the Schedule. Add the game first.`);return}
+    if(day.length>1){const q=String(o.opp||"").trim().toLowerCase();const m=q?day.filter(x=>O(x.opp).name.toLowerCase()===q||O(x.opp).name.toLowerCase().includes(q)):[];
+      if(m.length!==1){errs.push(`Row ${r}: there are ${day.length} games on ${nice} (${day.map(x=>O(x.opp).name).join(", ")}). Add an opp column with the opponent's name.`);return}g=m[0]}
     if(!g.played){errs.push(`Row ${r}: Enter the final score for ${nice} on the Schedule first.`);return}
     const raw=String(o.no||"").replace(/^#/,"").trim();let p=PL.find(x=>String(x.no)===raw);
     if(!p&&/^\d+$/.test(raw)){const c=PL.filter(x=>/^\d+$/.test(String(x.no))&&+x.no===+raw);if(c.length===1)p=c[0]}
     if(!p){errs.push(`Row ${r}: no player wears #${raw||"(blank)"}.`);return}
-    const sg=(seen[date]=seen[date]||{});if(sg[p.id]){errs.push(`${nice}: ${p.no!=null&&String(p.no)!==""?"#"+p.no:""} ${pName(p)} is listed twice (rows ${sg[p.id]} and ${r}). Fix the file. This game was not imported.`);bad.add(date);return}sg[p.id]=r;
+    const sg=(seen[g.id]=seen[g.id]||{});if(sg[p.id]){errs.push(`${nice}: ${p.no!=null&&String(p.no)!==""?"#"+p.no:""} ${pName(p)} is listed twice (rows ${sg[p.id]} and ${r}). Fix the file. This game was not imported.`);bad.add(g.id);return}sg[p.id]=r;
     const l={id:p.id};KEYS.forEach(k=>l[k]=Math.max(0,parseInt(o[k],10)||0));
     if(String(o.min??"").trim()===""&&KEYS.some(k=>k!=="min"&&l[k]>0))blank.push(`${p.no!=null&&String(p.no)!==""?"#"+p.no:""} ${pName(p)} (${nice})`);
-    (gs[date]=gs[date]||[]).push(l)});
+    (gs[g.id]=gs[g.id]||[]).push(l)});
   bad.forEach(d=>delete gs[d]);
   const warns=blank.length?[`Minutes are blank for ${blank.join(", ")}. Those lines won't count as games played until minutes are entered.`]:[];
   return{games:gs,errs,warns};
@@ -1650,15 +1669,21 @@ const teamHist=()=>{const d=get("history","seasons");return d&&Array.isArray(d.s
 const seasonTxt=x=>String(x||"").replace("-","–");
 function histCard(){const h=teamHist().slice(0,2);if(!h.length)return"";
   return `<div class="card histcard"><div class="cardhead"><h2>Our last two seasons</h2>${ebtn("editHist")}</div><div class="grid g2 histgrid">${h.map(x=>`<div class="hist"><div class="hs num">${esc(seasonTxt(x.season))}</div><div><div class="num"><b>${x.w}–${x.l}</b> <span class="muted">overall</span> · <b>${x.lw}–${x.ll}</b> <span class="muted">league</span></div>${x.finish||x.coach?`<div class="small muted">${parts(x.finish,x.coach?"Coach "+x.coach:"")}</div>`:""}${x.notes?`<div class="small muted">${esc(x.notes)}</div>`:""}</div></div>`).join("")}</div></div>`}
+/* Opponents we only meet in exhibitions (e.g. a jamboree) stay off the main Scouting list */
+const exhOnly=o=>{const gs=games().filter(g=>g.opp===o.id);return gs.length>0&&gs.every(isExh)};
+const hasScout=o=>!!((o.keys||[]).length||(o.players||[]).length||(o.last||[]).length||items("notes").some(n=>n.opp===o.id)||items("clips").some(c=>c.opp===o.id)||Object.values(o.coach||{}).some(v=>String(v||"").trim()));
+let scoutExhOpen=false;
 function scoutingView(){
-  const list=opps().map(o=>({o,next:nextFor(o.id)})).sort((a,b)=>(a.next?a.next.d:9e15)-(b.next?b.next.d:9e15));
-  return `<div class="head"><div><div class="eyebrow">${isCoach()?"Opponent scouting":"Game-day scouting"}</div><h1>Scouting</h1><p>${isCoach()?"Every coach can edit reports, notes, film and players.":"What you need to know about each opponent."}</p></div><div class="row">${teamHist().length?"":abtn("editHist","","Our last two seasons")}${abtn("addOpp","","Add opponent")}</div></div>
-  ${histCard()}${list.length?"":`<div class="empty">No opponents yet.${isCoach()?" Tap Add opponent to start a scouting report.":""}</div>`}<div class="grid g3">${list.map(({o,next})=>{const st=o.status==="ready"?'<span class="chip good">Ready</span>':o.status==="progress"?'<span class="chip warn">In progress</span>':'<span class="chip">Not started</span>';
+  const all=opps().map(o=>({o,next:nextFor(o.id)})).sort((a,b)=>(a.next?a.next.d:9e15)-(b.next?b.next.d:9e15));
+  const list=all.filter(x=>!exhOnly(x.o));const exh=isCoach()?all.filter(x=>exhOnly(x.o)&&hasScout(x.o)):[];
+  return `<div class="head"><div><div class="eyebrow">Varsity scouting · ${isCoach()?"Opponents":"Game day"}</div><h1>Scouting</h1><p>${isCoach()?"Varsity opponents. Every coach can edit reports, notes, film and players.":"What you need to know about each varsity opponent."}</p></div><div class="row">${teamHist().length?"":abtn("editHist","","Our last two seasons")}${abtn("addOpp","","Add opponent")}</div></div>
+  ${histCard()}${list.length?"":`<div class="empty">No opponents yet.${isCoach()?" Tap Add opponent to start a scouting report.":""}</div>`}<div class="grid g3">${list.map(oppCard).join("")}</div>
+  ${exh.length?`<div class="exhlink"><button type="button" class="linkbtn" data-act="scoutExh" aria-expanded="${scoutExhOpen}">${scoutExhOpen?"Hide":"Show"} exhibition opponents (${exh.length})</button>${scoutExhOpen?`<p class="small muted" style="margin:4px 0 10px">Teams we only play in exhibitions. They stay off the main list.</p><div class="grid g3">${exh.map(oppCard).join("")}</div>`:""}</div>`:""}`;
+}
+function oppCard({o,next}){{const st=o.status==="ready"?'<span class="chip good">Ready</span>':o.status==="progress"?'<span class="chip warn">In progress</span>':'<span class="chip">Not started</span>';
     return `<a class="card oppcard" href="#opp-${esc(o.id)}"><div class="spread"><span class="eyebrow">${o.league?"League":"Non-league"}</span>${isCoach()?st:""}</div><h3>${esc(o.name)}</h3><div class="small muted">${next?`Next: ${dow(next.d)}, ${mon(next.d)} ${next.d.getDate()} · ${({home:"Home",away:"Away",neutral:"Neutral"})[siteOf(next)]}`:"No games scheduled"}</div>
     ${(()=>{const gs=games().filter(g=>g.opp===o.id);return gs.length?`<div class="small muted">This season</div><div class="row">${gs.map(g=>`<span class="chip ${g.played?(g.res==="W"?"good":"bad"):""} num">${mon(g.d)} ${g.d.getDate()} · ${SITE_L[siteOf(g)]} · ${g.played?g.res+" "+scoreTxt(g):g.d<TODAY?"No score":esc(fmtTime(g.time)||"Time TBA")}</span>`).join("")}</div>`:""})()}
-    ${(()=>{const lm=lastMet(o);return lm?`<div class="row"><span class="chip ${lm.res==="W"?"good":"bad"} num">Last met: ${lm.res} ${lm.us}–${lm.them} (${esc(lm.when)})</span></div>`:""})()}</a>`}).join("")}</div>
-  `;
-}
+    ${(()=>{const lm=lastMet(o);return lm?`<div class="row"><span class="chip ${lm.res==="W"?"good":"bad"} num">Last met: ${lm.res} ${lm.us}–${lm.them} (${esc(lm.when)})</span></div>`:""})()}</a>`}}
 function oppView(id){
   const o=get("opps",id);if(!o)return `<div class="empty">Opponent not found.</div>`;
   const coach=isCoach();const next=nextFor(id);const stand=get("stand",id);const c=o.coach||{};
@@ -1678,7 +1703,7 @@ function oppView(id){
   const lastBody=T(abtn("addMeet",`data-id="${esc(id)}"`,"Add meeting"))+(pm.length?pastSeasons().map(ps=>{const rows=pm.filter(l=>seasonOf(l.date)===ps.label);if(!rows.length)return"";const w=rows.filter(l=>l.res==="W").length;return `<div class="meetseason"><div class="tplgroup">${esc(ps.label)} · <span class="num">${w}–${rows.length-w}</span></div>${rows.map(meetRow).join("")}</div>`}).join(""):'<p class="muted" style="margin:0">No meetings in the last two seasons.</p>');
   const mine=games().filter(g=>g.opp===id);const mrec=mine.filter(g=>g.played&&!isExh(g));
   const seasonBody=T(abtn("addGame",`data-opp="${esc(id)}"`,"Add game"))+(mine.length?mine.map(g=>`<div class="spread" style="padding:7px 0;border-top:1px solid var(--line)"><span>${dow(g.d)}, ${mon(g.d)} ${g.d.getDate()} · ${vsAt(g)} ${esc(o.name)}${siteOf(g)==="neutral"?" (neutral)":""}${g.venue?" · "+esc(g.venue):""}${g.lg&&!isExh(g)?" · League":""}${isExh(g)?" "+EXH_CHIP+(g.event?" "+esc(g.event):""):""}</span><span class="num" style="white-space:nowrap">${g.played?`<span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b>`:g.d<TODAY?'<span class="chip warn">Needs final score</span>':esc(fmtTime(g.time)||"Time TBA")}</span></div>`).join(""):'<p class="muted" style="margin:0">No games against them this season.</p>');
-  return `<div class="head"><div><div class="eyebrow">${o.league?"League":"Non-league"}${o.city?" · "+esc(o.city):""}${stand?` · ${stand.lw}–${stand.ll} league`:""}</div><h1>${esc(o.name)}</h1><p>${next?`Next meeting ${longDate(next.d)}, ${({home:"at home",away:"away",neutral:"at a neutral site"})[siteOf(next)]}.`:"No games scheduled."}</p></div><div class="row"><button class="btn sm" data-act="printReport" data-id="${esc(id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-2"/><rect x="6" y="14" width="12" height="7"/></svg>Print report</button>${ebtn("editOpp",`data-id="${esc(id)}"`,"Edit team")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="opp" data-id="${esc(id)}">${TRASH}Delete</button>`:""}<a class="btn sm" href="#scouting">All opponents</a></div></div>
+  return `<div class="head"><div><div class="eyebrow">Varsity scouting · ${o.league?"League":"Non-league"}${o.city?" · "+esc(o.city):""}${stand?` · ${stand.lw}–${stand.ll} league`:""}</div><h1>${esc(o.name)}</h1><p>${next?`Next meeting ${longDate(next.d)}, ${({home:"at home",away:"away",neutral:"at a neutral site"})[siteOf(next)]}.`:"No games scheduled."}</p></div><div class="row"><button class="btn sm" data-act="printReport" data-id="${esc(id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-2"/><rect x="6" y="14" width="12" height="7"/></svg>Print report</button>${ebtn("editOpp",`data-id="${esc(id)}"`,"Edit team")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="opp" data-id="${esc(id)}">${TRASH}Delete</button>`:""}<a class="btn sm" href="#scouting">All opponents</a></div></div>
   ${panel("this-season","This season",mine.length?plural(mine.length,"game")+(mrec.length?` · ${mrec.filter(g=>g.res==="W").length}–${mrec.filter(g=>g.res==="L").length}`:""):"No games",seasonBody)}
   ${panel("keys","Keys to the game",keys.length?plural(keys.length,"key"):"",keysBody,"keys")}
   ${panel("players-know","Players to know",opl.length?plural(opl.length,"player"):"",playersBody)}
@@ -1691,8 +1716,8 @@ function oppView(id){
 function reportHTML(id,forPlayers){
   const o=get("opps",id);const c=o.coach||{};const next=nextFor(id);const isC=isCoach()&&!forPlayers;
   const notes=items("notes").filter(n=>n.opp===id&&(isC||n.vis==="team")).sort((a,b)=>b.ts-a.ts);const clips=items("clips").filter(x=>x.opp===id);
-  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(o.name)} scouting report</title><style>body{font:12pt/1.45 -apple-system,Segoe UI,Arial,sans-serif;color:#111;max-width:760px;margin:24px auto;padding:0 16px}h1{font:700 26pt Arial Narrow,Arial;margin:0;text-transform:uppercase}h2{font:700 14pt Arial;border-bottom:2px solid #ab8c59;padding-bottom:3px;margin:20px 0 8px;text-transform:uppercase}.m{color:#555}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:5px 7px;text-align:left;vertical-align:top}ol li{font-weight:600;margin:3px 0}@media print{body{margin:0}}</style></head><body>
-  <div class="m">${esc(CONFIG.team)} scouting report · printed ${new Date().toLocaleDateString()}</div><h1>${esc(o.name)}</h1><div class="m">${next?`${vsAt(next)} ${esc(o.name)} · ${longDate(next.d)}${next.time?" · "+esc(fmtTime(next.time)):""}${siteOf(next)==="neutral"?" · Neutral":""}`:""}</div>
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(o.name)} varsity scouting report</title><style>body{font:12pt/1.45 -apple-system,Segoe UI,Arial,sans-serif;color:#111;max-width:760px;margin:24px auto;padding:0 16px}h1{font:700 26pt Arial Narrow,Arial;margin:0;text-transform:uppercase}h2{font:700 14pt Arial;border-bottom:2px solid #ab8c59;padding-bottom:3px;margin:20px 0 8px;text-transform:uppercase}.m{color:#555}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:5px 7px;text-align:left;vertical-align:top}ol li{font-weight:600;margin:3px 0}@media print{body{margin:0}}</style></head><body>
+  <div class="m">${esc(CONFIG.team)} varsity scouting report · printed ${new Date().toLocaleDateString()}</div><h1>${esc(o.name)}</h1><div class="m">${next?`${vsAt(next)} ${esc(o.name)} · ${longDate(next.d)}${next.time?" · "+esc(fmtTime(next.time)):""}${siteOf(next)==="neutral"?" · Neutral":""}`:""}</div>
   ${(o.keys||[]).length?`<h2>Keys to the game</h2><ol>${o.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ol>`:""}
   ${(o.players||[]).length?`<h2>Players to know</h2><table><tr><th>#</th><th>Player</th><th>PPG</th><th>RPG</th><th>APG</th><th>Tendencies</th></tr>${o.players.map(p=>`<tr><td>${esc(p.no)}</td><td><b>${esc(p.name)}</b><br><span class="m">${esc([p.pos,p.yr,p.ht].filter(Boolean).join(" · "))}</span></td><td>${p.ppg??"–"}</td><td>${p.rpg??"–"}</td><td>${p.apg??"–"}</td><td>${(p.tend||[]).map(esc).join("<br>")}${p.info?`<br><i>${esc(p.info)}</i>`:""}</td></tr>`).join("")}</table>`:""}
   ${c.offense||c.defense||c.press||c.sets||c.name?`<h2>Their coach &amp; schemes</h2><table>${[["Coach",[c.name,c.tenure,c.record].filter(Boolean).join(" · ")],["Offense",c.offense],["Defense",c.defense],["Press",c.press],["Sets",c.sets]].filter(r=>r[1]).map(r=>`<tr><th style="width:90px">${r[0]}</th><td>${esc(r[1])}</td></tr>`).join("")}</table>`:""}
@@ -1705,9 +1730,9 @@ function reportHTML(id,forPlayers){
 function leagueView(){
   const rec=record();const S=[{id:"cpc",lw:rec.lw,ll:rec.ll,w:rec.w,l:rec.l},...items("stand").filter(x=>x.id!=="cpc").map(x=>({...x,lw:+x.lw||0,ll:+x.ll||0,w:+x.w||0,l:+x.l||0}))].sort((a,b)=>(b.lw-b.ll)-(a.lw-a.ll)||b.lw-a.lw);const top=S[0];
   const R=items("lres").filter(r=>r.a!=="cpc"&&r.b!=="cpc").sort((a,b)=>b.date.localeCompare(a.date));
-  return `<div class="head"><div><div class="eyebrow">League · ${esc(CONFIG.season)}</div><h1>League</h1><p>${isCoach()?"Edit any team or result. Our row updates from the Schedule.":"League standings and recent results."}</p></div><div class="row">${abtn("addStand","","Add team")}${abtn("addLres","","Add result")}</div></div>
+  return `<div class="head"><div><div class="eyebrow">Varsity · ${esc(CONFIG.league)} · ${esc(CONFIG.season)}</div><h1>League</h1><p>${isCoach()?"Varsity league standings. Edit any team or result; our row updates from the varsity Schedule.":"Varsity league standings and recent results."}</p></div><div class="row">${abtn("addStand","","Add team")}${abtn("addLres","","Add result")}</div></div>
   <div class="grid split"><div class="card"><h2 style="margin-bottom:10px">Standings</h2><div class="tablewrap"><table><thead><tr><th class="l nosort">#</th><th class="l nosort">Team</th><th class="nosort">League</th><th class="nosort">Pct</th><th class="nosort">Overall</th><th class="nosort">GB</th>${isCoach()?'<th class="nosort"></th>':""}</tr></thead><tbody>${S.length?"":`<tr><td colspan="7" class="l muted" style="white-space:normal">No standings yet.</td></tr>`}
-  ${S.map((s,i)=>{const gb=top?((top.lw-s.lw)+(s.ll-top.ll))/2:0;const n=s.lw+s.ll;return `<tr class="${s.id==="cpc"?"me-row":""}"><td class="l num">${i+1}</td><td class="l">${s.id==="cpc"?"<b>CPC Eagles</b>":`<a href="#opp-${esc(s.id)}">${esc(oppName(s.id))}</a>`}</td><td class="num">${s.lw}–${s.ll}</td><td class="num">${n?(s.lw/n).toFixed(3).replace(/^0/,""):"–"}</td><td class="num">${s.w}–${s.l}</td><td class="num">${gb?gb.toFixed(1):"–"}</td>${isCoach()?`<td>${s.id==="cpc"?"":`<button class="btn icon edit" data-act="editStand" data-id="${esc(s.id)}" aria-label="Edit row">${PEN}</button>`}</td>`:""}</tr>`}).join("")}</tbody></table></div></div>
+  ${S.map((s,i)=>{const gb=top?((top.lw-s.lw)+(s.ll-top.ll))/2:0;const n=s.lw+s.ll;return `<tr class="${s.id==="cpc"?"me-row":""}"><td class="l num">${i+1}</td><td class="l">${s.id==="cpc"?"<b>CPC Eagles</b> <span class=\"muted small\">Varsity</span>":`<a href="#opp-${esc(s.id)}">${esc(oppName(s.id))}</a>`}</td><td class="num">${s.lw}–${s.ll}</td><td class="num">${n?(s.lw/n).toFixed(3).replace(/^0/,""):"–"}</td><td class="num">${s.w}–${s.l}</td><td class="num">${gb?gb.toFixed(1):"–"}</td>${isCoach()?`<td>${s.id==="cpc"?"":`<button class="btn icon edit" data-act="editStand" data-id="${esc(s.id)}" aria-label="Edit row">${PEN}</button>`}</td>`:""}</tr>`}).join("")}</tbody></table></div></div>
   <div class="card"><h2 style="margin-bottom:6px">Recent results</h2>${R.map(r=>`<div class="spread" style="padding:8px 0;border-top:1px solid var(--line)"><span class="small muted" style="width:44px">${mon(D(r.date))} ${D(r.date).getDate()}</span><span style="flex:1">${r.a==="cpc"?"<b>CPC</b>":esc(oppName(r.a))} <b class="num">${r.as}</b>, ${r.b==="cpc"?"<b>CPC</b>":esc(oppName(r.b))} <span class="num">${r.bs}</span></span>${isCoach()?`<button class="btn icon edit" data-act="editLres" data-id="${esc(r.id)}" aria-label="Edit result">${PEN}</button>`:""}</div>`).join("")||'<p class="muted">No results yet.</p>'}</div></div>`;
 }
 
@@ -1722,7 +1747,7 @@ function glossaryView(){
   const all=items(coll);const match=c=>!q||String(c.name).toLowerCase().includes(q)||String(c.def).toLowerCase().includes(q);const hit=all.filter(match);
   const tabs=`<div class="seg" role="tablist"><button data-gtab="calls" class="${calls?"on":""}" role="tab" aria-selected="${calls}">Our calls</button><button data-gtab="terms" class="${calls?"":"on"}" role="tab" aria-selected="${!calls}">Terms</button></div>`;
   const search=all.length?`<label class="f gsearch" for="gq">Search<input type="search" id="gq" value="${esc(glossQ)}" aria-label="Search the glossary" autocomplete="off"></label>`:"";
-  const head=`<div class="head"><div><div class="eyebrow">Learn the language</div><h1>Glossary & calls</h1><p>${calls?"Our program's calls: what we say on the floor and what it means.":"Basketball terms used at the college and NBA level, in plain English."}</p></div><div class="row">${tabs}${all.length||!calls?abtn(calls?"addCall":"addTerm","",calls?"Add call":"Add term"):""}${search}</div></div>`;
+  const head=`<div class="head"><div><div class="eyebrow">Learn the language · All levels</div><h1>Glossary & calls</h1><p>${calls?"Our program's calls: what we say on the floor and what it means.":"Basketball terms used at the college and NBA level, in plain English."}</p></div><div class="row">${tabs}${all.length||!calls?abtn(calls?"addCall":"addTerm","",calls?"Add call":"Add term"):""}${search}</div></div>`;
   const termRow=c=>`<div class="note gterm"><div class="by" style="padding:0">${calls?`<b style="font-family:var(--display);font-size:19px;letter-spacing:.04em;color:var(--gold-ink)">${esc(String(c.name).toUpperCase())}</b>`:`<b style="font-size:14px">${esc(c.name)}</b>`}${ebtn(calls?"editCall":"editTerm",`data-id="${esc(c.id)}"`)}</div><p class="muted">${esc(c.def)}</p></div>`;
   const byName=(a,b)=>String(a.name).localeCompare(String(b.name),undefined,{sensitivity:"base",numeric:true});
   if(calls){
@@ -1904,7 +1929,7 @@ function playbookView(){
   const groups=playGroups(bySide[pbSide],pbSide);
   const list=`<div class="card plist">${tabs}<div class="pgroups">${groups.map(([c,ps])=>`<div class="cat">${esc(c)}</div>${ps.map(row).join("")}`).join("")||`<p class="small muted pnone">No ${pbSide} plays yet.</p>`}</div>
    ${isCoach()?`<div style="padding:10px 6px 4px" class="newp"><button class="btn gold sm" data-act="newPlay" style="width:100%">${PLUS} New play</button></div>`:""}</div>`;
-  return `<div class="head"><div><div class="eyebrow">Visual playbook</div><h1>${ed?(ed.isNew?"New play":"Edit play"):"Playbook"}</h1><p>${ed?"Set where everyone starts, then add a step for each action.":"Press play to run it. Tap a position to follow that player."}</p></div></div>
+  return `<div class="head"><div><div class="eyebrow">Visual playbook · All levels</div><h1>${ed?(ed.isNew?"New play":"Edit play"):"Playbook"}</h1><p>${ed?"Set where everyone starts, then add a step for each action.":"Press play to run it. Tap a position to follow that player."}</p></div></div>
   <div class="pbwrap">${ed?"":list}<div ${ed?'style="grid-column:1/-1"':""}>${ed?builderView():viewerView()}</div></div>`;
 }
 function viewerView(){
@@ -2254,7 +2279,7 @@ const oppOptions=()=>opps().map(o=>[o.id,o.name]);
 const ACT={
   sbRetry(){if(SB&&user)sbLoad()},
   sbReload(){location.reload()},
-  async signout(){stopPlayback();ed=null;pbSide=null;curPlay=null;closeSheet(true);if(SB){try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear()}user=null;LS.set(CONFIG.sessionKey,null);history.replaceState(null,"","#");render();toast("Signed out")},
+  async signout(){openSet.delete("past-games");stopPlayback();ed=null;pbSide=null;curPlay=null;closeSheet(true);if(SB){try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear()}user=null;LS.set(CONFIG.sessionKey,null);history.replaceState(null,"","#");render();toast("Signed out")},
   more(){const items_=ROUTES[user.role].filter(k=>!TABS.includes(k));lastFocus=document.activeElement;history.pushState({sheet:1},"",location.href);document.addEventListener("keydown",escClose);$("#sheetroot").innerHTML=`<div class="sheet-back" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="More"><div class="sheet-head"><h2>More</h2><button class="btn icon" data-act="closeSheet" aria-label="Close"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></div><div class="sheet-body"><nav class="nav">${items_.map(k=>`<a href="#${k}">${ico(k)}${LABEL[k]}</a>`).join("")}</nav><div class="me" style="margin-top:14px"><div><div class="who">${esc(whoLabel()[0])}</div><div class="role">${esc(whoLabel()[1])}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn" data-act="logins">${pwBtnLabel()}</button>`:""}<button class="btn" data-act="signout">Sign out</button></div></div></div></div>`;paintSync()},
   logins(){if(!isCoach())return;closeSheet(true);
     if(SB)return openSheet({title:"My password",intro:"Change the password you use to sign in."+(user.email===CONFIG.supabase.coachEmail?" This is the shared coach login, so anyone still using it will need the new one.":"")+(isAdmin()?"<br>To change the player password, go to Staff &amp; changes → Player login.":""),fields:[{key:"cur",label:"Current password",type:"password",req:true},{key:"c1",label:"New password",type:"password",req:true,hint:`At least ${COACH_MIN} characters`},{key:"c2",label:"New password again",type:"password",req:true}],value:{},saved:"Password updated",
@@ -2278,12 +2303,11 @@ const ACT={
   sheetDelete(){if(!sheetCfg||!sheetCfg.del)return;const [k,id,idx]=sheetCfg.del;deleteFlow(k,id,idx)},
   del(d){deleteFlow(d.k,d.id,d.idx)},
   /* players */
-  addPlayer(d){playerSheet(null,d&&d.lv)},
+  addPlayer(d){playerSheet(null,d&&d.lv)},editPlayer(d){playerSheet(P(d.id))},
   rosterTab(d){rosterTab=["V","JV","C","staff"].includes(d.v)?d.v:"V";LS.set("cpc_roster_tab",rosterTab);render()},
+  scoutExh(){scoutExhOpen=!scoutExhOpen;render();const b=$('[data-act="scoutExh"]');b&&b.focus()},
+  calOpen(d){if(!realDate(d.d))return;calAnchor=D(d.d);calView="week";if(location.hash!=="#calendar")location.hash="calendar";else render();setTimeout(()=>{const el=document.getElementById("cd-"+d.d);if(el)el.scrollIntoView({block:"start"})},80)},
   addStaff(){if(isCoach())staffSheet(null)},editStaff(d){const x=get("staffdir",d.id);if(x&&isCoach())staffSheet(x)},
-  async staffMove(d){if(!isCoach())return;const L=staffDir();const i=L.findIndex(x=>x.id===d.id);const j=i+(+d.dir||0);if(i<0||j<0||j>=L.length)return;
-    const a=L.slice();[a[i],a[j]]=[a[j],a[i]];for(let k=0;k<a.length;k++){if(+a[k].order!==k){const {id,...rest}=a[k];await saveDoc("staffdir",id,{...rest,order:k})}}render();
-    setTimeout(()=>{const b=document.querySelector(`[data-act="staffMove"][data-id="${CSS.escape(d.id)}"][data-dir="${d.dir}"]`);if(b&&!b.disabled)b.focus();else{const o=document.querySelector(`[data-act="staffMove"][data-id="${CSS.escape(d.id)}"]:not([disabled])`);o&&o.focus()}},30)},editPlayer(d){playerSheet(P(d.id))},
   /* games */
   addGame(d){gameSheet(null,d&&d.opp)},morePosts(){feedN+=8;render()},
   /* calendar */
@@ -2407,14 +2431,15 @@ function gameSheet(g,preOpp){
       else if(!get("opps",v.opp))bad("opp","Opponent is required");
       if((v.us==null)!==(v.them==null))bad(v.us==null?"us":"them","Enter both scores, or leave both blank");
       if(v.us!=null){if(v.date>ymd(TODAY))bad("us","Scores can only be entered once the game has been played");if(![v.us,v.them].every(x=>Number.isInteger(x)&&x>=0&&x<=200))bad("us","Scores must be whole numbers from 0 to 200");if(v.us===v.them)bad("us","Basketball games can't end in a tie. Check the score.");}
-      const clash=games().find(x=>x.date===v.date&&(!g||x.id!==g.id));if(clash)bad("date","There's already a game on "+longDate(D(v.date))+" ("+vsAt(clash)+" "+O(clash.opp).name+")");
+      const clash=v.opp!==NEW&&games().find(x=>x.date===v.date&&x.opp===v.opp&&(!g||x.id!==g.id));if(clash)bad("date","We already play "+O(clash.opp).name+" on "+longDate(D(v.date)));
+      const oldKey=g&&g.date!==v.date&&store.statgames[boxKey(g)]?boxKey(g):null;
       const time=v.time==="TBA"?"TBA":(parseTime(v.time)||"");
       if(/^\d\d:\d\d$/.test(time)&&(time<"09:00"||time>"22:00")&&oddOk!==time){oddOk=time;bad("time","Tip-off looks wrong. Did you mean PM? Press Save again to keep "+fmtTime(time)+".")}
       let oid=v.opp;if(v.opp===NEW){const ex=oppDup(nm);if(ex)oid=ex.id;else{oid=uid("o");await saveDoc("opps",oid,{name:nm,city:"",status:"none",league:!!v.lg,coach:{},keys:[],players:[],last:[]})}}
       const exh=v.type==="exh";const id=g?g.id:uid("g");const obj={...(g||{}),date:v.date,time,opp:oid,site:v.site,home:v.site==="home",lg:exh?false:!!v.lg,us:v.us,them:v.them};
       const evn=(v.event||"").replace(/\s+/g," ").trim();if(evn.length>60)bad("event","Event name must be 60 characters or fewer");if(exh){obj.type="exh";if(evn)obj.event=evn;else delete obj.event}else{delete obj.type;delete obj.event}const ven=(v.venue||"").replace(/\s+/g," ").trim().slice(0,60);if(v.site==="neutral"&&ven)obj.venue=ven;else delete obj.venue;if(v.us!=null&&v.ot)obj.ot=true;else delete obj.ot;
       await saveDoc("games",id,obj);
-      if(g&&g.date!==v.date&&store.statgames[g.date]){await saveDoc("statgames",v.date,store.statgames[g.date]);await removeDoc("statgames",g.date)}},
+      if(oldKey){const data=store.statgames[oldKey];await saveDoc("statgames",g.id,data);await removeDoc("statgames",oldKey)}},
     del:g?["game",g.id]:null});
   const op=$("#sf-opp"),lg=$("#sf-lg"),us=$("#sf-us"),th=$("#sf-them"),ot=$("#sf-ot"),tp=$("#sf-type");
   op.addEventListener("change",()=>{const o=get("opps",op.value);if(o&&tp.value!=="exh")lg.checked=!!o.league});
@@ -2490,10 +2515,10 @@ function deleteFlow(kind,id,idx){
   else if(kind==="opp"){const o=get("opps",id);if(!o)return;const gs=games().filter(g=>g.opp===id),ns=items("notes").filter(x=>x.opp===id),cs=items("clips").filter(x=>x.opp===id),st=get("stand",id),lr=items("lres").filter(r=>r.a===id||r.b===id);
     cfg={title:`Delete ${o.name}?`,body:"Their whole scouting report is removed for every coach and player.",impacts:[ns.length&&plural(ns.length,"scouting note"),cs.length&&plural(cs.length,"film clip"),(o.players||[]).length&&plural(o.players.length,"player to know"),st&&"Their row in the standings",lr.length&&plural(lr.length,"league result")].filter(Boolean),
       check:gs.length?`Also delete ${plural(gs.length,"game")} against ${esc(o.name)} from our schedule${gs.some(g=>g.played)?", including results that count toward our record":""}. Games can't point to an opponent that no longer exists.`:null,type:o.name,button:"Delete opponent",done:o.name+" deleted",
-      run:async()=>{for(const g of gs){if(store.statgames[g.date])await removeDoc("statgames",g.date);await removeDoc("games",g.id)}for(const x of ns)await removeDoc("notes",x.id);for(const x of cs)await removeDoc("clips",x.id);for(const r of lr)await removeDoc("lres",r.id);if(st)await removeDoc("stand",id);await removeDoc("opps",id)},after:()=>{location.hash="scouting"}}}
-  else if(kind==="game"){const g=games().find(x=>x.id===id);if(!g)return;const o=O(g.opp);const imp=store.statgames[g.date];
+      run:async()=>{for(const g of gs){const k=boxKey(g);if(store.statgames[k])await removeDoc("statgames",k);await removeDoc("games",g.id)}for(const x of ns)await removeDoc("notes",x.id);for(const x of cs)await removeDoc("clips",x.id);for(const r of lr)await removeDoc("lres",r.id);if(st)await removeDoc("stand",id);await removeDoc("opps",id)},after:()=>{location.hash="scouting"}}}
+  else if(kind==="game"){const g=games().find(x=>x.id===id);if(!g)return;const o=O(g.opp);const bk=boxKey(g);const imp=store.statgames[bk];
     cfg={title:`Delete ${vsAt(g)} ${o.name}?`,body:`${longDate(g.d)} will be removed from the schedule.`,impacts:[g.played&&`The final score (${g.us}–${g.them}) is deleted and our record changes`,imp&&"Its imported box score is deleted"].filter(Boolean),button:"Delete game",done:"Game deleted",
-      run:async()=>{if(imp)await removeDoc("statgames",g.date);await removeDoc("games",id)},after:()=>{if(location.hash.startsWith("#game-"))location.hash="schedule"}}}
+      run:async()=>{if(imp)await removeDoc("statgames",bk);await removeDoc("games",id)},after:()=>{if(location.hash.startsWith("#game-"))location.hash="schedule"}}}
   else if(kind==="play"){const p=get("plays",id);if(!p)return;cfg={title:`Delete ${p.name}?`,body:"It's removed from the playbook for every coach and player."+(isBasic(p)?" It's a Basic play from the built-in library; an admin can bring it back later from the change log.":"")+(isHidden(p)?"":" To keep it but take it away from players, turn off Visible to players instead."),impacts:[plural(p.phases.length,"step")+" of diagram work",p.notes&&"Its roles, notes and reads"].filter(Boolean),button:"Delete play",done:p.name+" deleted",run:()=>removeDoc("plays",id),after:()=>{ed=null;curPlay=null}}}
   else if(kind==="oppPlayer"){const o=get("opps",id);const pl=o&&o.players[+idx];if(!pl)return;cfg={title:`Remove ${pl.no!=null&&String(pl.no).trim()!==""?"#"+pl.no+" ":""}${pl.name}?`,body:`From ${o.name}'s players to know, with his tendencies and notes.`,button:"Remove player",done:"Player removed",run:()=>{const arr=[...o.players];arr.splice(+idx,1);return saveDoc("opps",id,{...o,players:arr})}}}
   else if(kind==="meet"){const o=get("opps",id);const m=o&&(o.last||[])[+idx];if(!m)return;cfg={title:"Delete this meeting?",body:`${esc(longDate(D(m.date)))}, ${D(m.date).getFullYear()}: ${m.res} ${m.us}–${m.them} will be removed from past meetings.`,button:"Delete meeting",done:"Meeting deleted",run:()=>{const a=[...o.last];a.splice(+idx,1);return saveDoc("opps",id,{...o,last:a})}}}
@@ -2581,7 +2606,7 @@ function admLabel(a){a=admEff(a);const o=a.old||{},n=a.new||{};let d=a.action===
     case"games":s=(d.opp?`${vsAt(d)} ${oppName(d.opp)}`:"Game")+(d.date?" · "+shortDate(d.date):"");break;
     case"players":s=d.first||d.last?`${d.no!=null&&d.no!==""?"#"+d.no+" ":""}${[d.first,d.last].filter(Boolean).join(" ")} · ${lvName(lvOf(d))}`:"";break;
     case"staffdir":s=d.name?"Staff: "+d.name:"";break;
-    case"statgames":s="Box score · "+shortDate(id);break;
+    case"statgames":{const g=realDate(id)?null:games().find(x=>x.id===id);s="Box score · "+(g?`${vsAt(g)} ${oppName(g.opp)} · ${shortDate(g.date)}`:shortDate(id));break}
     case"opps":s=d.name;break;
     case"notes":s=d.text?(d.opp?"Note on "+oppName(d.opp)+": ":"Note: ")+"“"+snip(d.text)+"”":"";break;
     case"clips":s=d.label?"Clip: "+snip(d.label)+(d.opp?" ("+oppName(d.opp)+")":""):"";break;
@@ -2742,13 +2767,13 @@ function bindView(r){
       $("#csvtext").oninput=()=>{forceImport=false};
       go.onclick=async()=>{importMsg="";try{const {games:gs,errs,warns}=parseCSV($("#csvtext").value);const ds=Object.keys(gs);
         if(!ds.length){forceImport=false;$("#csvmsg").innerHTML=`<span style="color:var(--bad)">${errs.map(esc).join("<br>")||"Nothing to import."}</span>`;return}
-        const nice=d=>esc(mon(D(d))+" "+D(d).getDate());
-        const checks=ds.flatMap(d=>{const g=games().find(x=>x.date===d);const sum=gs[d].reduce((a,l)=>a+l.pts,0);const out=[];if(sum!==+g.us)out.push(`${nice(d)}: player points add to ${sum}, but the final was ${g.us}.`);
+        const gOf=k=>games().find(x=>x.id===k);const nice=k=>{const g=gOf(k);return esc(mon(g.d)+" "+g.d.getDate()+(sameDay(g).length>1?" vs "+O(g.opp).name:""))};
+        const checks=ds.flatMap(d=>{const g=gOf(d);const sum=gs[d].reduce((a,l)=>a+l.pts,0);const out=[];if(sum!==+g.us)out.push(`${nice(d)}: player points add to ${sum}, but the final was ${g.us}.`);
           gs[d].filter(l=>l.fgm>l.fga||l.tpm>l.tpa||l.ftm>l.fta||l.tpm>l.fgm||l.pts!==2*(l.fgm-l.tpm)+3*l.tpm+l.ftm).forEach(l=>{const p=P(l.id);out.push(`${nice(d)}: #${esc(p.no)} ${esc(pName(p))}'s shooting numbers don't add up to his points.`)});return out});
         const issues=[...errs.map(esc),...checks,...warns.map(esc)];
         if(issues.length&&!forceImport){forceImport=true;$("#csvmsg").innerHTML=`<span style="color:var(--warn)">${issues.join("<br>")}</span><br>${plural(ds.length,"game")} can be imported${errs.length?`; ${plural(errs.length,"problem row")} would be skipped`:""}. Fix the file, or tap <b>Import</b> again to import anyway.`;return}
         forceImport=false;
-        for(const d of ds)await saveDoc("statgames",d,{lines:gs[d],ts:Date.now()});
+        for(const d of ds){const g=gOf(d);await saveDoc("statgames",boxKey(g),{lines:gs[d],ts:Date.now()})}
         importMsg=`<span style="color:var(--good)">Imported ${plural(ds.length,"game")}.</span>${issues.length?` <span class="muted">Imported with the problems listed before.</span>`:""}`;render();toast("Stats imported")}catch(e){forceImport=false;$("#csvmsg").innerHTML=`<span style="color:var(--bad)">${esc(e.message)}</span>`}};
     }
   }
@@ -2771,17 +2796,18 @@ window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a 
   if(o.side!=null&&!SIDE_L[o.side])throw new Error('side must be "offense" or "defense"');
   const id=uid("pl");await saveDoc("plays",id,{name:String(o.name).trim().slice(0,80),side:o.side||(o.cat==="Defense"?"defense":"offense"),cat:o.cat,court:o.court==="full"?"full":"half",roles:o.roles||{},notes:String(o.notes||"").slice(0,3000),phases:cleanPhases(o.phases),author:user.cid,ts:Date.now(),...(o.hidden||o.draft?{draft:true}:{})});render();return id},
   /* CPC.addGames([{date:"YYYY-MM-DD",time:"19:00"|"7:00 PM"|"TBA",opp:"Opponent name",site?:"home"|"away"|"neutral",home?:bool,lg?:bool,
-       type?:"exh",event?:"Jamboree",venue?:"Name (neutral site only)",city?}]) creates missing opponents; skips dates that already have a game */
+       type?:"exh",event?:"Jamboree",venue?:"Name (neutral site only)",city?}]) creates missing opponents; skips a game when we already play that opponent on that date (a date can hold several games) */
   async addGames(list){needCoach();if(!Array.isArray(list))throw new Error("addGames needs an array of games");const out={added:[],skipped:[]};
     for(const g of list){if(!g||!realDate(g.date)||!String(g.opp||"").trim()||parseTime(g.time)===null)throw new Error("Bad game: "+JSON.stringify(g));
-      if(games().find(x=>x.date===g.date)){out.skipped.push(g.date);continue}
+      {const ex=cpcFindOpp(String(g.opp).replace(/\s+/g," ").trim());if(ex&&games().some(x=>x.date===g.date&&x.opp===ex.id)){out.skipped.push(g.date);continue}}
       const exh=g.type==="exh";const oid=await cpcOpp(g.opp,{city:g.city,league:!exh&&!!g.lg});
       const site=["home","away","neutral"].includes(g.site)?g.site:(g.home?"home":"away");
       const obj=cpcGameExtras({date:g.date,time:parseTime(g.time),opp:oid,site,home:site==="home",lg:!exh&&!!g.lg},g);
       await saveDoc("games",uid("g"),obj);out.added.push(g.date)}
     render();return out},
-  /* CPC.updateGame("YYYY-MM-DD",{time?,site?,lg?,type?:"exh"|"reg",event?,venue?,opp?:"Opponent name"}) -> true | false (no game that day) */
-  async updateGame(date,patch){needCoach();const g=games().find(x=>x.date===date);if(!g)return false;patch=patch||{};
+  /* CPC.updateGame("YYYY-MM-DD",{time?,site?,lg?,type?:"exh"|"reg",event?,venue?,opp?:"Opponent name"},which?) -> true | false (no game that day).
+       which = {opp?:"Name",time?:"5:20 PM"} picks one game when the date has several (required then). */
+  async updateGame(date,patch,which){needCoach();const g=cpcPickGame(date,which);if(!g)return false;patch=patch||{};
     const allowed=["time","site","lg","type","event","venue","opp"];const extra=Object.keys(patch).filter(k=>!allowed.includes(k));if(extra.length)throw new Error("updateGame can't change: "+extra.join(", "));
     const {d:_d,played:_p,res:_r,id:_i,...base}=g;const obj={...base};
     if("time" in patch){const t=parseTime(patch.time);if(t===null)throw new Error("Can't read the time “"+patch.time+"”. Use 19:00, 7:00 PM or TBA");obj.time=t}
@@ -2792,7 +2818,7 @@ window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a 
     if("opp" in patch){if(!String(patch.opp||"").trim())throw new Error("Opponent is required");obj.opp=await cpcOpp(patch.opp,{league:obj.type!=="exh"&&!!obj.lg})}
     const ext={event:"event" in patch?patch.event:obj.event,venue:"venue" in patch?patch.venue:obj.venue,type:obj.type};
     await saveDoc("games",g.id,cpcGameExtras(obj,ext));render();return true},
-  /* CPC.removeGame("YYYY-MM-DD") -> true | false. Also removes that game's imported box score. */
+  /* CPC.removeGame("YYYY-MM-DD",which?) -> true | false. Also removes that game's imported box score. which as in updateGame. */
   /* CPC.addEvents([{date:"YYYY-MM-DD",start:"HH:MM"|"",end:"HH:MM"|"",title,kind,who:"all"|"coaches",note?}]) checks every event first,
        then adds them; skips exact duplicates (same date + start + title). Returns {added, skipped} counts. */
   async addEvents(list){needCoach();if(!Array.isArray(list))throw new Error("addEvents needs an array of events");
@@ -2802,7 +2828,19 @@ window.CPC={async addPlay(o){if(!user||!isCoach())throw new Error("Sign in as a 
   /* CPC.clearEvents("YYYY-MM-DD","YYYY-MM-DD") removes every calendar event in that range (both ends included). Returns how many. */
   async clearEvents(fromDate,toDate){needCoach();if(!realDate(fromDate)||!realDate(toDate))throw new Error("clearEvents needs two dates as YYYY-MM-DD");if(toDate<fromDate)throw new Error("toDate must be on or after fromDate");
     const gone=items("events").filter(e=>e.date>=fromDate&&e.date<=toDate);for(const e of gone)await removeDoc("events",e.id);render();return gone.length},
-  async removeGame(date){needCoach();const g=games().find(x=>x.date===date);if(!g)return false;if(store.statgames[g.date])await removeDoc("statgames",g.date);await removeDoc("games",g.id);render();return true},
+  async removeGame(date,which){needCoach();const g=cpcPickGame(date,which);if(!g)return false;const k=boxKey(g);if(store.statgames[k])await removeDoc("statgames",k);await removeDoc("games",g.id);render();return true},
+  /* CPC.splitGame("YYYY-MM-DD","Old opponent",[{opp,time,site?,type?,event?,venue?,lg?}]) replaces one game with several on the same date.
+       Safe to run twice: the old game is only removed if it's still there, and games already on the schedule are skipped.
+       Refuses if the old game has a final score or a box score. The old opponent is removed too when nothing else points to it. */
+  async splitGame(date,fromOpp,list){needCoach();if(!realDate(date))throw new Error("splitGame needs a date as YYYY-MM-DD");if(!Array.isArray(list)||!list.length)throw new Error("splitGame needs a list of new games");
+    const from=cpcFindOpp(String(fromOpp||"").replace(/\s+/g," ").trim());let removed=0;
+    if(from){const old=games().filter(g=>g.date===date&&g.opp===from.id);for(const g of old)if(g.played||hasBox(g))throw new Error("The "+from.name+" game on "+date+" already has a score. Nothing was changed.");
+      for(const g of old){await removeDoc("games",g.id);removed++}}
+    const r=await CPC.addGames(list.map(x=>({...x,date})));
+    let oppRemoved=false;if(from&&get("opps",from.id)&&!games().some(g=>g.opp===from.id)&&!hasScout(from)&&!get("stand",from.id)&&!items("lres").some(x=>x.a===from.id||x.b===from.id)){await removeDoc("opps",from.id);oppRemoved=true}
+    render();return{removed,added:r.added.length,skipped:r.skipped.length,oppRemoved}},
+  /* One-time fix: the Nov 25 Jamboree is two exhibitions (Issaquah 5:00 PM, Cascade 5:20 PM), not one "Issaquah & Cascade" game. */
+  migrateJamboree(){return CPC.splitGame("2026-11-25","Issaquah & Cascade",[{opp:"Issaquah",time:"17:00",site:"neutral",type:"exh",event:"Jamboree",venue:"TBD"},{opp:"Cascade",time:"17:20",site:"neutral",type:"exh",event:"Jamboree",venue:"TBD"}])},
   /* CPC.updateOpp("Opponent name",{name?,city?,league?}) -> opponent id */
   async updateOpp(name,patch){needCoach();const o=cpcFindOpp(name);if(!o)throw new Error("No opponent named "+name);patch=patch||{};
     const extra=Object.keys(patch).filter(k=>!["name","city","league"].includes(k));if(extra.length)throw new Error("updateOpp can't change: "+extra.join(", "));
@@ -2879,6 +2917,10 @@ function needCoach(){if(!user||!isCoach())throw new Error("Sign in as a coach fi
 const cpcFindOpp=name=>{const nm=String(name||"").replace(/\s+/g," ").trim().toLowerCase();return nm?opps().find(o=>o.name.trim().toLowerCase()===nm):null};
 async function cpcOpp(name,{city,league}){const nm=String(name||"").replace(/\s+/g," ").trim();if(!nm||nm.length>60||!/[a-z]/i.test(nm))throw new Error("Opponent name needs 1 to 60 characters with a letter");
   const o=cpcFindOpp(nm);if(o)return o.id;const oid=uid("o");await saveDoc("opps",oid,{name:nm,city:String(city||"").trim().slice(0,60),status:"none",league:!!league,coach:{},keys:[],players:[],last:[]});return oid}
+/* CPC.updateGame / removeGame target one game by date; when a date has several, pass {opp:"Name"} and/or {time:"5:20 PM"} */
+function cpcPickGame(date,which){let L=games().filter(g=>g.date===date);if(which&&which.opp!=null){const o=cpcFindOpp(String(which.opp).replace(/\s+/g," ").trim());L=o?L.filter(g=>g.opp===o.id):[]}
+  if(which&&which.time!=null){const t=parseTime(which.time);L=L.filter(g=>parseTime(g.time)===t)}
+  if(L.length>1)throw new Error(`There are ${L.length} games on ${date} (${L.map(g=>O(g.opp).name).join(", ")}). Pass {opp:"Name"} or {time:"5:20 PM"} to pick one.`);return L[0]||null}
 /* Same rules as the game form: exhibitions are never league games; event only on exhibitions; venue only at neutral sites */
 function cpcGameExtras(obj,src){const o={...obj};const exh=src.type==="exh";
   const ev=String(src.event||"").replace(/\s+/g," ").trim();if(ev.length>60)throw new Error("Event name must be 60 characters or fewer");
