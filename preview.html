@@ -601,6 +601,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .rail{padding-top:calc(18px + var(--safe-t))}
 /* 8. More sheet: iOS-style list rows, current page marked */
 @media (max-width:820px){.sheet .nav a{min-height:50px;font-size:16px;padding:12px}.sheet .nav a.on{box-shadow:inset 3px 0 0 var(--gold-2)}}
+@media (max-width:820px){table.stand{width:100%;table-layout:auto}table.stand th,table.stand td{padding:8px 5px}table.stand td.l:nth-child(2){white-space:normal;overflow-wrap:anywhere}table.stand .c-pct,table.stand .c-gb,table.stand .c-lv{display:none}table.stand .btn.icon{min-height:36px;width:36px;padding:0}}
 </style>
 </head>
 <body>
@@ -1570,13 +1571,11 @@ function homeView0(){
     const ns=needsScore();
     return `<div class="head"><div><div class="eyebrow">${longDate(TODAY)}</div><h1>Welcome back, Coach</h1></div>${chips}</div>${ns.length?`<a class="banner" href="#schedule" style="text-decoration:none"><span class="chip warn">Action needed</span><span style="flex:1">${ns.length===1?"1 past game needs":ns.length+" past games need"} a final score.</span><b style="color:var(--gold-2)">Enter scores →</b></a>`:""}${talkCard()}${todayCard()}
     ${nextGames()}
-    <div class="section">${panel("coming","Varsity: coming up",plural(Math.max(0,upcoming().length-1),"more game"),`<div class="list">${upcoming().slice(1,4).map(gameRow).join("")||'<p class="muted" style="margin:0">No other varsity games scheduled.</p>'}</div>`)}${panel("feed","Team feed","",feedBody())}${panel("team-stats","Varsity team stats",`${plural(teamTotals().n,"game")} imported`,teamStatsBody())}
-    ${panel("notes-feed","Latest scouting notes",`${feed.length} recent`,feed.map(n=>`<div class="note ${n.vis==="team"?"":"coachonly"}"><div class="by"><a href="#opp-${esc(n.opp)}"><b>${esc(O(n.opp).name)}</b></a><span>${ago(n.ts)}</span>${n.vis==="team"?"":'<span class="chip">Coaches only</span>'}</div><p>${esc(n.text.length>140?n.text.slice(0,138)+"…":n.text)}</p></div>`).join("")||'<p class="muted" style="margin:0">No notes yet.</p>')}</div>`;
+    <div class="section">${panel("coming","Varsity: coming up",plural(Math.max(0,upcoming().length-1),"more game"),`<div class="list">${upcoming().slice(1,4).map(gameRow).join("")||'<p class="muted" style="margin:0">No other varsity games scheduled.</p>'}</div>`)}</div>`;
   }
   const g=nextGame();const o=g?O(g.opp):null;
   return `<div class="head"><div><div class="eyebrow">${longDate(TODAY)}</div><h1>Let's go, Eagles</h1></div>${chips}</div>${talkCard()}${todayCard()}
-  ${nextGames()}${o&&!scoutHidden(o)?`<div class="section">${panel("keys",`Varsity keys vs ${esc(o.name)}`,"",o.keys&&o.keys.length?`<ol>${o.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ol>`:'<p class="muted" style="margin:0">Coaches are still building this report.</p>',"keys")}</div>`:""}
-  <div class="section">${panel("feed","Team feed","",feedBody())}${panel("team-stats","Varsity team stats","",teamStatsBody())}</div>`;
+  ${nextGames()}${o&&!scoutHidden(o)?`<div class="section">${panel("keys",`Varsity keys vs ${esc(o.name)}`,"",o.keys&&o.keys.length?`<ol>${o.keys.map(k=>`<li>${esc(k)}</li>`).join("")}</ol>`:'<p class="muted" style="margin:0">Coaches are still building this report.</p>',"keys")}</div>`:""}`;
 }
 
 /* ================= Schedule & box score ================= */
@@ -1953,8 +1952,8 @@ function leagueView(){
   const rec=record();const S=[{id:"cpc",lw:rec.lw,ll:rec.ll,w:rec.w,l:rec.l},...items("stand").filter(x=>x.id!=="cpc").map(x=>({...x,lw:+x.lw||0,ll:+x.ll||0,w:+x.w||0,l:+x.l||0}))].sort((a,b)=>(b.lw-b.ll)-(a.lw-a.ll)||b.lw-a.lw);const top=S[0];
   const R=items("lres").filter(r=>r.a!=="cpc"&&r.b!=="cpc").sort((a,b)=>b.date.localeCompare(a.date));
   return `<div class="head"><div><h1>League</h1><p class="small muted">Varsity · ${esc(CONFIG.league)}</p></div><div class="row">${abtn("addStand","","Add team")}${abtn("addLres","","Add result")}</div></div>
-  <div class="grid split"><div class="card"><h2 style="margin-bottom:10px">Standings</h2><div class="tablewrap"><table><thead><tr><th class="l nosort">#</th><th class="l nosort">Team</th><th class="nosort">League</th><th class="nosort">Pct</th><th class="nosort">Overall</th><th class="nosort">GB</th>${isCoach()?'<th class="nosort"></th>':""}</tr></thead><tbody>${S.length?"":`<tr><td colspan="7" class="l muted" style="white-space:normal">No standings yet.</td></tr>`}
-  ${S.map((s,i)=>{const gb=top?((top.lw-s.lw)+(s.ll-top.ll))/2:0;const n=s.lw+s.ll;return `<tr class="${s.id==="cpc"?"me-row":""}"><td class="l num">${i+1}</td><td class="l">${s.id==="cpc"?"<b>CPC Eagles</b> <span class=\"muted small\">Varsity</span>":`<a href="#opp-${esc(s.id)}">${esc(oppName(s.id))}</a>`}</td><td class="num">${s.lw}–${s.ll}</td><td class="num">${n?(s.lw/n).toFixed(3).replace(/^0/,""):"–"}</td><td class="num">${s.w}–${s.l}</td><td class="num">${gb?gb.toFixed(1):"–"}</td>${isCoach()?`<td>${s.id==="cpc"?"":`<button class="btn icon edit" data-act="editStand" data-id="${esc(s.id)}" aria-label="Edit row">${PEN}</button>`}</td>`:""}</tr>`}).join("")}</tbody></table></div></div>
+  <div class="grid split"><div class="card"><h2 style="margin-bottom:10px">Standings</h2><div class="tablewrap"><table class="stand"><thead><tr><th class="l nosort">#</th><th class="l nosort">Team</th><th class="nosort">League</th><th class="nosort c-pct">Pct</th><th class="nosort">Overall</th><th class="nosort c-gb">GB</th>${isCoach()?'<th class="nosort"></th>':""}</tr></thead><tbody>${S.length?"":`<tr><td colspan="7" class="l muted" style="white-space:normal">No standings yet.</td></tr>`}
+  ${S.map((s,i)=>{const gb=top?((top.lw-s.lw)+(s.ll-top.ll))/2:0;const n=s.lw+s.ll;return `<tr class="${s.id==="cpc"?"me-row":""}"><td class="l num">${i+1}</td><td class="l">${s.id==="cpc"?"<b>CPC Eagles</b> <span class=\"muted small c-lv\">Varsity</span>":`<a href="#opp-${esc(s.id)}">${esc(oppName(s.id))}</a>`}</td><td class="num">${s.lw}–${s.ll}</td><td class="num c-pct">${n?(s.lw/n).toFixed(3).replace(/^0/,""):"–"}</td><td class="num">${s.w}–${s.l}</td><td class="num c-gb">${gb?gb.toFixed(1):"–"}</td>${isCoach()?`<td>${s.id==="cpc"?"":`<button class="btn icon edit" data-act="editStand" data-id="${esc(s.id)}" aria-label="Edit row">${PEN}</button>`}</td>`:""}</tr>`}).join("")}</tbody></table></div></div>
   <div class="card"><h2 style="margin-bottom:6px">Recent results</h2>${R.map(r=>`<div class="spread" style="padding:8px 0;border-top:1px solid var(--line)"><span class="small muted" style="width:44px">${mon(D(r.date))} ${D(r.date).getDate()}</span><span style="flex:1">${r.a==="cpc"?"<b>CPC</b>":esc(oppName(r.a))} <b class="num">${N(r.as)}</b>, ${r.b==="cpc"?"<b>CPC</b>":esc(oppName(r.b))} <span class="num">${N(r.bs)}</span></span>${isCoach()?`<button class="btn icon edit" data-act="editLres" data-id="${esc(r.id)}" aria-label="Edit result">${PEN}</button>`:""}</div>`).join("")||'<p class="muted">No results yet.</p>'}</div></div>`;
 }
 
