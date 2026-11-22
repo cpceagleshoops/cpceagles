@@ -1,4 +1,4 @@
-# CPC Eagles Basketball Hub
+# The Nest · CPC Eagles Basketball
 
 Team website for Cedar Park Christian (Bothell) varsity basketball.
 

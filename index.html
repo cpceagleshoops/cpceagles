@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CPC Eagles Basketball Hub</title>
+<title>The Nest · CPC Eagles Basketball</title>
 <meta name="description" content="Cedar Park Christian varsity basketball: schedule, scouting, playbook and stats.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#0b1522">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Eagles">
+<meta name="apple-mobile-web-app-title" content="The Nest">
 <meta name="format-detection" content="telephone=no">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -621,7 +621,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 (function(){
 "use strict";
 /* =====================================================================
-   CPC EAGLES BASKETBALL HUB
+   THE NEST · CPC EAGLES BASKETBALL
    HOW THIS SITE IS UPDATED
    - Coaches edit everything in the site (Edit / Add / Delete buttons).
    - Claude can also update data directly in the site's database.
@@ -1040,7 +1040,7 @@ async function saveDoc(c,id,data){
   if(recording)recording.push([c,id,snapOf(c,id)]);
   const clean=JSON.parse(JSON.stringify(data));delete clean.id;
   if(SB){if(!isCoach())return false;if(!sbLoaded||sbFailed){toast("Not connected to the team database. Refresh and try again.",true);throw new Error("Not connected to the team database. Refresh and try again.")}const {error}=await SB.from("docs").upsert({coll:c,id,data:clean,updated_at:new Date().toISOString()});if(isRls(error))throw sbAccessLost();if(error){toast("Couldn't save: "+error.message,true);throw new Error("Couldn't save. Check your connection and try again.")}store[c][id]=clean;return true}
-  if(shared()){try{await DB.collection(col(c)).doc(id).set(clean);store[c][id]=clean;return true}catch(e){toast("Couldn't save to the shared hub. Saved on this device.",true)}}
+  if(shared()){try{await DB.collection(col(c)).doc(id).set(clean);store[c][id]=clean;return true}catch(e){toast("Couldn't save online. Saved on this device.",true)}}
   store[c][id]=clean;saveLocal();return true;
 }
 async function dropDoc(c,id){
@@ -1281,17 +1281,17 @@ function render(){
   refreshToday();pendingRender=false;const app=$("#app");
   const msgScreen=(msg,btns)=>`<div class="login"><div class="loginbox" style="text-align:center">${MARK(84)}<p class="lead" style="margin-top:16px" role="status">${msg}</p>${btns?`<div class="row" style="justify-content:center;gap:10px;margin-top:16px">${btns}</div>`:""}</div></div>`;
   if(SB_FATAL){app.innerHTML=msgScreen("Couldn't load the team site. Check your connection and refresh.",`<button class="btn gold" data-act="sbReload">Refresh</button>`);return}
-  if(SB&&sbBooting){app.innerHTML=msgScreen("Loading the team hub…");return}
+  if(SB&&sbBooting){app.innerHTML=msgScreen("Loading The Nest…");return}
   if(SB&&sbRecovery){app.innerHTML=loginView();bindLogin();return}
   if(!user||!["coach","admin","player"].includes(user.role)){user=null;app.innerHTML=loginView();bindLogin();return}
   if(SB&&sbFailed){app.innerHTML=msgScreen("Couldn't load the team data. Check your connection and try again.",`<button class="btn gold" data-act="sbRetry">Retry</button><button class="btn" data-act="signout">Sign out</button>`);return}
-  if(SB&&!sbLoaded){app.innerHTML=msgScreen("Loading the team hub…");return}
+  if(SB&&!sbLoaded){app.innerHTML=msgScreen("Loading The Nest…");return}
   let r=route();if(!allowed(r)){r="home";if(location.hash&&location.hash!=="#home")history.replaceState(null,"","#home")}
   const [nm,rl]=whoLabel();const fresh=r!==render._r;render._r=r;
   const on=k=>r===k||(k==="scouting"&&r.startsWith("opp-"))||(k==="roster"&&r.startsWith("player-"))||(k==="schedule"&&(r.startsWith("game-")||r.startsWith("schedule/")))||(k==="calendar"&&r.startsWith("calendar/"));
   const moreOn=!TABS.some(on);
-  app.innerHTML=`  <header class="topbar">${MARK(26)}<span class="t1">CPC EAGLES</span><span class="sp"></span><span class="sync small"></span></header>
-  <div class="shell"><aside class="rail"><a class="brand" href="#home">${MARK()}<div><div class="t1">CPC EAGLES</div><div class="t2">${esc(CONFIG.level)} · ${esc(CONFIG.season)}</div></div></a>
+  app.innerHTML=`  <header class="topbar">${MARK(26)}<span class="t1">THE NEST</span><span class="sp"></span><span class="sync small"></span></header>
+  <div class="shell"><aside class="rail"><a class="brand" href="#home">${MARK()}<div><div class="t1">THE NEST</div><div class="t2">CPC Eagles Basketball · ${esc(CONFIG.season)}</div></div></a>
   <nav class="nav" aria-label="Main">${ROUTES[user.role].map(k=>`<a href="#${k}" class="${on(k)?"on":""}" ${on(k)?'aria-current="page"':""}>${ico(k)}${LABEL[k]}</a>`).join("")}</nav>
   <div class="me"><div><div class="who">${esc(nm)}</div><div class="role">${esc(rl)}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn sm" data-act="logins">${pwBtnLabel()}</button>`:""}<button class="btn sm" data-act="signout">Sign out</button></div></div></aside>
   <main id="main" class="${fresh?"fade":""}">${tipFor(r)}${view(r)}</main></div>
@@ -1326,7 +1326,7 @@ function loginView(){
   const st=loginStage;if(!st.u)st.u=lastTab();
   const body=st.step==="create"?`<p class="small" style="margin:0;color:#c3cfdb"><b style="color:#fff">First-time setup.</b> Create the two team passwords. Coaches use the coach password; every player uses the player password.</p>${pwField("lg-new","Coach password (at least "+CONFIG.minPassword.coach+" characters)","new-password")}${pwField("lg-new2","Coach password again","new-password")}${pwField("lg-pl","Player password (at least "+CONFIG.minPassword.player+" characters)","new-password")}<div class="loginerr" id="lg-err" aria-live="polite"></div><button class="btn gold" type="submit">Save passwords and sign in</button><button class="btn" type="button" id="lg-back">Back</button>`
    :`<label class="f" for="lg-user">Login<select id="lg-user" autocomplete="username"><option value="player" ${st.u==="coach"?"":"selected"}>Player</option><option value="coach" ${st.u==="coach"?"selected":""}>Coach</option></select></label>${pwField("lg-pass","Password","current-password")}<div class="loginerr" id="lg-err" aria-live="polite"></div><button class="btn gold" type="submit">Sign in</button>`;
-  return `<div class="login"><div class="loginbox">${MARK(84)}<h1>Eagles Basketball Hub</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${CONFIG.level.split(" · ").map(x=>`<span class="nw">${esc(x)}</span>`).join(" · ")}</p>
+  return `<div class="login"><div class="loginbox">${MARK(84)}<h1>The Nest</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${CONFIG.level.split(" · ").map(x=>`<span class="nw">${esc(x)}</span>`).join(" · ")}</p>
   <form class="loginform" id="loginform" autocomplete="on" novalidate>${body}</form>
   <p class="fine">Players: get the team password from your coach.${SB?"":" Coaches can change both passwords anytime."}</p></div></div>`;
 }
@@ -1370,7 +1370,7 @@ function sbLoginView(){
     ${coach?emailField(st.email):""}${pwField("lg-pass","Password","current-password")}${errBox}<button class="btn gold" type="submit">Sign in</button>
     ${coach?`<div class="lglinks"><button type="button" class="linkbtn" id="lg-signup">First time? Create your coach account</button><button type="button" class="linkbtn" id="lg-forgot">Forgot password?</button></div>`:""}`;
     if(coach)fine="Coaches: create your account once. The site admin approves it."}
-  return `<div class="login"><div class="loginbox">${MARK(84)}<h1>Eagles Basketball Hub</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${CONFIG.level.split(" · ").map(x=>`<span class="nw">${esc(x)}</span>`).join(" · ")}</p>
+  return `<div class="login"><div class="loginbox">${MARK(84)}<h1>The Nest</h1><p class="lead">${esc(CONFIG.school)} · ${esc(CONFIG.campus)} · ${CONFIG.level.split(" · ").map(x=>`<span class="nw">${esc(x)}</span>`).join(" · ")}</p>
   <form class="loginform" id="loginform" autocomplete="on" novalidate>${body}</form>${fine?`<p class="fine">${fine}</p>`:""}</div></div>`;
 }
 function sbAuthErr(e,coach){const st=e&&e.status,c=(e&&e.code)||"",m=String((e&&e.message)||"");
