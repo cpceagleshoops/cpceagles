@@ -528,9 +528,26 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 .topbar .t1{white-space:nowrap}
 @media (max-width:359px){.topbar .sync{display:none}}
 /* Phones: the court never pushes play/pause under the tab bar (aspect ratio kept; the SVG letterboxes) */
-@media (max-width:820px){.stage .courtbox .court{max-height:max(140px,calc(100vh - 450px - var(--safe-b)));max-height:max(140px,calc(100dvh - 450px - var(--safe-b)))}
+@media (max-width:820px){.stage .courtbox .court{max-height:max(126px,calc(100vh - 460px - var(--safe-b)));max-height:max(126px,calc(100dvh - 460px - var(--safe-b)))}
   .pbhead{display:none}/* the tab bar already says Playbook */
   .pbtabrow{display:flex;gap:6px;align-items:center}.pbtabrow .pbtabs{flex:1;margin-bottom:0}.plist .pbtabrow{margin-bottom:4px}}
+/* Play controls: big round play, chevrons, step capsules */
+.pbctl{display:flex;align-items:center;gap:8px;margin-top:8px}
+.pbbtns{display:flex;align-items:center;gap:2px;flex:none}
+.pbnav{width:44px;height:44px;border-radius:50%;border:none;background:transparent;color:var(--ink);display:grid;place-items:center;cursor:pointer;transition:transform .16s cubic-bezier(.2,.8,.2,1),background-color .15s}
+.pbnav:hover{background:var(--surface-2)}.pbnav:active{transform:scale(.88);background:var(--surface-3)}
+.pbplay{width:52px;height:52px;border-radius:50%;border:none;background:var(--gold);color:#101a27;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 14px rgba(171,140,89,.35);transition:transform .16s cubic-bezier(.2,.8,.2,1)}
+.pbplay svg{width:18px;height:18px}.pbplay:active{transform:scale(.92)}
+.scrub2{flex:1;min-width:0;height:44px;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:pointer;border-radius:22px;user-select:none;-webkit-user-select:none}
+.scrub2-track{display:flex;align-items:center;will-change:transform}
+.slot{width:var(--slot,28px);height:44px;display:flex;align-items:center;justify-content:center;flex:none}
+.cap{display:block;height:8px;width:8px;border-radius:4px;background:rgba(194,176,138,.32);position:relative;overflow:hidden;transition:transform .16s cubic-bezier(.2,.8,.2,1)}
+.cap i{position:absolute;inset:0;background:var(--gold-2);border-radius:4px;opacity:0}
+.scrub2.press .cap{transform:scaleY(1.3)}
+.stepl.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.vbox .court{touch-action:pan-y}.vbox{will-change:transform}
+.pbcap{display:grid}.pbcap .cx{grid-area:1/1;opacity:0;transition:opacity .12s ease}.pbcap .cx.on{opacity:1;transition:opacity .24s ease .08s}
+@media (prefers-reduced-motion:reduce){.pbcap .cx{transition:none}.cap,.pbnav,.pbplay{transition:none}}
 /* Calendar */
 .calsegs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .lvtag{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:0 5px;border-radius:4px;border:1px solid var(--line);color:#c4cfdc;background:var(--surface-2);line-height:16px}
@@ -2111,9 +2128,61 @@ const PAUSE='<svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2h3v10H
 const REPLAY='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 7a4.5 4.5 0 1 0 1.4-3.3"/><path d="M2 1.5v3h3"/></svg>';
 /* "Step 1 of 4" on desktop, "1/4" on phones (keeps the controls on one row) */
 const stepLbl=(i,N)=>`<span class="dk-only">Step </span>${i}<span class="dk-only"> of </span><span class="mb-only">/</span>${N}`;
-function syncViewer(){const play=getPlay();if(!play||ed)return;const N=play.phases.length;const sg=viewerSeg(play);paint(play,pb.t,pb.sel,sg);const cp=$("#pbcap");if(cp){const c=capFor(play,sg,pb.t);cp.textContent=c;cp.hidden=!c}const r=$("#scrub");if(r)r.value=pb.t;const st=$("#stepl");if(st)st.innerHTML=stepLbl(Math.min(N,Math.floor(pb.t+1e-6)+1),N);const b=$("#pbplay");if(b)b.innerHTML=pb.playing?PAUSE:(pb.t>=N-1-1e-6?REPLAY:PLAY)}
+function syncViewer(){const play=getPlay();if(!play||ed)return;const N=play.phases.length;const sg=viewerSeg(play);paint(play,pb.t,pb.sel,sg);const cp=$("#pbcap");if(cp){const c=capFor(play,sg,pb.t);if(cp.dataset.txt!==c){cp.dataset.txt=c;const on=cp.querySelector(".cx.on"),off=cp.querySelector(".cx:not(.on)");if(on&&off){off.textContent=c;off.classList.add("on");on.classList.remove("on")}else cp.textContent=c}cp.hidden=!c}syncScrub(N);const st=$("#stepl");if(st)st.innerHTML=stepLbl(Math.min(N,Math.floor(pb.t+1e-6)+1),N);const b=$("#pbplay");if(b)b.innerHTML=pb.playing?PAUSE:(pb.t>=N-1-1e-6?REPLAY:PLAY)}
 function animate(play,from,to,onFrame,done){stopPlayback();pb.playing=true;pb.t=from;pb.last=performance.now();const step=ts=>{if(!pb.playing)return;const dt=clamp((ts-pb.last)/1000,0,.05);pb.last=ts;pb.t+=dt*pb.speed/STEP_SECONDS;if(pb.t>=to){pb.t=to;pb.playing=false;onFrame();done&&done();return}onFrame();pb.raf=requestAnimationFrame(step)};pb.raf=requestAnimationFrame(step)}
-function stopPlayback(){pb.playing=false;cancelAnimationFrame(pb.raf)}
+function stopPlayback(){pb.playing=false;cancelAnimationFrame(pb.raf);spr.on=false;spr.v=0;cancelAnimationFrame(spr.raf)}
+document.addEventListener("keydown",e=>{if(e.key!=="ArrowLeft"&&e.key!=="ArrowRight")return;if(!user||route()!=="playbook"||ed||$("#sheetroot").firstChild||$("#cfmroot"))return;
+  const t=e.target;if(t&&(/INPUT|TEXTAREA|SELECT/.test(t.tagName)||t.isContentEditable||t.id==="scrub2"||t.closest(".seg,.pgroups")))return;const play=getPlay();if(!play)return;e.preventDefault();
+  if(e.key==="ArrowRight")ACT.pbNext();else ACT.pbPrev()});
+/* ===== Step scrubber + court swipe (Apple-style): 1:1 drag, critically damped spring, momentum projection, rubber band ===== */
+const RMo=()=>matchMedia("(prefers-reduced-motion: reduce)").matches;
+const spr={raf:0,v:0,target:0,on:false};
+/* Spring pb.t to a step. Retargets from the live value and velocity, so it can be grabbed mid-flight. */
+function springTo(target,v0){const play=getPlay();if(!play||ed)return;const N=play.phases.length;target=clamp(Math.round(target),0,N-1);
+  pb.playing=false;cancelAnimationFrame(pb.raf);cancelAnimationFrame(spr.raf);if(v0!=null)spr.v=v0;
+  if(RMo()){pb.t=target;spr.on=false;spr.v=0;syncViewer();return}
+  spr.v=clamp(spr.v,-12,12);spr.target=target;spr.on=true;let last=performance.now();const k=180,c=2*Math.sqrt(k);/* damping ratio 1: no overshoot */
+  const step=ts=>{if(!spr.on)return;const dt=clamp((ts-last)/1000,0,1/30);last=ts;
+    for(let i=0;i<4;i++){const h=dt/4;spr.v+=(-k*(pb.t-spr.target)-c*spr.v)*h;pb.t+=spr.v*h;
+      if(pb.t<0||pb.t>N-1){pb.t=clamp(pb.t,0,N-1);spr.v=0}}/* the ends absorb momentum: never animate past the first/last step */
+    if(Math.abs(pb.t-spr.target)<6e-4&&Math.abs(spr.v)<6e-3){pb.t=spr.target;spr.v=0;spr.on=false;syncViewer();return}
+    syncViewer();spr.raf=requestAnimationFrame(step)};spr.raf=requestAnimationFrame(step)}
+const scrubHTML=N=>`<div class="scrub2" id="scrub2" role="slider" tabindex="0" aria-label="Step" aria-valuemin="1" aria-valuemax="${N}" aria-valuenow="1" aria-valuetext="Step 1 of ${N}"><div class="scrub2-track" id="scrubtrack">${[...Array(N).keys()].map(i=>`<span class="slot" data-i="${i}"><b class="cap"><i></i></b></span>`).join("")}</div></div>`;
+/* Capsules follow pb.t continuously: the one under t expands and fills gold (like iOS page dots) */
+function syncScrub(N){const sc=$("#scrub2");if(!sc)return;const S=+sc.dataset.slot||28;const big=Math.min(28,S-4),small=Math.min(8,big);
+  sc.querySelectorAll(".slot").forEach((el,i)=>{const w=clamp(1-Math.abs(pb.t-i),0,1);const cap=el.firstChild;cap.style.width=(small+(big-small)*w).toFixed(2)+"px";cap.firstChild.style.opacity=w.toFixed(3)});
+  const cur=clamp(Math.round(pb.t),0,N-1)+1;if(sc.getAttribute("aria-valuenow")!==String(cur)){sc.setAttribute("aria-valuenow",cur);sc.setAttribute("aria-valuetext",`Step ${cur} of ${N}`)}sc.dataset.t=pb.t.toFixed(3)}
+const rubber=(d,max=26)=>Math.sign(d)*max*(1-1/(Math.abs(d)/max*.55+1));
+/* tiny spring for the rubber-band offset (px) */
+function springPx(el,from){if(RMo()||!el){if(el)el.style.transform="";return}let x=from,v=0,last=performance.now();const k=260,c=2*Math.sqrt(k);
+  const f=ts=>{const dt=clamp((ts-last)/1000,0,1/30);last=ts;for(let i=0;i<4;i++){const h=dt/4;v+=(-k*x-c*v)*h;x+=v*h}if(Math.abs(x)<.2&&Math.abs(v)<.5){el.style.transform="";return}el.style.transform=`translateX(${x.toFixed(2)}px)`;requestAnimationFrame(f)};requestAnimationFrame(f)}
+/* velocity tracker over the last ~100ms (units per second) */
+const velTrack=()=>{const pts=[];return{add(t,x){pts.push([t,x]);while(pts.length>2&&t-pts[0][0]>100)pts.shift()},v(){if(pts.length<2)return 0;const a=pts[0],b=pts[pts.length-1];const dt=(b[0]-a[0])/1000;return dt>0?(b[1]-a[1])/dt:0}}};
+function bindScrubber(play){const sc=$("#scrub2");if(!sc)return;const N=play.phases.length;const tr=$("#scrubtrack");
+  const fit=()=>{const S=clamp(Math.floor(sc.clientWidth/N),16,40);sc.dataset.slot=S;sc.style.setProperty("--slot",S+"px");syncScrub(N)};fit();
+  let g=null;
+  const rawAt=x=>{const r=tr.getBoundingClientRect();return (x-r.left)/(+sc.dataset.slot)-.5};
+  sc.onpointerdown=e=>{if(e.button>0)return;stopPlayback();sc.classList.add("press");sc.setPointerCapture(e.pointerId);g={x0:e.clientX,drag:false,vt:velTrack()};g.vt.add(e.timeStamp,pb.t)};
+  sc.onpointermove=e=>{if(!g)return;if(!g.drag&&Math.abs(e.clientX-g.x0)>4)g.drag=true;if(!g.drag)return;
+    const raw=rawAt(e.clientX);const t=clamp(raw,0,N-1);pb.t=t;const over=(raw-t)*(+sc.dataset.slot);tr.style.transform=over?`translateX(${rubber(over).toFixed(2)}px)`:"";g.over=over;g.vt.add(e.timeStamp,t);syncViewer()};
+  const end=e=>{if(!g)return;sc.classList.remove("press");const gg=g;g=null;
+    if(!gg.drag){springTo(clamp(Math.round(rawAt(e.clientX)),0,N-1));return}
+    if(gg.over)springPx(tr,rubber(gg.over));const v=gg.vt.v();springTo(pb.t+v*0.12,v)};/* project the throw, then snap */
+  sc.onpointerup=end;sc.onpointercancel=e=>{if(g){sc.classList.remove("press");g=null;springTo(pb.t)}};
+  sc.onkeydown=e=>{const k=e.key;const cur=Math.round(pb.t);if(k==="ArrowRight"||k==="ArrowUp"){e.preventDefault();springTo(cur+1)}else if(k==="ArrowLeft"||k==="ArrowDown"){e.preventDefault();springTo(cur-1)}else if(k==="Home"){e.preventDefault();springTo(0)}else if(k==="End"){e.preventDefault();springTo(N-1)}};
+  if(window.ResizeObserver){new ResizeObserver(fit).observe(sc)}
+  /* Court swipe: horizontal drag scrubs 1:1 (court follows), release projects momentum and snaps to a step */
+  const svg=$("#court");if(!svg)return;let c=null;const box=svg.closest(".courtbox");
+  svg.addEventListener("pointerdown",e=>{if(e.button>0)return;c={x0:e.clientX,y0:e.clientY,t0:pb.t,drag:false,id:e.pointerId,vt:velTrack(),wasPlaying:pb.playing}});
+  svg.addEventListener("pointermove",e=>{if(!c)return;const dx=e.clientX-c.x0,dy=e.clientY-c.y0;
+    if(!c.drag){if(Math.abs(dx)>8&&Math.abs(dx)>Math.abs(dy)*1.2){c.drag=true;stopPlayback();c.t0=pb.t;c.x0=e.clientX;try{svg.setPointerCapture(c.id)}catch(err){}}else{if(Math.abs(dy)>10)c=null;return}}
+    const W=svg.getBoundingClientRect().width;const raw=c.t0-(e.clientX-c.x0)/(W*.55);const t=clamp(raw,0,N-1);pb.t=t;
+    const over=(t-raw)*W*.55;if(box)box.style.transform=over?`translateX(${rubber(over,18).toFixed(2)}px)`:"";c.over=over;c.vt.add(e.timeStamp,t);syncViewer()});
+  const cend=e=>{if(!c)return;const cc=c;c=null;if(!cc.drag)return;svg.dataset.swiped="1";setTimeout(()=>{delete svg.dataset.swiped},0);
+    if(cc.over&&box)springPx(box,rubber(cc.over,18));const v=cc.vt.v();const proj=pb.t+v*0.12;
+    const tgt=Math.abs(proj-cc.t0)<.5&&Math.abs(v)>.8?(v>0?Math.floor(cc.t0)+1:Math.ceil(cc.t0)-1):proj;springTo(tgt,v)};
+  svg.addEventListener("pointerup",cend);svg.addEventListener("pointercancel",cend);
+  svg.addEventListener("click",e=>{if(svg.dataset.swiped){e.stopPropagation();e.preventDefault()}},true)}
 
 /* ================= Playbook views ================= */
 function playbookView(){
@@ -2135,10 +2204,9 @@ const rolesBtn=p=>hasRoles(p)?`<button class="btn sm mb-only" data-act="pbRoles"
 function pbIntoView(){if(!isPhone())return;requestAnimationFrame(()=>{const st=$(".stage");if(!st)return;const tb=$(".topbar");const off=tb?tb.getBoundingClientRect().height+6:0;const y=st.getBoundingClientRect().top+scrollY-off;window.scrollTo({top:Math.max(0,y),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})})}
 function viewerView(){
   const play=getPlay();if(!play)return `<div class="empty">No ${pbSide==="defense"?"defensive":"offensive"} plays yet.${isCoach()?" Tap New play to build one.":""}</div>`;const N=play.phases.length;const dv=isDefP(play);
-  return `<div class="stage ${isFull(play)?"wide":""}"><div><div class="courtbox">${playSVG(play)}</div>
-    <div class="controls"><button class="btn icon" data-act="pbPrev" aria-label="Previous step"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M3 2h2v10H3zM12 2v10L5.5 7z" fill="currentColor"/></svg></button><button class="btn gold icon" id="pbplay" data-act="pbPlay" aria-label="Play or pause">${PLAY}</button><button class="btn icon" data-act="pbNext" aria-label="Next step"><svg width="14" height="14" viewBox="0 0 14 14"><path d="M9 2h2v10H9zM2 2v10l6.5-5z" fill="currentColor"/></svg></button>
-    <span class="stepl" id="stepl">${stepLbl(1,N)}</span><input type="range" id="scrub" min="0" max="${N-1}" step="0.01" value="${pb.t}" aria-label="Scrub through the play">
-    </div>${(play.phases||[]).some(ph=>ph&&ph.cap)?'<div class="pbcap" id="pbcap" aria-live="polite"></div>':""}</div>
+  return `<div class="stage ${isFull(play)?"wide":""}"><div><div class="courtbox vbox">${playSVG(play)}</div>
+    <div class="pbctl"><div class="pbbtns"><button class="pbnav" data-act="pbPrev" aria-label="Previous step"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><button class="pbplay" id="pbplay" data-act="pbPlay" aria-label="Play or pause">${PLAY}</button><button class="pbnav" data-act="pbNext" aria-label="Next step"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
+    ${scrubHTML(N)}<span class="stepl sr" id="stepl" aria-live="polite">${stepLbl(1,N)}</span></div>${(play.phases||[]).some(ph=>ph&&ph.cap)?'<div class="pbcap" id="pbcap" aria-live="polite"><span class="cx on"></span><span class="cx"></span></div>':""}</div>
    <div><div class="spread" style="margin-bottom:10px;align-items:flex-start"><div><div class="eyebrow">${SIDE_L[sideOf(play)]} · ${esc(play.cat||"Other")}${String(play.cat||"").toLowerCase()===(isFull(play)?"full court":"half court")?"":" · "+(isFull(play)?"Full court":"Half court")}</div><h2 style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2>${isBasic(play)||isCoach()?`<div class="row" style="gap:6px;margin-top:6px">${isCoach()?visBtn(play,false):""}${isBasic(play)?'<span class="chip basic">Basic</span>':""}</div>`:""}</div>
     <div class="row">${rolesBtn(play)}${ebtn("editPlay",`data-id="${esc(play.id)}"`,"Edit play")}${isCoach()?hmenu([`<button class="btn sm" data-act="dupPlay" data-id="${esc(play.id)}">Duplicate play</button>`,`<button class="btn sm del" data-act="del" data-k="play" data-id="${esc(play.id)}">${TRASH}Delete play</button>`]):""}</div></div>
     <div class="dk-only">${panel("play-roles",dv?"Defenders & jobs":"Positions & roles",pb.sel?"Following "+pLabel(play,pb.sel):"Tap one to follow it",`<div class="legend">${["1","2","3","4","5"].map(id=>`<button class="prole ${pb.sel===id?"on":""}" data-act="pbSel" data-v="${id}"><span class="badge ${dv?"dbadge":""}">${pLabel(play,id)}</span><span><b>${dv?"Defender X"+id:"Position "+id}</b><span>${esc(play.roles&&play.roles[id]||"No role written yet.")}</span></span></button>`).join("")}</div>`)}</div>
@@ -2417,7 +2485,7 @@ function setPos(id,np){const ph=ed.play.phases;const o=ph[ed.cur].pos[id];const 
   [ed.cur,ed.cur+1].forEach(k=>{const c=ph[k]&&curveOf(ph[k],id);if(c)ph[k].curve[id]=[Math.round(c[0]+dx),Math.round(c[1]+dy)]})}
 function bindPlaybook(){
   if(!ed){const play=getPlay();if(!play)return;pb.seg=-2;syncViewer();
-    $("#scrub").oninput=e=>{stopPlayback();pb.t=+e.target.value;syncViewer()};
+    bindScrubber(play);
     $$("#court .pl").forEach(g=>{g.onclick=()=>ACT.pbSel({v:g.dataset.p});g.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();ACT.pbSel({v:g.dataset.p})}}});return}
   edDraw();const svg=$("#court");
   const sc=$("#edscrub");if(sc)sc.oninput=e=>{stopPlayback();pb.t=+e.target.value;edPaintPV()};
@@ -2558,8 +2626,8 @@ const ACT={
     recording=[];let snaps;try{if(isBasic(p))await setBasicHidden(d.id,hide);else await saveDoc("plays",d.id,obj);snaps=recording}catch(e){toast(e.message||"Couldn't save",true);return}finally{recording=null}
     render();toastUndo(hide?p.name+" is hidden from players":p.name+" is visible to players",snaps)},
   pbPlay(){const play=getPlay();if(!play||play.phases.length<2)return;if(pb.playing){stopPlayback();syncViewer();return}const N=play.phases.length;const from=pb.t>=N-1-1e-6?0:pb.t;animate(play,from,N-1,syncViewer,()=>{if(pendingRender)render()})},
-  pbPrev(){stopPlayback();pb.t=Math.max(0,Math.ceil(pb.t-1e-6)-1);syncViewer()},
-  pbNext(){const play=getPlay();const N=play.phases.length;const from=Math.floor(pb.t+1e-6);if(from>=N-1)return;animate(play,from,from+1,syncViewer)},
+  pbPrev(){const t=spr.on?spr.target:pb.t;springTo(Math.max(0,Math.ceil(t-1e-6)-1))},
+  pbNext(){const play=getPlay();if(!play)return;const N=play.phases.length;const base=spr.on?spr.target:pb.t;const to=Math.min(N-1,Math.floor(base+1e-6)+1);if(to<=pb.t+1e-6&&to>=N-1){springTo(N-1);return}animate(play,Math.min(pb.t,to),to,syncViewer)},/* plays the step at playback speed */
   pbRoles(d){const p=get("plays",d.id)||getPlay();if(!p)return;const dv=isDefP(p);listSheet(dv?"Defenders & jobs":"Roles",`<div class="legend">${["1","2","3","4","5"].filter(id=>p.roles&&String(p.roles[id]||"").trim()).map(id=>`<div class="prole"><span class="badge ${dv?"dbadge":""}">${pLabel(p,id)}</span><span><b>${dv?"Defender X"+id:"Position "+id}</b><span>${esc(p.roles[id])}</span></span></div>`).join("")}</div>`)},
   pbSel(d){pb.sel=pb.sel===d.v?null:d.v;$$('[data-act="pbSel"]').forEach(b=>b.classList.toggle("on",b.dataset.v===pb.sel));const s=$('[data-panel="play-roles"] .sum');if(s){const pl=getPlay();s.textContent=pb.sel?"Following "+(pl?pLabel(pl,pb.sel):pb.sel):"Tap one to follow it"}syncViewer()},
   /* playbook builder */
