@@ -1239,8 +1239,8 @@ function winStreak(){const p=counted();if(!p.length)return"";const last=p[p.leng
 
 /* ================= Session, routing, nav ================= */
 let user=LOCAL_OK?LS.get(CONFIG.sessionKey):null;
-const ROUTES={coach:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary"],admin:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary","admin"],player:["home","schedule","calendar","roster","stats","scouting","league","playbook","glossary"]};
-const TABS=["home","calendar","roster","playbook"];
+const ROUTES={coach:["home","calendar","playbook","scouting","roster","stats","schedule","league","glossary"],admin:["home","calendar","playbook","scouting","roster","stats","schedule","league","glossary","admin"],player:["home","calendar","playbook","scouting","roster","stats","schedule","league","glossary"]};
+const TABS=["home","calendar","playbook","scouting"];
 const route=()=>location.hash.slice(1)||"home";
 function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(/^schedule\/(v|jv|c)$/.test(r))return true;if(/^calendar\/\d{4}-\d\d-\d\d$/.test(r))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin();return (ROUTES[user.role]||[]).includes(r)}
 window.addEventListener("popstate",()=>{if(suppressPop>0){suppressPop--;return}if($("#cfmroot")){$("#cfmroot").remove()}if($("#sheetroot").firstChild){if(sheetDirty()){history.pushState({sheet:1},"",location.href);confirmDiscard(()=>closeSheet())}else closeSheet(false,true)}});
@@ -1262,7 +1262,7 @@ const IC={
   admin:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
 };
-const LABEL={home:"Home",schedule:"Schedule",calendar:"Calendar",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"League",playbook:"Playbook",glossary:"Glossary & calls",admin:"Staff & changes",more:"More"};
+const LABEL={home:"Home",schedule:"Game schedule",calendar:"Calendar",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"Standings",playbook:"Playbook",glossary:"Basketball glossary",admin:"Staff & changes",more:"More"};
 const ico=k=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
 const MARK=(w=36)=>`<img src="logo.png" width="${w}" height="${w}" alt="" aria-hidden="true" style="display:block;flex:none;object-fit:contain">`;
 const openSet=new Set(["keys","players-know","feed","play-roles","play-notes"]);
@@ -1291,7 +1291,7 @@ function render(){
   const on=k=>r===k||(k==="scouting"&&r.startsWith("opp-"))||(k==="roster"&&r.startsWith("player-"))||(k==="schedule"&&(r.startsWith("game-")||r.startsWith("schedule/")))||(k==="calendar"&&r.startsWith("calendar/"));
   const moreOn=!TABS.some(on);
   app.innerHTML=`  <header class="topbar">${MARK(26)}<span class="t1">THE NEST</span><span class="sp"></span><span class="sync small"></span></header>
-  <div class="shell"><aside class="rail"><a class="brand" href="#home">${MARK()}<div><div class="t1">THE NEST</div><div class="t2">CPC Eagles Basketball · ${esc(CONFIG.season)}</div></div></a>
+  <div class="shell"><aside class="rail"><a class="brand" href="#home">${MARK()}<div><div class="t1">THE NEST</div></div></a>
   <nav class="nav" aria-label="Main">${ROUTES[user.role].map(k=>`<a href="#${k}" class="${on(k)?"on":""}" ${on(k)?'aria-current="page"':""}>${ico(k)}${LABEL[k]}</a>`).join("")}</nav>
   <div class="me"><div><div class="who">${esc(nm)}</div><div class="role">${esc(rl)}</div></div><div class="sync"></div><div class="row">${isCoach()?`<button class="btn sm" data-act="logins">${pwBtnLabel()}</button>`:""}<button class="btn sm" data-act="signout">Sign out</button></div></div></aside>
   <main id="main" class="${fresh?"fade":""}">${tipFor(r)}${view(r)}</main></div>
@@ -1439,7 +1439,7 @@ function bindSbLogin(){
 
 /* ================= First-time tips (coaches) ================= */
 const TIPS={
-  home:"Everything is editable: look for <b>Edit</b> and <b>Add</b>. Stats, Scouting and League are varsity only.",
+  home:"Everything is editable: look for <b>Edit</b> and <b>Add</b>. Stats, Scouting and Standings are varsity only.",
   roster:"Pick a level, then <b>Add player</b>. Tap a player to edit.",
   calendar:"Tap <b>+</b> on a day to add an event.",
   schedule:"Pick a level, then <b>Add game</b>. Enter varsity scores with the pencil.",
@@ -1609,13 +1609,13 @@ function lvGameRow(e,isNext){const d=D(e.date);const i=lvGameInfo(e);
   const note=String(e.note||"").trim();const showNote=note&&note.toLowerCase()!==i.exh.toLowerCase();
   return `<div class="li lvx ${isNext?"upnext":""}" style="${evLvStyle(e)}"><div class="date">${mon(d)}<b>${d.getDate()}</b></div><div><button type="button" class="opp linkish" data-act="evOpen" data-id="${esc(e.id)}">${esc(i.name)}</button><div class="small muted">${parts(dow(d),i.site,i.exh)}${e.who==="coaches"&&isCoach()?' · <span class="chip">Coaches only</span>':""}${showNote?`<div class="lvnote">${esc(note)}</div>`:""}</div></div><div class="right">${isNext?`<span class="nextcell"><span class="chip gold">Up next</span>${e.start?`<span class="muted small num">${esc(fmtTime(e.start))}</span>`:""}</span>`:`<span class="muted small num">${e.start?esc(fmtTime(e.start)):"TBA"}</span>`}${isCoach()?`<button class="btn icon edit" data-act="editEvent" data-id="${esc(e.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`}
 function levelSchedule(lv,seg){const nm=lvName(lv);const t=ymd(TODAY);const L=lvGames(lv);const now=L.filter(e=>e.date>=t),past=L.filter(e=>e.date<t).reverse();
-  return `<div class="head"><div><h1>Schedule</h1><p class="small muted">${plural(L.length,"game")} · results tracked for varsity only</p></div><div class="row">${abtn("addLvGame",`data-lv="${lv}"`,"Add game")}</div></div>${seg}
+  return `<div class="head"><div><h1>Game schedule</h1><p class="small muted">${plural(L.length,"game")} · results tracked for varsity only</p></div><div class="row">${abtn("addLvGame",`data-lv="${lv}"`,"Add game")}</div></div>${seg}
   <div class="card"><h2 style="margin-bottom:6px">Upcoming</h2><div class="list">${now.map((e,i)=>lvGameRow(e,i===0)).join("")||`<p class="muted">No upcoming ${esc(nm)} games.${isCoach()?" Tap Add game to add one.":""}</p>`}</div></div>
   ${past.length?`<div class="section">${panel("past-"+lv,`Past games (${past.length})`,"Newest first",`<div class="list">${past.map(e=>lvGameRow(e,false)).join("")}</div>`)}</div>`:""}`}
 function varsitySchedule(seg){
   const rec=record();const now=games().filter(g=>g.d>=TODAY);const past=games().filter(g=>g.d<TODAY).reverse();const ns=needsScore();
   if(isCoach()&&ns.length)openSet.add("past-games");
-  return `<div class="head"><div><h1>Schedule</h1><p class="small muted">${rec.w}–${rec.l} · League ${rec.lw}–${rec.ll}</p></div><div class="row">${abtn("addGame","","Add game")}<a class="btn sm" href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch on NFHS</a></div></div>${seg}
+  return `<div class="head"><div><h1>Game schedule</h1><p class="small muted">${rec.w}–${rec.l} · League ${rec.lw}–${rec.ll}</p></div><div class="row">${abtn("addGame","","Add game")}<a class="btn sm" href="${NFHS_SCHOOL}" target="_blank" rel="noopener">Watch on NFHS</a></div></div>${seg}
   <div class="card"><h2 style="margin-bottom:6px">Upcoming</h2><div class="list">${now.map(gameRow).join("")||'<p class="muted">No upcoming varsity games.</p>'}</div></div>
   ${past.length?`<div class="section">${panel("past-games",`Past games (${past.length})`,isCoach()&&ns.length?`<span class="chip warn">${ns.length===1?"1 needs":ns.length+" need"} a final score</span>`:"Newest first",`<div class="list">${past.map(gameRow).join("")}</div>`)}</div>`:""}`;
 }
@@ -1750,7 +1750,7 @@ function eventSheet(e,preset){
 function gameView(date){
   const g=games().find(x=>x.id===date)||games().find(x=>x.date===date&&hasBox(x))||games().find(x=>x.date===date);if(!g||!g.played||!hasBox(g))return `<div class="empty">No varsity box score for this game yet.${isCoach()?' Import one from <a href="#stats">Stats → Import</a>.':""}</div>`;
   const lines_=box(g).filter(l=>KEYS.some(k=>+l[k]>0));const myId=null;
-  return `<a class="backlink" href="#schedule/v">‹ Schedule</a><div class="head"><div><div class="eyebrow">Varsity · ${longDate(g.d)}</div><h1>${gTitle(g)} <span class="res ${g.res}" style="font-size:30px;width:auto">${g.res}</span> <span class="num">${scoreTxt(g)}</span></h1></div><div class="row">${ebtn("editGame",`data-id="${esc(g.id)}"`,"Edit game")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="game" data-id="${esc(g.id)}">${TRASH}Delete</button>`:""}</div></div>
+  return `<a class="backlink" href="#schedule/v">‹ Game schedule</a><div class="head"><div><div class="eyebrow">Varsity · ${longDate(g.d)}</div><h1>${gTitle(g)} <span class="res ${g.res}" style="font-size:30px;width:auto">${g.res}</span> <span class="num">${scoreTxt(g)}</span></h1></div><div class="row">${ebtn("editGame",`data-id="${esc(g.id)}"`,"Edit game")}${isCoach()?`<button class="btn sm del" data-act="del" data-k="game" data-id="${esc(g.id)}">${TRASH}Delete</button>`:""}</div></div>
   <div class="card"><div class="tablewrap"><table><thead><tr><th class="l nosort">Player</th>${["MIN","PTS","REB","AST","STL","BLK","TO","FG","3PT","FT"].map(h=>`<th class="nosort">${h}</th>`).join("")}</tr></thead><tbody>
   ${lines_.map(l=>{const p=P(l.id);return `<tr class="${l.id===myId?"me-row":""}"><td class="l">${p?`${p.no!=null&&String(p.no)!==""?`<span class="muted num">#${esc(p.no)}</span> `:""}${esc(pName(p))}`:'<span class="muted">Former player</span>'}</td><td class="num">${+l.min||0}</td><td class="num us">${l.pts}</td><td class="num">${l.reb}</td><td class="num">${l.ast}</td><td class="num">${l.stl}</td><td class="num">${l.blk}</td><td class="num">${l.to}</td><td class="num">${l.fgm}-${l.fga}</td><td class="num">${l.tpm}-${l.tpa}</td><td class="num">${l.ftm}-${l.fta}</td></tr>`}).join("")}</tbody>
   <tfoot>${(()=>{const t={};KEYS.forEach(k=>t[k]=box(g).reduce((a,l)=>a+(+l[k]||0),0));return `<tr class="totrow"><td class="l">Team totals</td><td class="num">${t.min}</td><td class="num us">${t.pts}</td><td class="num">${t.reb}</td><td class="num">${t.ast}</td><td class="num">${t.stl}</td><td class="num">${t.blk}</td><td class="num">${t.to}</td><td class="num">${t.fgm}-${t.fga}</td><td class="num">${t.tpm}-${t.tpa}</td><td class="num">${t.ftm}-${t.fta}</td></tr>`})()}</tfoot></table></div></div>`;
@@ -1919,8 +1919,8 @@ function reportHTML(id,forPlayers){
 function leagueView(){
   const rec=record();const S=[{id:"cpc",lw:rec.lw,ll:rec.ll,w:rec.w,l:rec.l},...items("stand").filter(x=>x.id!=="cpc").map(x=>({...x,lw:+x.lw||0,ll:+x.ll||0,w:+x.w||0,l:+x.l||0}))].sort((a,b)=>(b.lw-b.ll)-(a.lw-a.ll)||b.lw-a.lw);const top=S[0];
   const R=items("lres").filter(r=>r.a!=="cpc"&&r.b!=="cpc").sort((a,b)=>b.date.localeCompare(a.date));
-  return `<div class="head"><div><h1>League</h1><p class="small muted">Varsity · ${esc(CONFIG.league)}</p></div><div class="row">${abtn("addStand","","Add team")}${abtn("addLres","","Add result")}</div></div>
-  <div class="grid split"><div class="card"><h2 style="margin-bottom:10px">Standings</h2><div class="tablewrap"><table class="stand"><thead><tr><th class="l nosort">#</th><th class="l nosort">Team</th><th class="nosort">League</th><th class="nosort c-pct">Pct</th><th class="nosort">Overall</th><th class="nosort c-gb">GB</th>${isCoach()?'<th class="nosort"></th>':""}</tr></thead><tbody>${S.length?"":`<tr><td colspan="7" class="l muted" style="white-space:normal">No standings yet.</td></tr>`}
+  return `<div class="head"><div><h1>Standings</h1><p class="small muted">Varsity · ${esc(CONFIG.league)}</p></div><div class="row">${abtn("addStand","","Add team")}${abtn("addLres","","Add result")}</div></div>
+  <div class="grid split"><div class="card"><div class="tablewrap"><table class="stand"><thead><tr><th class="l nosort">#</th><th class="l nosort">Team</th><th class="nosort">League</th><th class="nosort c-pct">Pct</th><th class="nosort">Overall</th><th class="nosort c-gb">GB</th>${isCoach()?'<th class="nosort"></th>':""}</tr></thead><tbody>${S.length?"":`<tr><td colspan="7" class="l muted" style="white-space:normal">No standings yet.</td></tr>`}
   ${S.map((s,i)=>{const gb=top?((top.lw-s.lw)+(s.ll-top.ll))/2:0;const n=s.lw+s.ll;return `<tr class="${s.id==="cpc"?"me-row":""}"><td class="l num">${i+1}</td><td class="l">${s.id==="cpc"?"<b>CPC Eagles</b> <span class=\"muted small c-lv\">Varsity</span>":`<a href="#opp-${esc(s.id)}">${esc(oppName(s.id))}</a>`}</td><td class="num">${s.lw}–${s.ll}</td><td class="num c-pct">${n?(s.lw/n).toFixed(3).replace(/^0/,""):"–"}</td><td class="num">${s.w}–${s.l}</td><td class="num c-gb">${gb?gb.toFixed(1):"–"}</td>${isCoach()?`<td>${s.id==="cpc"?"":`<button class="btn icon edit" data-act="editStand" data-id="${esc(s.id)}" aria-label="Edit row">${PEN}</button>`}</td>`:""}</tr>`}).join("")}</tbody></table></div></div>
   <div class="card"><h2 style="margin-bottom:6px">Recent results</h2>${R.map(r=>`<div class="spread" style="padding:8px 0;border-top:1px solid var(--line)"><span class="small muted" style="width:44px">${mon(D(r.date))} ${D(r.date).getDate()}</span><span style="flex:1">${r.a==="cpc"?"<b>CPC</b>":esc(oppName(r.a))} <b class="num">${N(r.as)}</b>, ${r.b==="cpc"?"<b>CPC</b>":esc(oppName(r.b))} <span class="num">${N(r.bs)}</span></span>${isCoach()?`<button class="btn icon edit" data-act="editLres" data-id="${esc(r.id)}" aria-label="Edit result">${PEN}</button>`:""}</div>`).join("")||'<p class="muted">No results yet.</p>'}</div></div>`;
 }
@@ -1936,7 +1936,7 @@ function glossaryView(){
   const all=items(coll);const match=c=>!q||String(c.name).toLowerCase().includes(q)||String(c.def).toLowerCase().includes(q);const hit=all.filter(match);
   const tabs=`<div class="seg" role="tablist"><button data-gtab="calls" class="${calls?"on":""}" role="tab" aria-selected="${calls}">Our calls</button><button data-gtab="terms" class="${calls?"":"on"}" role="tab" aria-selected="${!calls}">Terms</button></div>`;
   const search=all.length?`<label class="f gsearch" for="gq">Search<input type="search" id="gq" value="${esc(glossQ)}" aria-label="Search the glossary" autocomplete="off"></label>`:"";
-  const head=`<div class="head"><div><h1>Glossary & calls</h1></div><div class="row">${tabs}${all.length||!calls?abtn(calls?"addCall":"addTerm","",calls?"Add call":"Add term"):""}${search}</div></div>`;
+  const head=`<div class="head"><div><h1>Basketball glossary</h1></div><div class="row">${tabs}${all.length||!calls?abtn(calls?"addCall":"addTerm","",calls?"Add call":"Add term"):""}${search}</div></div>`;
   const termRow=c=>`<div class="note gterm"><div class="by" style="padding:0">${calls?`<b style="font-family:var(--display);font-size:19px;letter-spacing:.04em;color:var(--gold-ink)">${esc(String(c.name).toUpperCase())}</b>`:`<b style="font-size:14px">${esc(c.name)}</b>`}${ebtn(calls?"editCall":"editTerm",`data-id="${esc(c.id)}"`)}</div><p class="muted">${esc(c.def)}</p></div>`;
   const byName=(a,b)=>String(a.name).localeCompare(String(b.name),undefined,{sensitivity:"base",numeric:true});
   if(calls){
@@ -1983,7 +1983,7 @@ const PEYE='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="
 const PEYE_OFF='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.7A6.6 6.6 0 0 1 8 3.5C12 3.5 14.5 8 14.5 8a12 12 0 0 1-1.9 2.5M4.3 4.9C2.6 6.1 1.5 8 1.5 8S4 12.5 8 12.5c1.2 0 2.3-.4 3.2-.9M6.6 6.6a2 2 0 0 0 2.8 2.8M2 2l12 12"/></svg>';
 const visBtn=(p,small)=>{const h=isHidden(p);return small?`<button type="button" class="eye ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}" aria-label="${h?"Show "+esc(p.name)+" to players":"Hide "+esc(p.name)+" from players"}" title="${h?"Hidden from players. Tap to show.":"Visible to players. Tap to hide."}">${h?PEYE_OFF:PEYE}</button>`
   :`<span class="chip ${h?"warn":"good"}">${h?"Hidden from players":"Visible to players"}</span><button type="button" class="btn sm eyeb ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}">${h?PEYE:PEYE_OFF}${h?"Show to players":"Hide from players"}</button>`};
-const SPEEDS={slow:.5,normal:1,fast:1.8};const SPEED_KEY="cpc_pb_speed";const STEP_SECONDS=2.2;
+const SPEEDS={slow:.75,normal:1,fast:1.8};const SPEED_KEY="cpc_pb_speed";const STEP_SECONDS=2.2;
 const savedSpeed="slow";/* one speed: the old "slow" */
 let curPlay=null;let pb={t:0,playing:false,sel:null,speed:SPEEDS[savedSpeed],speedKey:savedSpeed,raf:0,last:0,seg:-2};let ed=null;let drag=null;
 const lerp=(a,b,f)=>a+(b-a)*f;const ease=f=>f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2;const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
