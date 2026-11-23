@@ -1471,7 +1471,6 @@ function bindSbLogin(){
 const TIPS={
   home:"Everything is editable: look for <b>Edit</b> and <b>Add</b>. Stats, Scouting and Standings are varsity only.",
   roster:"Pick a level, then <b>Add player</b>. Tap a player to edit.",
-  calendar:"Tap <b>+</b> on a day to add an event.",
   schedule:"Pick a level, then <b>Add game</b>. Enter varsity scores with the pencil.",
   scouting:"Add an opponent, then fill in keys, players, film and notes.",
   playbook:"<b>New play</b>: place players, then <b>Add step</b> for each action.",
@@ -1852,7 +1851,7 @@ function calendarView(){
   return `<div class="calhead-ph"><h1 class="calttl" aria-live="polite"><span class="lg">${esc(label)}</span><span class="sm" aria-hidden="true">${esc(calAnchor.toLocaleDateString("en-US",{month:"short",year:"numeric"}))}</span></h1>
    <div class="calnav"><button class="btn icon" data-act="calNav" data-dir="-1" aria-label="Previous month">${ARR("M10 3.5L5.5 8 10 12.5")}</button><button class="btn icon" data-act="calNav" data-dir="1" aria-label="Next month">${ARR("M6 3.5L10.5 8 6 12.5")}</button><button class="btn sm" data-act="calToday">Today</button></div></div>
   <div class="calbar2"><div class="seg lvseg" role="group" aria-label="Level">${LV_FILTERS.map(([v,l])=>`<button type="button" data-act="calLevel" data-v="${v}" data-lv="${v}" class="${calLevel===v?"on":""}" aria-pressed="${calLevel===v}" aria-label="${esc(l)}">${lvDot(v)}<span class="lvs">${lvShort[v]}</span><span class="lvl">${esc(l)}</span></button>`).join("")}</div>
-   <button class="btn icon" data-act="calSub" aria-label="Subscribe in your phone's calendar" title="Subscribe">${ADDCAL}</button><button class="btn icon filtbtn" data-act="calFiltSheet" aria-label="Filter by type${calFilt!=="all"?" (on)":""}">${FIL}${calFilt!=="all"?'<i class="fdot" aria-hidden="true"></i>':""}</button></div>
+   <button class="btn icon" data-act="calSub" aria-label="Subscribe in your phone's calendar" title="Subscribe">${ADDCAL}</button></div>
   <div class="calmo">${body}</div>`;
 }
 /* Home: today's events (players see only "Everyone" events) plus the next game */
