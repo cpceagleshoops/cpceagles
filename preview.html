@@ -1662,7 +1662,7 @@ const VTIMEZONE = [
   "END:VTIMEZONE"];
 /* TEXT escaping (RFC 5545 3.3.11) */
 function escText(s) {
-  return String(s == null ? "" : s).replace(/\r\n?/g, "\n").replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  return String(s == null ? "" : s).replace(/\r\n?/g, "\n").replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 }
 /* Fold to 75 octets per line (UTF-8), never splitting a character; continuation lines start with one space */
 function foldLine(line) {
