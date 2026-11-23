@@ -1652,12 +1652,12 @@ const pastTalks=()=>items("talks").filter(t=>t&&t.msg).sort((a,b)=>(b.ts||0)-(a.
 const dShort=ts=>new Date(ts).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});
 const coachOf=id=>COACHES.find(c=>c.id===id);
 function talkCard(){
-  const t=talkNow();const n=pastTalks().length;const pastLink=n?`<button type="button" class="linkbtn" data-act="pastTalks">Past messages (${n})</button>`:"";
+  const cur=talkNow();const pt=pastTalks();const t=cur||pt[0]||null;const n=pt.length-(cur?0:pt.length?1:0);const pastLink=n?`<button type="button" class="linkbtn" data-act="pastTalks">Past messages (${n})</button>`:"";
   if(!t){if(!isCoach())return"";return `<section class="talk talk-empty" aria-label="Coach Talk"><div><div class="eyebrow">Coach Talk</div><h2>Share a word with the team</h2><p>A short message and a Bible verse every player in the program sees at the top of Home.</p></div><div class="row">${pastLink}${abtn("editTalk","","Add")}</div></section>`}
   return `<section class="talk" aria-label="Coach Talk"><div class="talk-top"><span class="eyebrow">Coach Talk · All levels</span><span class="talk-date">Updated ${esc(dShort(t.ts||Date.now()))}</span></div>
   <p class="talk-msg">${esc(t.msg)}</p>
   ${t.verse||t.ref?`<figure class="verse"><blockquote>“${esc(t.verse)}”</blockquote><figcaption>${esc(t.ref)}</figcaption></figure>`:""}
-  ${pastLink||isCoach()?`<div class="talk-foot">${pastLink||"<span></span>"}${isCoach()?`<span class="row">${ebtn("editTalk")}<button class="btn sm del" data-act="clearTalk">${TRASH}Clear</button></span>`:""}</div>`:""}</section>`;
+  ${pastLink||isCoach()?`<div class="talk-foot">${pastLink||"<span></span>"}${isCoach()?`<span class="row">${ebtn("editTalk")}</span>`:""}</div>`:""}</section>`;
 }
 function talkSheet(){
   const t=talkNow();
