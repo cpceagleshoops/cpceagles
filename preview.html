@@ -638,6 +638,7 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* 8. More sheet: iOS-style list rows, current page marked */
 @media (max-width:820px){.sheet .nav a{min-height:50px;font-size:16px;padding:12px}.sheet .nav a.on{box-shadow:inset 3px 0 0 var(--gold-2)}}
 @media (max-width:820px){table.stand{width:100%;table-layout:auto}table.stand th,table.stand td{padding:8px 5px}table.stand td.l:nth-child(2){white-space:normal;overflow-wrap:normal;word-break:normal}table.stand .c-pct,table.stand .c-gb,table.stand .c-lv{display:none}table.stand .btn.icon{min-height:36px;width:32px;padding:0;border:none;background:transparent}}
+.ev .evr{display:flex;gap:4px;align-items:center}
 </style>
 </head>
 <body>
@@ -1824,7 +1825,7 @@ function evRow(x,compact){
     return `<a class="ev game lvx" style="${lvStyle(["V"])}" href="${gameHref(g)}"><div class="evt num"><b>${tm?esc(tm):"TBA"}</b><span>Game</span></div><div class="evb"><div class="evtitle">${isExh(g)?esc(vsAt(g)+" "+o.name):gTitle(g,o)}</div><div class="evmeta">${lvTags(["V"])}${parts(isExh(g)?"Exhibition"+(g.event?` (${g.event})`:""):null,siteText(g,o),isExh(g)?null:g.lg?"League":"Non-league")}</div></div><div class="evr num">${res}${CHEV}</div></a>`}
   const e=x.e;const off=e.kind==="off";const coachOnly=e.who==="coaches";const gm=e.kind==="game";
   const time=e.start?`<b>${esc(fmtTime(e.start))}</b>${e.end?`<span>${esc(fmtTime(e.end))}</span>`:""}`:`<b>${off?"Off":"All day"}</b>`;
-  return `<div class="ev lvx ${off?"off":""} ${gm?"lvgame":""}" style="${evLvStyle(e)}"><div class="evt num">${time}</div><div class="evb"><div class="evtitle"><button type="button" class="linkish evopen" data-act="evOpen" data-id="${esc(e.id)}">${esc(e.title)}</button></div><div class="evmeta">${lvTags(evTeams(e))}${gm?"":kindDot(e.kind)}${esc(kindLabel(e))}${coachOnly&&isCoach()?'<span class="chip">Coaches only</span>':""}</div>${e.note&&!compact?`<p class="evnote">${esc(e.note)}</p>`:""}</div>${isCoach()?`<div class="evr"><button class="btn icon edit" data-act="editEvent" data-id="${esc(e.id)}" aria-label="Edit ${esc(e.title)}">${PEN}</button></div>`:""}</div>`}
+  return `<div class="ev lvx ${off?"off":""} ${gm?"lvgame":""}" style="${evLvStyle(e)}"><div class="evt num">${time}</div><div class="evb"><div class="evtitle"><button type="button" class="linkish evopen" data-act="evOpen" data-id="${esc(e.id)}">${esc(e.title)}</button></div><div class="evmeta">${lvTags(evTeams(e))}${gm?"":kindDot(e.kind)}${esc(kindLabel(e))}${coachOnly&&isCoach()?'<span class="chip">Coaches only</span>':""}</div>${e.note&&!compact?`<p class="evnote">${esc(e.note)}</p>`:""}</div><div class="evr">${off?"":`<button class="btn icon edit" data-act="icsEvent" data-id="${esc(e.id)}" aria-label="Add ${esc(e.title)} to my calendar" title="Add to my calendar">${ADDCAL}</button>`}${isCoach()?`<button class="btn icon edit" data-act="editEvent" data-id="${esc(e.id)}" aria-label="Edit ${esc(e.title)}">${PEN}</button>`:""}</div></div>`}
 /* Calendar: one month view on every screen size (grid with level dots + the selected day's agenda) */
 const isPhone=()=>matchMedia("(max-width:820px)").matches;
 try{localStorage.removeItem("cpc_cal_view")}catch(e){}/* old Week/List preference */
