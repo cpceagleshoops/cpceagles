@@ -553,6 +553,27 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
 .subname{display:flex;align-items:center;gap:8px;font-weight:700;margin-bottom:8px}.subacts{display:flex;flex-wrap:wrap;gap:6px}
 .subadmin{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
 .evopen{font-weight:600;text-align:left}
+/* Phone play selector + picker sheet */
+@media (max-width:820px){.pvtitle{display:none}}
+.plist.pick{padding:8px;display:flex;flex-direction:column;gap:8px}
+.psel{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:10px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);text-align:left;cursor:pointer;font:inherit;transition:background-color .15s,transform .16s cubic-bezier(.2,.8,.2,1)}
+.psel:active{background:var(--surface-3);transform:scale(.985)}
+.psel-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.psel-t b{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:-.005em;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.psel-t span{font-size:12.5px;color:var(--muted);letter-spacing:.01em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.psel-t em{font-style:normal;color:var(--warn)}
+.psel-ch{flex:none;color:var(--gold-2)}
+.psel.empty{cursor:default;flex-direction:column;align-items:flex-start;gap:2px}.psel.empty b{font-size:15px}.psel.empty span{font-size:12.5px;color:var(--muted)}
+.pksearch{display:block;position:sticky;top:-16px;z-index:1;background:var(--surface);padding:0 0 10px}.pksearch input{width:100%}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.pkgrp+.pkgrp{margin-top:14px}
+.pkh{font-family:var(--body);font-size:12px;font-weight:700;letter-spacing:.02em;color:var(--muted);margin:0 0 6px 14px;text-transform:none}
+.pkinset{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.pkrow{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:10px 14px;border:none;border-top:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.pkrow:first-child{border-top:none}.pkrow:active{background:var(--surface-3)}.pkrow[hidden],.pkgrp[hidden]{display:none}
+.pkname{flex:1;min-width:0;font-weight:600;font-size:15px;overflow-wrap:anywhere}.pkmeta{flex:none;font-size:12px;color:var(--muted)}
+.pkck{flex:none;width:18px;height:18px;color:var(--gold-2)}.pkrow.on .pkname{color:var(--gold-ink)}
+.courtbox.xfade{animation:pbx .26s ease}@keyframes pbx{from{opacity:.15}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.courtbox.xfade{animation:none}.psel{transition:none}}
 /* Calendar */
 .calsegs{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .lvtag{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;letter-spacing:.03em;padding:0 5px;border-radius:4px;border:1px solid var(--line);color:#c4cfdc;background:var(--surface-2);line-height:16px}
@@ -2335,21 +2356,30 @@ function playbookView(){
   const tabs=`<div class="seg pbtabs" role="tablist" aria-label="Offense or defense">${["offense","defense"].map(s=>`<button type="button" role="tab" data-act="pbSide" data-v="${s}" class="${pbSide===s?"on":""}" aria-selected="${pbSide===s}">${SIDE_L[s]} <span class="num cnt">${bySide[s].length}</span></button>`).join("")}</div>`;
   const groups=playGroups(bySide[pbSide],pbSide);
   const ph=isPhone();
+  /* Phones: one play selector row that opens a grouped list sheet (desktop keeps the sidebar list) */
+  const curGroup=gp?((groups.find(([c,ps])=>ps.some(p=>p.id===gp.id))||[gp.cat||"Other"])[0]):"";
+  const UPDN='<svg class="psel-ch" width="14" height="20" viewBox="0 0 14 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7.5L7 3.5l4 4M3 12.5l4 4 4-4"/></svg>';
+  const selector=gp&&!ed?`<button type="button" class="psel" data-act="pbPicker" aria-haspopup="dialog" aria-label="${esc(`Choose a ${pbSide} play. Now showing ${gp.name}`)}"><span class="psel-t"><b>${esc(gp.name)}</b><span>${esc(curGroup)}${curGroup.toLowerCase()===(isFull(gp)?"full court":"half court")?"":" · "+(isFull(gp)?"Full court":"Half court")}${isCoach()&&isHidden(gp)?' · <em>Hidden</em>':""}</span></span>${UPDN}</button>`
+    :`<div class="psel empty" role="status"><b>No ${pbSide} plays yet</b><span>${isCoach()?"Tap + to draw one.":"Your coaches haven't shared any yet."}</span></div>`;
+  if(ph&&!ed)return `<div class="head pbhead"><div><h1>Playbook</h1></div></div>
+  <div class="pbwrap"><div class="card plist pick">${isCoach()?`<div class="pbtabrow">${tabs}<button class="btn icon edit" data-act="newPlay" aria-label="New play">${PLUS}</button></div>`:tabs}${selector}</div><div>${gp?viewerView():""}</div></div>`;
   const list=`<div class="card plist">${ph&&isCoach()?`<div class="pbtabrow">${tabs}<button class="btn icon edit" data-act="newPlay" aria-label="New play">${PLUS}</button></div>`:tabs}<div class="pgroups">${groups.map(([c,ps])=>`<div class="cat">${esc(c)}</div>${ps.map(row).join("")}`).join("")||`<p class="small muted pnone">No ${pbSide} plays yet.</p>`}</div>
    ${isCoach()&&!ph?`<div style="padding:10px 6px 4px" class="newp"><button class="btn gold sm" data-act="newPlay" style="width:100%">${PLUS} New play</button></div>`:""}</div>`;
   return `<div class="head ${ed?"":"pbhead"}"><div><h1>${ed?(ed.isNew?"New play":"Edit play"):"Playbook"}</h1>${ed?'<p class="small muted">Set where everyone starts, then add a step for each action.</p>':""}</div></div>
   <div class="pbwrap">${ed?"":list}<div ${ed?'style="grid-column:1/-1"':""}>${ed?builderView():viewerView()}</div></div>`;
 }
+let pbXfade=false;
 const hasRoles=p=>!!(p&&p.roles&&Object.values(p.roles).some(v=>String(v||"").trim()));
 const rolesBtn=p=>hasRoles(p)?`<button class="btn sm mb-only" data-act="pbRoles" data-id="${esc(p.id)}">Roles</button>`:"";
 /* Phones: bring the court + controls up under the top bar (they're sized to fit above the tab bar) */
 function pbIntoView(){if(!isPhone())return;requestAnimationFrame(()=>{const st=$(".stage");if(!st)return;const tb=$(".topbar");const off=tb?tb.getBoundingClientRect().height+6:0;const y=st.getBoundingClientRect().top+scrollY-off;window.scrollTo({top:Math.max(0,y),behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})})}
 function viewerView(){
   const play=getPlay();if(!play)return `<div class="empty">No ${pbSide==="defense"?"defensive":"offensive"} plays yet.${isCoach()?" Tap New play to build one.":""}</div>`;const N=play.phases.length;const dv=isDefP(play);
-  return `<div class="stage ${isFull(play)?"wide":""}"><div><div class="courtbox vbox">${playSVG(play)}</div>
+  const xf=pbXfade&&!matchMedia("(prefers-reduced-motion: reduce)").matches;pbXfade=false;
+  return `<div class="stage ${isFull(play)?"wide":""}"><div><div class="courtbox vbox ${xf?"xfade":""}">${playSVG(play)}</div>
     <div class="pbctl"><div class="pbbtns"><button class="pbnav" data-act="pbPrev" aria-label="Previous step"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><button class="pbplay" id="pbplay" data-act="pbPlay" aria-label="Play or pause">${PLAY}</button><button class="pbnav" data-act="pbNext" aria-label="Next step"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div>
     ${scrubHTML(N)}<span class="stepl sr" id="stepl" aria-live="polite">${stepLbl(1,N)}</span></div>${(play.phases||[]).some(ph=>ph&&ph.cap)?'<div class="pbcap" id="pbcap" aria-live="polite"><span class="cx on"></span><span class="cx"></span></div>':""}</div>
-   <div><div class="spread" style="margin-bottom:10px;align-items:flex-start"><div><div class="eyebrow">${SIDE_L[sideOf(play)]} · ${esc(play.cat||"Other")}${String(play.cat||"").toLowerCase()===(isFull(play)?"full court":"half court")?"":" · "+(isFull(play)?"Full court":"Half court")}</div><h2 style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2>${isBasic(play)||isCoach()?`<div class="row" style="gap:6px;margin-top:6px">${isCoach()?visBtn(play,false):""}${isBasic(play)?'<span class="chip basic">Basic</span>':""}</div>`:""}</div>
+   <div><div class="spread" style="margin-bottom:10px;align-items:flex-start"><div><div class="eyebrow pvtitle">${SIDE_L[sideOf(play)]} · ${esc(play.cat||"Other")}${String(play.cat||"").toLowerCase()===(isFull(play)?"full court":"half court")?"":" · "+(isFull(play)?"Full court":"Half court")}</div><h2 class="pvtitle" style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2>${isBasic(play)||isCoach()?`<div class="row" style="gap:6px;margin-top:6px">${isCoach()?visBtn(play,false):""}${isBasic(play)?'<span class="chip basic">Basic</span>':""}</div>`:""}</div>
     <div class="row">${rolesBtn(play)}${ebtn("editPlay",`data-id="${esc(play.id)}"`,"Edit play")}${isCoach()?hmenu([`<button class="btn sm" data-act="dupPlay" data-id="${esc(play.id)}">Duplicate play</button>`,`<button class="btn sm del" data-act="del" data-k="play" data-id="${esc(play.id)}">${TRASH}Delete play</button>`]):""}</div></div>
     <div class="dk-only">${panel("play-roles",dv?"Defenders & jobs":"Positions & roles",pb.sel?"Following "+pLabel(play,pb.sel):"Tap one to follow it",`<div class="legend">${["1","2","3","4","5"].map(id=>`<button class="prole ${pb.sel===id?"on":""}" data-act="pbSel" data-v="${id}"><span class="badge ${dv?"dbadge":""}">${pLabel(play,id)}</span><span><b>${dv?"Defender X"+id:"Position "+id}</b><span>${esc(play.roles&&play.roles[id]||"No role written yet.")}</span></span></button>`).join("")}</div>`)}</div>
     ${panel("play-notes","Notes & reads",play.notes?"":"None yet",play.notes?`<p style="margin:0;white-space:pre-wrap">${esc(play.notes)}</p>`:'<p class="muted" style="margin:0">No notes yet.</p>')}</div></div>`;
@@ -2777,6 +2807,14 @@ const ACT={
   pbPlay(){const play=getPlay();if(!play||play.phases.length<2)return;if(pb.playing){stopPlayback();syncViewer();return}const N=play.phases.length;const from=pb.t>=N-1-1e-6?0:pb.t;animate(play,from,N-1,syncViewer,()=>{if(pendingRender)render()})},
   pbPrev(){const t=spr.on?spr.target:pb.t;springTo(Math.max(0,Math.ceil(t-1e-6)-1))},
   pbNext(){const play=getPlay();if(!play)return;const N=play.phases.length;const base=spr.on?spr.target:pb.t;const to=Math.min(N-1,Math.floor(base+1e-6)+1);if(to<=pb.t+1e-6&&to>=N-1){springTo(N-1);return}animate(play,Math.min(pb.t,to),to,syncViewer)},/* plays the step at playback speed */
+  pbPicker(){const all=shownPlays().filter(p=>sideOf(p)===pbSide);const groups=playGroups(all,pbSide);const cur=curPlay;
+    const CHECK='<svg class="pkcheck" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    const row=p=>`<button type="button" class="pkrow ${p.id===cur?"on":""}" data-act="pickPlayS" data-id="${esc(p.id)}" data-q="${esc((p.name+" "+(p.cat||"")).toLowerCase())}" ${p.id===cur?'aria-current="true"':""}><span class="pkname">${esc(p.name)}</span>${(p.cat||"Other").toLowerCase()===(isFull(p)?"full court":"half court")?"":`<span class="pkmeta">${isFull(p)?"Full":"Half"}</span>`}${isCoach()&&isHidden(p)?'<span class="chip warn">Hidden</span>':""}<span class="pkck">${p.id===cur?CHECK:""}</span></button>`;
+    const search=all.length>8?`<label class="pksearch" for="pkq"><span class="sr">Search plays</span><input type="search" id="pkq" autocomplete="off" placeholder="Search" aria-label="Search ${pbSide} plays"></label>`:"";
+    listSheet(`${SIDE_L[pbSide]} plays`,`${search}<div class="pklist">${groups.map(([c,ps])=>`<section class="pkgrp"><h3 class="pkh">${esc(c)}</h3><div class="pkinset">${ps.map(row).join("")}</div></section>`).join("")}</div><p class="muted small pknone" hidden>No plays match.</p>`);
+    const q=$("#pkq");if(q)q.oninput=()=>{const v=q.value.trim().toLowerCase();let any=0;$$("#sheetroot .pkgrp").forEach(g=>{let n=0;g.querySelectorAll(".pkrow").forEach(r=>{const hit=!v||r.dataset.q.includes(v);r.hidden=!hit;n+=hit});g.hidden=!n;any+=n});const no=$("#sheetroot .pknone");if(no)no.hidden=!!any};
+    const on=$("#sheetroot .pkrow.on");if(on)on.scrollIntoView({block:"center"})},
+  pickPlayS(d){const id=d.id;closeSheetPop(()=>{pbXfade=true;ACT.pickPlay({id})})},
   pbRoles(d){const p=get("plays",d.id)||getPlay();if(!p)return;const dv=isDefP(p);listSheet(dv?"Defenders & jobs":"Roles",`<div class="legend">${["1","2","3","4","5"].filter(id=>p.roles&&String(p.roles[id]||"").trim()).map(id=>`<div class="prole"><span class="badge ${dv?"dbadge":""}">${pLabel(p,id)}</span><span><b>${dv?"Defender X"+id:"Position "+id}</b><span>${esc(p.roles[id])}</span></span></div>`).join("")}</div>`)},
   pbSel(d){pb.sel=pb.sel===d.v?null:d.v;$$('[data-act="pbSel"]').forEach(b=>b.classList.toggle("on",b.dataset.v===pb.sel));const s=$('[data-panel="play-roles"] .sum');if(s){const pl=getPlay();s.textContent=pb.sel?"Following "+(pl?pLabel(pl,pb.sel):pb.sel):"Tap one to follow it"}syncViewer()},
   /* playbook builder */
