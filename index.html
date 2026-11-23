@@ -693,6 +693,28 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .tlrow .tl-step{position:absolute;right:10px;top:-2px;font-size:11px;color:var(--muted)}
   .tlrow .tl-hit{height:28px}.tlrow .tl-labels{height:18px}.tlrow .tl-lab{height:18px;line-height:18px}
 }
+
+/* ===== UX polish pass 2 (2026-11-23) ===== */
+/* Quieter icon buttons: tinted fill instead of a gold outline (tap target unchanged) */
+.btn.icon.edit{border-color:transparent;background:rgba(194,176,138,.10)}
+.btn.icon.edit:hover{background:rgba(194,176,138,.18);border-color:transparent}
+.btn.icon.edit svg{width:15px;height:15px}
+@media (hover:none){.btn.icon.edit:hover{border-color:transparent;background:rgba(194,176,138,.10)}}
+.btn.icon.edit:active{background:rgba(194,176,138,.24)}
+/* Playbook viewer header */
+.pvhead{flex-wrap:wrap;gap:8px}.pvhead>.row{flex-wrap:nowrap;flex:none;margin-left:auto}
+/* Playbook court: never shrink below a readable size on short phones (iPhone SE) */
+@media (max-width:820px){.stage .courtbox .court{min-height:0;max-height:max(200px,calc(100dvh - 460px - var(--safe-b)))}}
+/* Home level cards */
+.ngact{margin-top:10px;gap:8px}
+/* Tables: names are links without heavy underlines */
+td a{text-decoration:none;font-weight:600}td a:hover{color:var(--accent-text)}
+/* Game schedule rows on narrow phones */
+@media (max-width:360px){.li{grid-template-columns:40px 1fr auto;gap:8px}.li .date b{font-size:20px}}
+/* Top bar sync: just the dot + "Live" on phones */
+@media (max-width:820px){.topbar .synx{display:none}}
+/* Player page: coach tools sit under the name on phones instead of above it */
+@media (max-width:820px){.phero{display:flex;flex-direction:column}.phero .tools{order:9;margin:14px 0 0}}
 </style>
 </head>
 <body>
@@ -1230,7 +1252,7 @@ async function initDb(){
   const timer=setTimeout(()=>{if(syncState==="connecting"){syncState="slow";paintSync()}},10000);
   COLLS.forEach(c=>{try{DB.collection(col(c)).onSnapshot(s=>{const o={};s.docs.forEach(d=>o[d.id]=d.data());store[c]=o;if(!s.metadata.fromCache){clearTimeout(timer);syncState="live";paintSync()}requestRender()},()=>{clearTimeout(timer);if(syncState!=="live"){syncState="local";paintSync()}})}catch(e){}});
 }
-function paintSync(){$$(".sync").forEach(el=>{const map={local:["","Saved on this device"],connecting:["","Connecting…"],slow:["","Shared data can't be reached yet"],live:["live",SB?"Live · shared with the team":"Live · shared with staff"],sbfail:["","Can't reach the team database"],reconnecting:["","Reconnecting…"]};const [c,t]=map[syncState];el.innerHTML=`<span class="dot ${c}"></span>${t}`})}
+function paintSync(){$$(".sync").forEach(el=>{const map={local:["","Saved on this device"],connecting:["","Connecting…"],slow:["","Shared data can't be reached yet"],live:["live",SB?"Live<span class=\"synx\"> · shared with the team</span>":"Live<span class=\"synx\"> · shared with staff</span>"],sbfail:["","Can't reach the team database"],reconnecting:["","Reconnecting…"]};const [c,t]=map[syncState];el.innerHTML=`<span class="dot ${c}"></span>${t}`})}
 function requestRender(){if($("#sheetroot").firstChild||ed||pb.playing||drag){pendingRender=true;return}const a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)&&a.closest("main")){pendingRender=true;return}render()}
 function flushRender(){if(pendingRender&&!$("#sheetroot").firstChild&&!ed&&!pb.playing&&!drag){pendingRender=false;render()}}
 document.addEventListener("focusout",()=>setTimeout(flushRender,60));
@@ -1588,13 +1610,13 @@ function closeSheet(silent,viaPop){if(!$("#sheetroot").firstChild)return;if(ed&&
 function gameRow(g){
   const o=O(g.opp);const isNext=g===nextGame()||(nextGame()&&g.id===nextGame().id);
   const right=g.played?`<span class="num"><span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b></span>`:g.d<TODAY?`<span class="chip warn">Needs final score</span>`:(isNext?`<span class="nextcell"><span class="chip gold">Up next</span>${fmtTime(g.time)?`<span class="muted small num">${esc(fmtTime(g.time))}</span>`:""}</span>`:`<span class="muted small num">${esc(fmtTime(g.time))}</span>`);
-  return `<div class="li lvx ${isNext?"upnext":""}" style="${lvStyle(["V"])}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${gTitle(g,o)}</a><div class="small muted">${dow(g.d)} · ${esc(siteText(g,o))} · ${isExh(g)?EXH_CHIP:g.lg?"League":'<span class="nw">Non-league</span>'} · ${g.played?(hasBox(g)?`<a href="${gameLink(g)}">Box score</a>`:"Final"):`<a href="${esc(watchOf(g))}" target="_blank" rel="noopener">Watch</a>`}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
+  return `<div class="li lvx ${isNext?"upnext":""}" style="${lvStyle(["V"])}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${gTitle(g,o)}</a><div class="small muted gmeta"><span class="nw">${dow(g.d)} ·</span> <span class="nw">${esc(siteText(g,o))} ·</span> ${isExh(g)?EXH_CHIP+" ·":g.lg?'<span class="nw">League ·</span>':'<span class="nw">Non-league ·</span>'} ${g.played?(hasBox(g)?`<a href="${gameLink(g)}">Box score</a>`:"Final"):`<a href="${esc(watchOf(g))}" target="_blank" rel="noopener">Watch</a>`}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
 }
 /* Home: next game for each level. Varsity from the Schedule (rich card); JV and C-Team from Calendar events of kind "game". */
 function lvNextCard(k){const t=ymd(TODAY);const e=items("events").filter(x=>x&&x.kind==="game"&&realDate(x.date)&&x.date>=t&&x.who!=="coaches"&&evTeams(x).includes(k)).sort(evCmp)[0];
   const nm=lvName(k);if(!e)return `<div class="card ngcard" style="${lvStyle([k])}"><div class="eyebrow">${esc(nm)}</div><p class="muted" style="margin:6px 0 0">No games scheduled</p><a class="small" href="#schedule/${k.toLowerCase()}">Game schedule</a></div>`;
   const d=D(e.date);const days=Math.round((d-TODAY)/864e5-.5);const gi=lvGameInfo(e);
-  return `<div class="card ngcard" style="${lvStyle([k])}"><div class="eyebrow herohd"><span>${esc(nm)}</span>${isCoach()?`<button class="btn icon edit" data-act="editEvent" data-id="${esc(e.id)}" aria-label="Edit ${esc(nm)} game">${PEN}</button>`:""}</div><h3>${esc(gi.name)}${gi.site?` <span class="ngsite">· ${esc(gi.site)}</span>`:""}</h3><div class="small muted">${esc(dow(d))}, ${esc(mon(d))} ${d.getDate()}${e.start?" · "+esc(fmtTime(e.start)):""}</div>${gi.exh?`<div style="margin-top:6px"><span class="chip gold">${esc(gi.exh)}</span></div>`:""}<div class="row" style="margin-top:8px"><span class="chip">${days<=0?"Today":days===1?"Tomorrow":days+" days away"}</span><a class="small" href="#schedule/${k.toLowerCase()}">Game schedule</a></div><div style="margin-top:4px">${icsBtn("icsEvent",e.id)}</div></div>`}
+  return `<div class="card ngcard" style="${lvStyle([k])}"><div class="eyebrow herohd"><span>${esc(nm)}</span>${isCoach()?`<button class="btn icon edit" data-act="editEvent" data-id="${esc(e.id)}" aria-label="Edit ${esc(nm)} game">${PEN}</button>`:""}</div><h3>${esc(gi.name)}${gi.site?` <span class="ngsite">· ${esc(gi.site)}</span>`:""}</h3><div class="small muted">${esc(dow(d))}, ${esc(mon(d))} ${d.getDate()}${e.start?" · "+esc(fmtTime(e.start)):""}</div>${gi.exh?`<div style="margin-top:6px"><span class="chip gold">${esc(gi.exh)}</span></div>`:""}<div class="row" style="margin-top:8px"><span class="chip">${days<=0?"Today":days===1?"Tomorrow":days+" days away"}</span></div><div class="row ngact"><a class="btn sm" href="#schedule/${k.toLowerCase()}">Game schedule</a>${icsBtn("icsEvent",e.id,"btn sm")}</div></div>`}
 function nextGames(){return `<section class="nextgames" aria-label="Next game for each level"><h2 class="ngh">Next game</h2><div class="grid split">${nextHero()}<div class="ngstack">${lvNextCard("JV")}${lvNextCard("C")}</div></div></section>`}
 function nextHero(){
   const g=nextGame();if(!g)return `<div class="card hero"><div class="eyebrow">Varsity</div><h2>No games scheduled</h2>${abtn("addGame","","Add a game")}</div>`;
@@ -2093,8 +2115,8 @@ function scoutingView(){
   ${exh.length?`<div class="exhlink"><button type="button" class="linkbtn" data-act="scoutExh" aria-expanded="${scoutExhOpen}">${scoutExhOpen?"Hide":"Show"} exhibition opponents (${exh.length})</button>${scoutExhOpen?`<p class="small muted" style="margin:4px 0 10px">Teams we only play in exhibitions. They stay off the main list.</p><div class="grid g3">${exh.map(oppCard).join("")}</div>`:""}</div>`:""}`;
 }
 function oppCard({o,next}){{const st=o.status==="ready"?'<span class="chip good">Ready</span>':o.status==="progress"?'<span class="chip warn">In progress</span>':'<span class="chip">Not started</span>';
-    return `<a class="card oppcard" href="#opp-${esc(o.id)}"><div class="spread"><span class="eyebrow">${o.league?"League":"Non-league"}</span>${isCoach()?st:""}</div><h3>${esc(o.name)}</h3><div class="small muted">${next?`Next: ${dow(next.d)}, ${mon(next.d)} ${next.d.getDate()} · ${({home:"Home",away:"Away",neutral:"Neutral"})[siteOf(next)]}`:"No games scheduled"}</div>
-    ${(()=>{const gs=games().filter(g=>g.opp===o.id);return gs.length?`<div class="small muted">This season</div><div class="row">${gs.map(g=>`<span class="chip ${g.played?(g.res==="W"?"good":"bad"):""} num">${mon(g.d)} ${g.d.getDate()} · ${SITE_L[siteOf(g)]} · ${g.played?g.res+" "+scoreTxt(g):g.d<TODAY?"No score":esc(fmtTime(g.time)||"Time TBA")}</span>`).join("")}</div>`:""})()}
+    return `<a class="card oppcard" href="#opp-${esc(o.id)}"><div class="spread"><span class="eyebrow">${o.league?"League":"Non-league"}</span>${isCoach()?st:""}</div><h3>${esc(o.name)}</h3>${(()=>{const gs=games().filter(g=>g.opp===o.id);return gs.length?"":`<div class="small muted">${next?`Next: ${dow(next.d)}, ${mon(next.d)} ${next.d.getDate()} · ${({home:"Home",away:"Away",neutral:"Neutral"})[siteOf(next)]}`:"No games scheduled"}</div>`})()}
+    ${(()=>{const gs=games().filter(g=>g.opp===o.id);return gs.length?`<div class="small muted">This season</div><div class="row">${gs.map(g=>`<span class="chip ${g.played?(g.res==="W"?"good":"bad"):(next&&g.id===next.id?"gold":"")} num">${mon(g.d)} ${g.d.getDate()} · ${SITE_L[siteOf(g)]} · ${g.played?g.res+" "+scoreTxt(g):g.d<TODAY?"No score":esc(fmtTime(g.time)||"Time TBA")}</span>`).join("")}</div>`:""})()}
     ${(()=>{const lm=lastMet(o);return lm?`<div class="row"><span class="chip ${lm.res==="W"?"good":"bad"} num">Last met: ${lm.res} ${lm.us}–${lm.them} (${esc(lm.when)})</span></div>`:""})()}</a>`}}
 function oppView(id){
   const o=get("opps",id);if(!o)return notFound("Opponent not found","That team isn't in Scouting.","#scouting","Scouting");
@@ -2205,7 +2227,7 @@ let pbSide=null;
 const PEYE='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z"/><circle cx="8" cy="8" r="2"/></svg>';
 const PEYE_OFF='<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.6 3.7A6.6 6.6 0 0 1 8 3.5C12 3.5 14.5 8 14.5 8a12 12 0 0 1-1.9 2.5M4.3 4.9C2.6 6.1 1.5 8 1.5 8S4 12.5 8 12.5c1.2 0 2.3-.4 3.2-.9M6.6 6.6a2 2 0 0 0 2.8 2.8M2 2l12 12"/></svg>';
 const visBtn=(p,small)=>{const h=isHidden(p);return small?`<button type="button" class="eye ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}" aria-label="${h?"Show "+esc(p.name)+" to players":"Hide "+esc(p.name)+" from players"}" title="${h?"Hidden from players. Tap to show.":"Visible to players. Tap to hide."}">${h?PEYE_OFF:PEYE}</button>`
-  :`<span class="chip ${h?"warn":"good"}">${h?"Hidden from players":"Visible to players"}</span><button type="button" class="btn sm eyeb ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}">${h?PEYE:PEYE_OFF}${h?"Show to players":"Hide from players"}</button>`};
+  :`${h?'<span class="chip warn">Hidden from players</span>':""}<button type="button" class="btn sm eyeb ${h?"off":""}" data-act="pbVis" data-id="${esc(p.id)}">${h?PEYE:PEYE_OFF}${h?"Show to players":"Hide from players"}</button>`};
 const SPEEDS={slow:.75,normal:1,fast:1.8};const SPEED_KEY="cpc_pb_speed";const STEP_SECONDS=2.2;
 const savedSpeed="slow";/* one speed: the old "slow" */
 let curPlay=null;let pb={t:0,playing:false,sel:null,speed:SPEEDS[savedSpeed],speedKey:savedSpeed,raf:0,last:0,seg:-2};let ed=null;let drag=null;
@@ -2451,7 +2473,7 @@ function viewerView(){
   const xf=pbXfade&&!matchMedia("(prefers-reduced-motion: reduce)").matches;pbXfade=false;
   return `<div class="stage ${isFull(play)?"wide":""}"><div><div class="courtbox vbox ${xf?"xfade":""}">${playSVG(play)}</div>
     <div class="tlrow"><div class="tlwrap">${tlHTML("vtl",N)}</div><div class="pbctl tlctl"><div class="pbbtns"><button class="pbnav" data-act="pbPrev" aria-label="Previous step"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><button class="pbplay" id="pbplay" data-act="pbPlay" aria-label="Play or pause">${PLAY}</button><button class="pbnav" data-act="pbNext" aria-label="Next step"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button></div><span class="tl-step num" id="vtlstep" aria-hidden="true">Step 1 / ${N}</span><span class="stepl sr" id="stepl">${stepLbl(1,N)}</span></div></div>${(play.phases||[]).some(ph=>ph&&ph.cap)?'<div class="pbcap" id="pbcap" aria-live="polite"><span class="cx on"></span><span class="cx"></span></div>':""}</div>
-   <div><div class="spread" style="margin-bottom:10px;align-items:flex-start"><div><div class="eyebrow pvtitle">${SIDE_L[sideOf(play)]} · ${esc(play.cat||"Other")}${String(play.cat||"").toLowerCase()===(isFull(play)?"full court":"half court")?"":" · "+(isFull(play)?"Full court":"Half court")}</div><h2 class="pvtitle" style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2>${isBasic(play)||isCoach()?`<div class="row" style="gap:6px;margin-top:6px">${isCoach()?visBtn(play,false):""}${isBasic(play)?'<span class="chip basic">Basic</span>':""}</div>`:""}</div>
+   <div><div class="spread pvhead" style="margin-bottom:10px;align-items:flex-start"><div><div class="eyebrow pvtitle">${SIDE_L[sideOf(play)]} · ${esc(play.cat||"Other")}${String(play.cat||"").toLowerCase()===(isFull(play)?"full court":"half court")?"":" · "+(isFull(play)?"Full court":"Half court")}</div><h2 class="pvtitle" style="font-size:28px;text-transform:uppercase">${esc(play.name)}</h2>${isBasic(play)||isCoach()?`<div class="row" style="gap:6px;margin-top:6px">${isCoach()?visBtn(play,false):""}${isBasic(play)?'<span class="chip basic">Basic</span>':""}</div>`:""}</div>
     <div class="row">${rolesBtn(play)}${ebtn("editPlay",`data-id="${esc(play.id)}"`,"Edit play")}${isCoach()?hmenu([`<button class="btn sm" data-act="dupPlay" data-id="${esc(play.id)}">Duplicate play</button>`,`<button class="btn sm del" data-act="del" data-k="play" data-id="${esc(play.id)}">${TRASH}Delete play</button>`]):""}</div></div>
     <div class="dk-only">${panel("play-roles",dv?"Defenders & jobs":"Positions & roles",pb.sel?"Following "+pLabel(play,pb.sel):"Tap one to follow it",`<div class="legend">${["1","2","3","4","5"].map(id=>`<button class="prole ${pb.sel===id?"on":""}" data-act="pbSel" data-v="${id}"><span class="badge ${dv?"dbadge":""}">${pLabel(play,id)}</span><span><b>${dv?"Defender X"+id:"Position "+id}</b><span>${esc(play.roles&&play.roles[id]||"No role written yet.")}</span></span></button>`).join("")}</div>`)}</div>
     ${panel("play-notes","Notes & reads",play.notes?"":"None yet",play.notes?`<p style="margin:0;white-space:pre-wrap">${esc(play.notes)}</p>`:'<p class="muted" style="margin:0">No notes yet.</p>')}</div></div>`;
