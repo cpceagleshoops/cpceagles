@@ -715,6 +715,49 @@ td a{text-decoration:none;font-weight:600}td a:hover{color:var(--accent-text)}
 @media (max-width:820px){.topbar .synx{display:none}}
 /* Player page: coach tools sit under the name on phones instead of above it */
 @media (max-width:820px){.phero{display:flex;flex-direction:column}.phero .tools{order:9;margin:14px 0 0}}
+/* Game Scout */
+.gs{max-width:720px;margin:0 auto}
+.gshead{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:6px 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.gshead .gsht{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}.gshead b{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.gshead svg{transform:none!important;vertical-align:middle;width:12px;height:12px}
+.gsq{position:sticky;top:0;z-index:5;display:grid!important;grid-template-columns:repeat(5,1fr);width:100%;margin:8px 0 12px;padding:4px;background:rgba(11,21,34,.92);-webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px)}
+.gsq button{min-height:56px;font-size:18px;font-weight:800;font-family:var(--display);letter-spacing:.04em;border-radius:8px}
+.gsq button.on{background:var(--gold);color:#13202f}
+@media (max-width:820px){.gsq{top:calc(var(--safe-t) + 45px)}}
+.gsgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gsbig{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:8px;min-height:128px;padding:14px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line);color:#fff;font:inherit;text-align:left;cursor:pointer;transition:transform .12s ease,background .12s ease}
+.gsbig svg{color:var(--gold-2)}.gsbig b{font-size:17px;line-height:1.2}.gsbig span{color:var(--muted);font-size:14px;font-weight:600}
+.gsbig:active,.gstap:active,.gskey:active,.gsdef:active,.gsrow:active{transform:scale(.97)}
+.gsback{display:flex;align-items:center;gap:8px;margin-bottom:10px}.gsback h2{margin:0;font-size:20px}
+.gsbk{min-width:48px;min-height:48px}.gsbk svg{transform:rotate(180deg)!important}
+.gsfbar{display:flex;gap:10px;margin-bottom:12px}.gsadd{flex:1;min-height:60px;font-size:19px;justify-content:center}.gsedit{min-height:60px;min-width:84px;justify-content:center}.gsedit.on{background:var(--surface-3)}
+.gstiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px}
+.gstile{position:relative}
+.gstap{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:100%;min-height:104px;padding:8px 4px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);color:#fff;font:inherit;cursor:pointer;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;transition:transform .12s ease}
+.gsno{font-family:var(--display);font-size:30px;font-weight:800;line-height:1}.gsfc{font-size:22px;font-weight:800}.gsqb{font-size:11px;color:var(--muted);line-height:1.2;text-align:center}
+.gstile.yel .gstap{background:#f2c94c;border-color:#f2c94c;color:#1a1505}.gstile.yel .gsqb{color:#3b3210}
+.gstile.red .gstap{background:#ff7a6e;border-color:#ff7a6e;color:#1d0806}.gstile.red .gsqb{color:#3f1410}
+.gsminus{position:absolute;top:-8px;right:-8px;width:40px;height:40px;border-radius:50%;border:2px solid var(--bg);background:var(--bad,#e5534b);color:#fff;font-size:24px;font-weight:800;line-height:1;cursor:pointer}
+.gshint{margin-top:10px}
+.gsform{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}.gsform textarea{font-size:17px;min-height:56px}
+.gsaddbtn{min-height:56px;font-size:18px;justify-content:center}
+.gsdefs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.gsdef{min-height:56px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);color:#fff;font:inherit;font-weight:700;font-size:15px;cursor:pointer}
+.gsdef.on{background:var(--gold);border-color:var(--gold);color:#13202f}
+.gslist{display:flex;flex-direction:column;gap:8px}
+.gsent{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:10px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line)}
+.gset{display:flex;flex-direction:column;gap:2px;overflow-wrap:anywhere}.gsqc{font-weight:800;color:var(--gold-ink)}
+.gssec{margin-bottom:14px}.gsh{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.gspast summary{display:flex;align-items:center;gap:8px;cursor:pointer;min-height:44px;list-style:none}.gspast summary::-webkit-details-marker{display:none}.gspast[open] summary svg{transform:rotate(180deg)}
+.gsrow{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:64px;padding:10px 12px 10px 16px;margin-bottom:8px;border-radius:12px;background:var(--surface-2);border:1px solid var(--line);color:inherit;font:inherit;text-align:left;cursor:pointer;overflow:hidden}
+.gsrow.cur{border-color:var(--gold)}.gsrt{display:flex;flex-direction:column;gap:2px;min-width:0}.gsrt b{overflow-wrap:anywhere}.gsrc{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px}
+.gskp{display:flex;flex-direction:column;gap:12px}.gskd{font-family:var(--display);font-size:44px;font-weight:800;text-align:center;min-height:56px;color:#fff}
+.gskeys{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gskey{min-height:60px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);color:#fff;font:inherit;font-size:26px;font-weight:700;cursor:pointer}
+.gskey.ok{background:var(--gold);border-color:var(--gold);color:#13202f;font-size:20px}.gskey.ok:disabled{opacity:.4}
+.gsopp{border-top:1px solid var(--line);padding:8px 0}.gsopp summary{display:flex;flex-direction:column;gap:2px;cursor:pointer;list-style:none}.gsopp summary::-webkit-details-marker{display:none}
+.gsoppb{padding:8px 0 0}.gsqgrp{display:flex;flex-direction:column;gap:4px;margin:6px 0}.gsqgrp .chip{align-self:flex-start}
+@media (prefers-reduced-motion:reduce){.gsbig,.gstap,.gskey,.gsdef,.gsrow{transition:none}.gsbig:active,.gstap:active,.gskey:active,.gsdef:active,.gsrow:active{transform:none}}
 </style>
 </head>
 <body>
@@ -761,6 +804,9 @@ td a{text-decoration:none;font-weight:600}td a:hover{color:var(--accent-text)}
                  kind:"practice|lift|film|meeting|team|travel|off|other", who:"all|coaches", note? (max 300), author, ts}
                 Team calendar (practices, lifts, film, team events). Games stay in "games". start "" = all day.
                 who:"coaches" rows are hidden from the player login by the database rule and by the page.
+       gscout   {ref:{kind:"game|event|quick",id}, level, date, oppId?, oppName, exh, q:"Q1|Q2|Q3|Q4|OT", fouls:{"23":[{q,ts}]},
+                 entries:[{id, sec:"off|def|note", q, text, def?, ts, by}]}  id = "g-"+game id, "e-"+event id, or "q-…" (quick exhibition)
+                Game Scout (coaches only; players never read it, by the database rule and by the page). Exhibitions never attach to an opponent.
        accounts {salt, hash, setAt}  id = "coach" or "player" (one shared login each; stored only as salted hashes)
    - On the live site (GitHub Pages) the same collections live in Supabase table public.docs
      as rows {coll:"<name>", id, data:{...}}; logins are Supabase users (CONFIG.supabase).
@@ -1119,7 +1165,7 @@ const slug=x=>String(x).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/
 const DEF={
  players:[],games:[],opps:[],notes:[],clips:[],posts:[],calls:[],
  terms:GLOSS.flatMap(([cat,a])=>a.map(([name,def])=>({id:"gl-"+slug(name),cat,name,def}))),
- stand:[],lres:[],plays:[],playsets:[],templates:[],statgames:[],accounts:[],talk:[],talks:[],history:[],events:[],staffdir:[],settings:[]
+ stand:[],lres:[],plays:[],playsets:[],templates:[],statgames:[],accounts:[],talk:[],talks:[],history:[],events:[],staffdir:[],settings:[],gscout:[]
 };
 /* Terms saved by older versions under ids t0..t15 duplicate the built-in list; hide those copies. */
 const DEF_TERM_NAMES=new Set(DEF.terms.map(t=>t.name.trim().toLowerCase()));
@@ -1347,7 +1393,7 @@ function winStreak(){const p=counted();if(!p.length)return"";const last=p[p.leng
 
 /* ================= Session, routing, nav ================= */
 let user=LOCAL_OK?LS.get(CONFIG.sessionKey):null;
-const ROUTES={coach:["home","calendar","playbook","scouting","roster","stats","schedule","league","glossary"],admin:["home","calendar","playbook","scouting","roster","stats","schedule","league","glossary","admin"],player:["home","calendar","playbook","scouting","roster","stats","schedule","league","glossary"]};
+const ROUTES={coach:["home","calendar","playbook","scouting","scout","roster","stats","schedule","league","glossary"],admin:["home","calendar","playbook","scouting","scout","roster","stats","schedule","league","glossary","admin"],player:["home","calendar","playbook","scouting","roster","stats","schedule","league","glossary"]};
 const TABS=["home","calendar","playbook","scouting"];
 const route=()=>location.hash.slice(1)||"home";
 function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(/^schedule\/(v|jv|c)$/.test(r))return true;if(/^calendar\/\d{4}-\d\d-\d\d$/.test(r))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin();return (ROUTES[user.role]||[]).includes(r)}
@@ -1363,6 +1409,7 @@ const IC={
   roster:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c.5-3.5 3-5.5 6-5.5s5.5 2 6 5.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.5c2.6.2 4.4 2 5 5"/>',
   stats:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   scouting:'<circle cx="11" cy="11" r="6.5"/><path d="M20.5 20.5L16 16"/>',
+  scout:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4M9 10h6M9 14h6M9 18h3"/>',
   league:'<path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8"/>',
   playbook:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.6"/><path d="M14 8l3 3m0-3l-3 3M9 15c2 0 4-1 6-3"/>',
   glossary:'<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11M9 8h6"/>',
@@ -1370,7 +1417,7 @@ const IC={
   admin:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
 };
-const LABEL={home:"Home",schedule:"Game schedule",calendar:"Calendar",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"Standings",playbook:"Playbook",glossary:"Basketball glossary",admin:"Staff & changes",more:"More"};
+const LABEL={home:"Home",scout:"Game Scout",schedule:"Game schedule",calendar:"Calendar",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"Standings",playbook:"Playbook",glossary:"Basketball glossary",admin:"Staff & changes",more:"More"};
 const ico=k=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
 const MARK=(w=36)=>`<img src="logo.png" width="${w}" height="${w}" alt="" aria-hidden="true" style="display:block;flex:none;object-fit:contain">`;
 const openSet=new Set(["keys","players-know","play-roles","play-notes"]);
@@ -1412,7 +1459,7 @@ function view(r){
   if(r==="home")return homeView();if(r==="schedule"||r.startsWith("schedule/"))return scheduleView(r.split("/")[1]);
   /* #calendar/YYYY-MM-DD selects that day, then the address goes back to #calendar */
   if(r.startsWith("calendar/")){const d=r.slice(9);if(realDate(d)){const dd=D(d);calAnchor=new Date(dd.getFullYear(),dd.getMonth(),1,12);calSel=d}else{calAnchor=new Date(TODAY);calSel=ymd(TODAY)}try{history.replaceState(history.state,"","#calendar")}catch(e){}return calendarView()}if(r==="calendar")return calendarView();if(r==="roster")return rosterView();if(r==="stats")return statsView();
-  if(r==="scouting")return scoutingView();if(r.startsWith("opp-"))return oppView(r.slice(4));if(r==="league")return leagueView();
+  if(r==="scout")return scoutView();if(r==="scouting")return scoutingView();if(r.startsWith("opp-"))return oppView(r.slice(4));if(r==="league")return leagueView();
   if(r==="playbook")return playbookView();if(r==="glossary")return glossaryView();if(r.startsWith("player-"))return playerView(r.slice(7));
 if(r.startsWith("game-"))return gameView(r.slice(5));if(r==="admin")return adminView();return homeView();
 }
@@ -2144,6 +2191,7 @@ function oppView(id){
   ${panel("their-coach","Their coach & schemes","Offense, defense, press, sets",coachBody)}
   ${panel("film","Film",plural(clips.length,"clip"),filmBody)}
   ${(()=>{const sh=notes.filter(n=>n.vis==="team").length;return coach?panel("opp-notes",`<span class="pc-only">Scouting notes</span><span class="pp-only">Notes from your coaches</span>`,`<span class="pc-only">${plural(notes.length,"note")}</span><span class="pp-only">${plural(sh,"note")}</span>`,notesBody,sh?"":"coachonly"):panel("opp-notes","Notes from your coaches",plural(notes.length,"note"),notesBody)})()}
+  ${gsOppPanel(id)}
   ${panel("past-meetings","Past meetings",pm.length?`${plural(pm.length,"game")} · ${pmW}–${pm.length-pmW}`:"Last two seasons",lastBody)}`;
 }
 
@@ -2814,10 +2862,113 @@ function tplListHTML(){const row=(t,mine)=>`<div class="tplitem"><button type="b
   const ours=tplAll().sort((a,b)=>String(a.name).localeCompare(String(b.name)));
   return `<p class="small muted" style="margin:0">Copies the court, steps and roles into this play, and sets offense or defense. Your play name stays.</p><div class="tplgroup">Offense base sets</div>${BASE_SETS.map(t=>row(t,false)).join("")}<div class="tplgroup">Defensive alignments</div>${DEF_SETS.map(t=>row(t,false)).join("")}<div class="tplgroup">Our templates</div>${ours.map(t=>row(t,true)).join("")||'<p class="small muted" style="margin:0">None saved yet. Build a play and tap <b>Save as template</b>.</p>'}`}
 
+/* ================= Game Scout (coaches only): live opponent tracking from the bench ================= */
+const GS_DEFS=["Man","2-3 Zone","1-3-1","3-2","Full-Court Press","Half-Court Trap"];
+const GS_QS=["Q1","Q2","Q3","Q4","OT"];
+const GS_SEC={fouls:"Fouls",off:"Opponent Offense",def:"Opponent Defense",note:"Game Notes"};
+const GS_LAST="cpc_gs_last";
+let gsView="home",gsEdit=false,gsQ=Promise.resolve(),gsDef="";
+const gsExhRe=/jamboree|exhibition|scrimmage/i;
+const gsAll=()=>isCoach()?items("gscout"):[];
+const gsGet=id=>isCoach()?get("gscout",id):null;
+/* Every game a coach can scout: varsity games, JV/C game events, and quick exhibitions already started */
+function gsGames(){if(!isCoach())return[];const out=[];
+  games().forEach(g=>{const o=O(g.opp);const exh=isExh(g)||gsExhRe.test(String(g.event||""));out.push({key:"g-"+g.id,ref:{kind:"game",id:g.id},level:"V",date:g.date,time:parseTime(g.time)||"",oppName:o.name,oppId:exh||!get("opps",g.opp)?null:g.opp,exh,title:(isExh(g)&&g.event?g.event+": ":"")+vsAt(g)+" "+o.name})});
+  evs().filter(e=>e&&e.kind==="game"&&realDate(e.date)).forEach(e=>{const t=evTeams(e);const lv=t.length===1?t[0]:(t.find(k=>k!=="V")||"V");
+    const gi=lvGameInfo(e);const nm=gi.name.replace(/^(vs\.?|@|at)\s+/i,"").trim()||gi.name;const exh=gsExhRe.test(String(e.title||"")+" "+String(e.note||""));const m=exh?null:oppDup(nm);
+    out.push({key:"e-"+e.id,ref:{kind:"event",id:e.id},level:lv,date:e.date,time:e.start||"",oppName:nm,oppId:m?m.id:null,exh,title:gi.name})});
+  gsAll().filter(s=>s.ref&&s.ref.kind==="quick").forEach(s=>out.push({key:s.id,ref:s.ref,level:s.level,date:s.date,time:"",oppName:s.oppName,oppId:null,exh:true,title:"vs "+s.oppName}));
+  return out.sort((a,b)=>a.date.localeCompare(b.date)||String(a.time).localeCompare(String(b.time)))}
+const gsGameOf=key=>gsGames().find(x=>x.key===key)||null;
+function gsCur(){const k=LS.get(GS_LAST);if(!k)return null;const g=gsGameOf(k);if(g)return g;const s=gsGet(k);return s?{key:s.id,ref:s.ref,level:s.level,date:s.date,oppName:s.oppName,oppId:s.oppId||null,exh:!!s.exh,title:"vs "+s.oppName}:null}
+const gsBlank=g=>({ref:g.ref,level:g.level,date:g.date,oppId:g.oppId||null,oppName:g.oppName,exh:!!g.exh,q:"Q1",fouls:{},entries:[]});
+const gsDoc=g=>{const s=gsGet(g.key);return s?{...gsBlank(g),...s,ref:g.ref,level:g.level,date:g.date,oppId:g.oppId||null,oppName:g.oppName,exh:!!g.exh}:gsBlank(g)};
+const gsFoulN=s=>Object.values(s.fouls||{}).reduce((a,l)=>a+l.length,0);
+const gsSecN=(s,sec)=>(s.entries||[]).filter(e=>e.sec===sec).length;
+const gsNum=(a,b)=>(+a-+b)||(a.length-b.length)||a.localeCompare(b);
+/* Save the whole session doc: shows at once, saves in order, Undo puts the previous version back */
+function gsSave(key,next,msg){const prev=store.gscout[key]===undefined?undefined:JSON.parse(JSON.stringify(store.gscout[key]));
+  const clean=JSON.parse(JSON.stringify(next));delete clean.id;store.gscout[key]=clean;render();
+  gsQ=gsQ.then(()=>saveDoc("gscout",key,clean)).catch(e=>{if(prev===undefined)delete store.gscout[key];else store.gscout[key]=prev;render();toast(e.message||"Couldn't save",true)});
+  toastUndo(msg,async()=>{await gsQ;if(prev===undefined)await removeDoc("gscout",key);else await saveDoc("gscout",key,prev)})}
+const gsLvChip=lv=>`<span class="lvtag" data-lv="${esc(String(lv).toLowerCase())}">${esc(lv==="C"?"C-Team":lv)}</span>`;
+const gsExhChip='<span class="chip gold">Exhibition</span>';
+const gsWhen=x=>`${dow(D(x.date))}, ${mon(D(x.date))} ${D(x.date).getDate()}${x.time&&/^\d\d:\d\d$/.test(x.time)?" · "+fmtTime(x.time):""}`;
+function gsPickRow(x){const cur=LS.get(GS_LAST)===x.key;return `<button type="button" class="gsrow lvx ${cur?"cur":""}" style="${lvStyle([x.level])}" data-act="gsPick" data-k="${esc(x.key)}"><span class="gsrt"><b>${esc(x.title)}</b><span class="small muted">${esc(gsWhen(x))}</span></span><span class="gsrc">${gsLvChip(x.level)}${x.exh?gsExhChip:""}${gsGet(x.key)?'<span class="chip num">'+gsFoulN(gsGet(x.key))+'F</span>':""}</span></button>`}
+function gsPicker(){const t=ymd(TODAY);const L=gsGames();const today=L.filter(x=>x.date===t),up=L.filter(x=>x.date>t),past=L.filter(x=>x.date<t).reverse();
+  return `<div class="head"><div><h1>Game Scout</h1></div><div class="row"><button class="btn sm edit" data-act="gsQuick">${PLUS}Quick exhibition</button></div></div>
+  <section class="gssec" aria-label="Today"><h2 class="gsh">Today</h2>${today.map(gsPickRow).join("")||'<p class="muted small">No games today.</p>'}</section>
+  ${up.length?`<section class="gssec" aria-label="Upcoming"><h2 class="gsh">Upcoming</h2>${up.slice(0,12).map(gsPickRow).join("")}</section>`:""}
+  ${past.length?`<details class="gssec gspast"><summary class="gsh">${CHEV}Past <span class="chip num">${past.length}</span></summary>${past.map(gsPickRow).join("")}</details>`:""}`}
+function gsHeadRow(g){return `<button type="button" class="gshead" data-act="gsSwitch" aria-label="Switch game"><span class="gsht"><b>${esc(g.oppName)}</b>${gsLvChip(g.level)}${g.exh?gsExhChip:""}</span><span class="small muted">${esc(mon(D(g.date))+" "+D(g.date).getDate())} ${CHEV}</span></button>`}
+function gsQuarter(s){return `<div class="gsq seg" role="group" aria-label="Quarter">${GS_QS.map(q=>`<button type="button" data-act="gsSetQ" data-q="${q}" class="${s.q===q?"on":""}" aria-pressed="${s.q===q}">${q}</button>`).join("")}</div>`}
+const GS_IC={fouls:'<path d="M12 3v10M12 17v.5"/><circle cx="12" cy="12" r="10"/>',off:'<path d="M4 12h13M13 6l6 6-6 6"/>',def:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/>',note:'<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>'};
+function gsHome(s){const c={fouls:plural(gsFoulN(s),"foul"),off:plural(gsSecN(s,"off"),"note"),def:plural(gsSecN(s,"def"),"note"),note:plural(gsSecN(s,"note"),"note")};
+  return `<div class="gsgrid">${Object.keys(GS_SEC).map(k=>`<button type="button" class="gsbig" data-act="gsGo" data-v="${k}"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GS_IC[k]}</svg><b>${esc(GS_SEC[k])}</b><span class="num" data-count="${k}">${esc(c[k])}</span></button>`).join("")}</div>`}
+const gsBack=t=>`<div class="gsback"><button type="button" class="btn icon gsbk" data-act="gsGo" data-v="home" aria-label="Back">${CHEV}</button><h2>${esc(t)}</h2></div>`;
+function gsFouls(s){const F=s.fouls||{};const nos=Object.keys(F).filter(n=>F[n].length).sort(gsNum);
+  return gsBack("Fouls")+`<div class="gsfbar"><button type="button" class="btn gold gsadd" data-act="gsKeypad">${PLUS}Foul</button>${nos.length?`<button type="button" class="btn gsedit ${gsEdit?"on":""}" data-act="gsEditMode" aria-pressed="${gsEdit}">${gsEdit?"Done":"Edit"}</button>`:""}</div>
+  <div class="gstiles ${gsEdit?"editing":""}">${nos.map(n=>{const l=F[n];const k=l.length;return `<div class="gstile ${k>=4?"red":k===3?"yel":""}" data-no="${esc(n)}"><button type="button" class="gstap" data-act="gsFoul" data-no="${esc(n)}" aria-label="#${esc(n)}: ${plural(k,"foul")}. Tap to add one"><span class="gsno">#${esc(n)}</span><span class="gsfc num">${k}</span><span class="gsqb">${esc(l.map(x=>x.q).join(" · "))}</span></button>${gsEdit?`<button type="button" class="gsminus" data-act="gsUnfoul" data-no="${esc(n)}" aria-label="Remove a foul from #${esc(n)}">−</button>`:""}</div>`}).join("")}</div>
+  ${nos.length?'<p class="small muted gshint">Tap a player for +1. Hold to remove one.</p>':""}`}
+function gsEntries(s,sec){const L=(s.entries||[]).filter(e=>e.sec===sec).sort((a,b)=>b.ts-a.ts);
+  return `<div class="gslist">${L.map(e=>`<div class="gsent"><span class="chip gsqc">${esc(e.q)}</span><div class="gset">${e.def?`<b>${esc(e.def)}</b>`:""}${e.text?`<span>${esc(e.text)}</span>`:""}</div><button type="button" class="btn icon edit" data-act="gsEditEnt" data-id="${esc(e.id)}" aria-label="Edit">${PEN}</button><button type="button" class="btn icon del" data-act="gsDelEnt" data-id="${esc(e.id)}" aria-label="Delete">${TRASH}</button></div>`).join("")||'<p class="muted small">Nothing yet.</p>'}</div>`}
+function gsTextSec(s,sec){const lab=sec==="off"?"What are they running?":"Note";
+  return gsBack(GS_SEC[sec])+`<form class="gsform" data-sec="${sec}"><label class="f" for="gstext">${lab}<textarea id="gstext" rows="2" maxlength="400" enterkeyhint="done"></textarea></label><button type="submit" class="btn gold gsaddbtn">${PLUS}Add</button></form>`+gsEntries(s,sec)}
+function gsDefSec(s){return gsBack(GS_SEC.def)+`<form class="gsform" data-sec="def"><div class="gsdefs" role="group" aria-label="Defense">${GS_DEFS.map(d=>`<button type="button" class="gsdef ${gsDef===d?"on":""}" data-act="gsPickDef" data-v="${esc(d)}" aria-pressed="${gsDef===d}">${esc(d)}</button>`).join("")}</div><label class="f" for="gstext">Note<textarea id="gstext" rows="2" maxlength="400" enterkeyhint="done"></textarea></label><button type="submit" class="btn gold gsaddbtn">${PLUS}Add</button></form>`+gsEntries(s,"def")}
+function scoutView(){if(!isCoach())return homeView();const g=gsCur();if(!g)return gsPicker();const s=gsDoc(g);
+  const body=gsView==="fouls"?gsFouls(s):gsView==="def"?gsDefSec(s):gsView==="off"||gsView==="note"?gsTextSec(s,gsView):gsHome(s);
+  return `<div class="gs">${gsHeadRow(g)}${gsQuarter(s)}<div class="gsbody">${body}</div></div>`}
+/* Opponent page: past scouting sessions (never exhibitions) */
+const gsTally=s=>{const t={};(s.entries||[]).filter(e=>e.sec==="def"&&e.def).forEach(e=>t[e.def]=(t[e.def]||0)+1);return Object.entries(t).sort((a,b)=>b[1]-a[1]).map(([d,n])=>`${d} ×${n}`).join(", ")};
+const gsTopFouls=s=>Object.entries(s.fouls||{}).filter(([,l])=>l.length).sort((a,b)=>b[1].length-a[1].length||gsNum(a[0],b[0])).slice(0,3).map(([n,l])=>`#${n} ×${l.length}`).join(", ");
+function gsOppPanel(oid){if(!isCoach())return"";const L=gsAll().filter(s=>s.oppId===oid&&!s.exh).sort((a,b)=>String(b.date).localeCompare(String(a.date)));if(!L.length)return"";
+  const body=L.map(s=>{const byQ=GS_QS.map(q=>{const es=(s.entries||[]).filter(e=>e.q===q).sort((a,b)=>a.ts-b.ts);return es.length?`<div class="gsqgrp"><span class="chip gsqc">${q}</span>${es.map(e=>`<div class="small"><span class="muted">${e.sec==="off"?"Offense":e.sec==="def"?"Defense":"Note"}:</span> ${e.def?`<b>${esc(e.def)}</b> `:""}${esc(e.text||"")}</div>`).join("")}</div>`:""}).join("");
+    const tf=gsTopFouls(s),td=gsTally(s);
+    return `<details class="gsopp"><summary><span><b>${esc(mon(D(s.date))+" "+D(s.date).getDate()+", "+D(s.date).getFullYear())}</b> ${gsLvChip(s.level)}</span><span class="small muted">${tf?"Fouls "+esc(tf):"No fouls"}${td?" · "+esc(td):""}</span></summary><div class="gsoppb">${byQ||'<p class="muted small">No notes.</p>'}</div></details>`}).join("");
+  return panel("game-scout",'Game Scout <span class="chip">Coaches only</span>',plural(L.length,"game"),body,"coachonly")}
+function gsKeypadHTML(){return `<div class="gskp"><div class="gskd num" id="gskd" aria-live="polite">#</div><div class="gskeys">${["1","2","3","4","5","6","7","8","9","bk","0","ok"].map(k=>k==="bk"?`<button type="button" class="gskey" data-act="gsKey" data-k="bk" aria-label="Delete digit">⌫</button>`:k==="ok"?`<button type="button" class="gskey ok" data-act="gsKey" data-k="ok" id="gskok" disabled>Add</button>`:`<button type="button" class="gskey num" data-act="gsKey" data-k="${k}">${k}</button>`).join("")}</div></div>`}
+let gsKp="";
+function gsAddFoul(no){const g=gsCur();if(!g)return;const s=gsDoc(g);const F={...(s.fouls||{})};F[no]=[...(F[no]||[]),{q:s.q||"Q1",ts:Date.now()}];
+  const k=F[no].length;gsSave(g.key,{...s,fouls:F},`#${no}: ${plural(k,"foul")}`+(k>=4?" ⚠":""))}
+function gsRemoveFoul(no){const g=gsCur();if(!g)return;const s=gsDoc(g);const F={...(s.fouls||{})};if(!F[no]||!F[no].length)return;F[no]=F[no].slice(0,-1);if(!F[no].length)delete F[no];
+  gsSave(g.key,{...s,fouls:F},`#${no}: ${plural((F[no]||[]).length,"foul")}`)}
+function gsAddEntry(sec,text,def){const g=gsCur();if(!g)return false;const s=gsDoc(g);text=String(text||"").replace(/\s+$/,"").trim().slice(0,400);
+  if(!text&&!(sec==="def"&&def)){toast(sec==="def"?"Pick a defense or type a note":"Type a note first",true);return false}
+  const e={id:uid("x"),sec,q:s.q||"Q1",text,ts:Date.now(),by:(user&&(user.cid||user.name))||"coach"};if(sec==="def"&&def)e.def=def;
+  gsSave(g.key,{...s,entries:[...(s.entries||[]),e]},"Added to "+(s.q||"Q1"));return true}
+const GS_ACT={
+  gsPick(d){LS.set(GS_LAST,d.k);gsView="home";gsEdit=false;render();window.scrollTo(0,0)},
+  gsSwitch(){LS.set(GS_LAST,null);gsView="home";render();window.scrollTo(0,0)},
+  gsGo(d){gsView=d.v;gsEdit=false;if(d.v!=="def")gsDef="";render();window.scrollTo(0,0)},
+  gsSetQ(d){const g=gsCur();if(!g)return;const s=gsDoc(g);if(s.q===d.q)return;gsSave(g.key,{...s,q:d.q},"Quarter: "+d.q)},
+  gsKeypad(){gsKp="";listSheet("Jersey number",gsKeypadHTML())},
+  gsKey(d){if(d.k==="ok"){if(!gsKp)return;const n=gsKp;gsKp="";closeSheetPop();gsAddFoul(n);return}
+    if(d.k==="bk")gsKp=gsKp.slice(0,-1);else if(gsKp.length<2)gsKp+=d.k;const el=$("#gskd");if(el)el.textContent="#"+gsKp;const ok=$("#gskok");if(ok)ok.disabled=!gsKp},
+  gsFoul(d,el){if(el&&el.dataset.lp==="1"){el.dataset.lp="";return}gsAddFoul(d.no)},
+  gsUnfoul(d){gsRemoveFoul(d.no)},
+  gsEditMode(){gsEdit=!gsEdit;render()},
+  gsPickDef(d){gsDef=gsDef===d.v?"":d.v;$$(".gsdef").forEach(b=>{const on=b.dataset.v===gsDef;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)})},
+  gsDelEnt(d){const g=gsCur();if(!g)return;const s=gsDoc(g);const e=(s.entries||[]).find(x=>x.id===d.id);if(!e)return;gsSave(g.key,{...s,entries:s.entries.filter(x=>x.id!==d.id)},"Note deleted")},
+  gsEditEnt(d){const g=gsCur();if(!g)return;const s=gsDoc(g);const e=(s.entries||[]).find(x=>x.id===d.id);if(!e)return;
+    openSheet({title:"Edit "+(GS_SEC[e.sec]||"note").toLowerCase(),fields:[...(e.sec==="def"?[{key:"def",label:"Defense",type:"select",options:[["","None"],...GS_DEFS.map(x=>[x,x])]}]:[]),{key:"q",label:"Quarter",type:"select",options:GS_QS.map(x=>[x,x]),half:true},{key:"text",label:"Note",type:"textarea",max:400}],value:{...e,def:e.def||""},saved:"Saved",
+      onSave:async v=>{const t=String(v.text||"").trim().slice(0,400);if(!t&&!(e.sec==="def"&&v.def))throw new Error("Type a note first");const cur=gsDoc(g);const ne={...e,text:t,q:GS_QS.includes(v.q)?v.q:e.q};if(e.sec==="def"){if(v.def)ne.def=v.def;else delete ne.def}
+        await saveDoc("gscout",g.key,{...cur,entries:cur.entries.map(x=>x.id===e.id?ne:x)})}})},
+  gsQuick(){openSheet({title:"Quick exhibition",fields:[{key:"level",label:"Level",type:"seg",options:[["V","Varsity"],["JV","JV"],["C","C-Team"]],req:true},{key:"opp",label:"Opponent",req:true,max:60}],value:{level:"V"},saved:"Game started",
+    onSave:async v=>{const nm=String(v.opp||"").replace(/\s+/g," ").trim();if(!nm)throw new Error("Opponent is required");const id="q-"+uid("");const lv=["V","JV","C"].includes(v.level)?v.level:"V";
+      await saveDoc("gscout",id,{ref:{kind:"quick",id},level:lv,date:ymd(TODAY),oppId:null,oppName:nm,exh:true,q:"Q1",fouls:{},entries:[]});LS.set(GS_LAST,id);gsView="home"}})}
+};
+function gsBind(){
+  $$(".gsform").forEach(f=>f.addEventListener("submit",e=>{e.preventDefault();const t=f.querySelector("textarea");const sec=f.dataset.sec;const dv=sec==="def"?gsDef:"";gsDef="";if(!gsAddEntry(sec,t.value,dv))gsDef=dv}));
+  $$(".gsform textarea").forEach(t=>t.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();t.form.requestSubmit()}}));
+  /* Hold a player tile to take one foul back */
+  $$(".gstap").forEach(b=>{let tm=null;const clear=()=>{clearTimeout(tm);tm=null};
+    b.addEventListener("pointerdown",()=>{clear();b.dataset.lp="";tm=setTimeout(()=>{tm=null;b.dataset.lp="1";if(navigator.vibrate)try{navigator.vibrate(15)}catch(e){}gsRemoveFoul(b.dataset.no)},550)});
+    ["pointerup","pointerleave","pointercancel"].forEach(ev=>b.addEventListener(ev,clear));b.addEventListener("contextmenu",e=>e.preventDefault())})}
+
 /* ================= Actions (all edits go through Save + toast) ================= */
 const POS=["PG","SG","G","W","F","C"],YRS=["Fr","So","Jr","Sr"];
 const oppOptions=()=>opps().map(o=>[o.id,o.name]);
-const ACT={
+const ACT={...GS_ACT,
   sbRetry(){if(SB&&user)sbLoad()},
   sbReload(){location.reload()},
   async signout(){openSet.delete("past-games");stopPlayback();ed=null;pbSide=null;curPlay=null;closeSheet(true);if(SB){try{await SB.auth.signOut({scope:"local"})}catch(e){}sbClear()}user=null;LS.set(CONFIG.sessionKey,null);history.replaceState(null,"","#");render();toast("Signed out")},
@@ -3126,7 +3277,7 @@ document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if
 
 /* ================= Admin: Staff & changes (live site only; staff names appear only here) ================= */
 let ADM;function admReset(){ADM={tab:"staff",staff:null,staffBusy:false,staffErr:"",reqs:null,reqsBusy:false,log:[],logDone:false,logBusy:false,logErr:"",logLoaded:false,logGen:ADM?ADM.logGen+1:0,f:{actor:"",coll:"",from:"",to:""},exact:new Set()}}admReset();
-const SECT={games:"Game schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"Standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Basketball glossary",calls:"Calls",playsets:"Playbook (hidden list)",posts:"Team feed (old)",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",events:"Calendar",staffdir:"Staff directory",settings:"Settings",accounts:"Passwords"};
+const SECT={games:"Game schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"Standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Basketball glossary",calls:"Calls",playsets:"Playbook (hidden list)",posts:"Team feed (old)",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",events:"Calendar",staffdir:"Staff directory",settings:"Settings",accounts:"Passwords",gscout:"Game Scout"};
 const sectName=c=>SECT[c]||c;
 /* Sections of removed features: their old rows stay in the database but never show in the change log. */
 const GONE_COLLS=["badges","awards"];
@@ -3179,6 +3330,7 @@ function admLabel(a){a=admEff(a);const o=a.old||{},n=a.new||{};let d=a.action===
     case"events":s=d.title?"Event: "+snip(d.title)+(d.date?" · "+shortDate(d.date):""):"";break;
     case"playsets":s="Basic plays hidden from players";break;
     case"accounts":s="Password";break;
+    case"gscout":s="Game Scout: "+(d.oppName||"Game")+(d.date?" · "+shortDate(d.date):"");break;
     default:s=d.name||d.title||"";
   }}catch(e){s=""}
   return String(s||"").trim()||String(id)}
@@ -3319,6 +3471,7 @@ Object.assign(ACT,{
 
 /* ================= Page bindings ================= */
 function bindView(r){
+  if(r==="scout")gsBind();
   if(r==="stats"){
     $$("[data-tab]").forEach(b=>b.onclick=()=>{statTab=b.dataset.tab;render()});
     $$("[data-sort]").forEach(th=>th.onclick=()=>{const k=th.dataset.sort;statSort=statSort.k===k?{k,d:-statSort.d}:{k,d:k==="name"?1:-1};render()});
