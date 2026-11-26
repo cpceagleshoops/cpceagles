@@ -132,7 +132,8 @@ main{padding:22px clamp(16px,2.6vw,34px) 60px;max-width:1180px;width:100%;min-wi
 .res.W{color:var(--good)} .res.L{color:var(--bad)}
 
 .list{display:flex;flex-direction:column}
-.li{display:grid;grid-template-columns:54px 1fr auto;gap:12px;align-items:center;padding:10px 4px;border-top:1px solid var(--line)}
+.li{display:grid;grid-template-columns:54px minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 4px;border-top:1px solid var(--line)}
+.li>div{min-width:0}.li .opp{overflow-wrap:anywhere}.li .gmeta{display:flex;flex-wrap:wrap;align-items:center;column-gap:4px;row-gap:3px}.li .gmeta .chip{font-size:11px;padding:1px 7px;max-width:100%;overflow:hidden;text-overflow:ellipsis}.li .gmeta .nw{white-space:nowrap}.li .gmeta .gsite{min-width:0;overflow-wrap:anywhere}.li .right:empty{display:none}.li .right{flex-shrink:0}.li .gres{white-space:nowrap}
 .li:first-child{border-top:none}
 .li .date{font-family:var(--display);font-size:13px;line-height:1.05;color:var(--muted);text-transform:uppercase}
 .li .date b{display:block;font-size:22px;color:var(--ink);font-weight:600}
@@ -440,7 +441,7 @@ input[type=search]{padding-left:32px;background:var(--bg) url("data:image/svg+xm
   .plist .prow{flex:0 0 auto;background:var(--surface-2);border-radius:9px}.plist .prow .ppick{background:transparent}.plist .prow .ppick.on{background:var(--gold-bg)}.plist .prow .eye{flex-basis:40px;width:40px;height:40px;background:transparent}
   .plist .newp{flex:0 0 100%;padding:4px 0 0!important}
   .plist .newp{white-space:nowrap}
-  .li{grid-template-columns:48px 1fr auto}
+  .li{grid-template-columns:48px minmax(0,1fr) auto}
   .hero h2{font-size:28px}
 }
 @media (max-width:440px){.g4{grid-template-columns:1fr 1fr}.kv{grid-template-columns:repeat(2,minmax(0,1fr))}.scheme{grid-template-columns:1fr}.scheme dt{padding-top:6px}}
@@ -710,12 +711,12 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 /* Tables: names are links without heavy underlines */
 td a{text-decoration:none;font-weight:600}td a:hover{color:var(--accent-text)}
 /* Game schedule rows on narrow phones */
-@media (max-width:360px){.li{grid-template-columns:40px 1fr auto;gap:8px}.li .date b{font-size:20px}}
+@media (max-width:360px){.li{grid-template-columns:40px minmax(0,1fr) auto;gap:8px}.li .date b{font-size:20px}}
 /* Top bar sync: just the dot + "Live" on phones */
 @media (max-width:820px){.topbar .synx{display:none}}
 /* Player page: coach tools sit under the name on phones instead of above it */
 @media (max-width:820px){.phero{display:flex;flex-direction:column}.phero .tools{order:9;margin:14px 0 0}}
-/* Game Scout */
+/* Game Tracker (was Game Scout; route #tracker, old #scout still works) */
 .gs{max-width:720px;margin:0 auto}
 .gshead{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;padding:6px 12px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;color:inherit;font:inherit;text-align:left;cursor:pointer}
 .gshead .gsht{display:flex;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}.gshead b{font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
@@ -780,6 +781,16 @@ td a{text-decoration:none;font-weight:600}td a:hover{color:var(--accent-text)}
 @media (prefers-reduced-motion:reduce){.gssw,.gssw::after{transition:none}}
 .gsft{display:grid!important;grid-template-columns:1fr 1fr;width:100%;margin-bottom:10px}.gsft button{min-height:48px;font-size:16px;font-weight:700}.gsft button.on{background:var(--gold-bg);color:var(--gold-ink)}
 .gspn{font-size:12px;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 4px}
+body.on-tracker .toast{top:auto;bottom:calc(84px + var(--safe-b));transform:translateX(-50%) translateY(20px)}body.on-tracker .toast.show{transform:translateX(-50%) translateY(0)}
+@media (min-width:821px){body.on-tracker .toast{bottom:24px}}
+.gsminus{width:44px;height:44px;top:-10px;right:-10px}
+.gsent .btn.icon{min-width:44px;min-height:44px}
+.gsform textarea,.gsform .gsaddbtn{scroll-margin-top:140px;scroll-margin-bottom:96px}
+.gsopp{border-top:1px solid var(--line);padding:10px 0}.gsopp:first-child{border-top:0;padding-top:2px}
+.gsopph{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin-bottom:6px}.gsopph .small{flex-basis:100%}
+.gsoppn{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 8px;align-items:baseline;padding:5px 0}.gsoppn>span:nth-child(2){overflow-wrap:anywhere}.gsoppn>.small{grid-column:2}
+.gstag{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:6px;background:var(--surface-3);color:var(--muted)}.gstag.opp{color:#ff9a8f}.gstag.eagles{color:var(--gold-ink)}
+.lastmet{margin:0 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
 </style>
 </head>
 <body>
@@ -1356,7 +1367,8 @@ const isExh=g=>!!g&&g.type==="exh";
 /* Games that count: played and not exhibitions (record, standings, season stats) */
 const counted=()=>played().filter(g=>!isExh(g));
 const upcoming=()=>games().filter(g=>!g.played&&g.d>=TODAY);
-const needsScore=()=>games().filter(g=>!g.played&&g.d<TODAY);
+/* past games without a score; exhibitions never nag (coaches can still add one with the pencil) */
+const needsScore=()=>games().filter(g=>!g.played&&g.d<TODAY&&!isExh(g));
 const nextGame=()=>upcoming()[0];
 const nextFor=oid=>upcoming().find(g=>g.opp===oid);
 /* Game label: "Jamboree: vs Issaquah" for exhibitions with an event name (escaped HTML) */
@@ -1419,7 +1431,7 @@ function winStreak(){const p=counted();if(!p.length)return"";const last=p[p.leng
 
 /* ================= Session, routing, nav ================= */
 let user=LOCAL_OK?LS.get(CONFIG.sessionKey):null;
-const ROUTES={coach:["home","calendar","playbook","scouting","scout","roster","stats","schedule","league","glossary"],admin:["home","calendar","playbook","scouting","scout","roster","stats","schedule","league","glossary","admin"],player:["home","calendar","playbook","scouting","roster","stats","schedule","league","glossary"]};
+const ROUTES={coach:["home","calendar","playbook","scouting","tracker","roster","stats","schedule","league","glossary"],admin:["home","calendar","playbook","scouting","tracker","roster","stats","schedule","league","glossary","admin"],player:["home","calendar","playbook","scouting","roster","stats","schedule","league","glossary"]};
 const TABS=["home","calendar","playbook","scouting"];
 const route=()=>location.hash.slice(1)||"home";
 function allowed(r){if(!user)return false;if(r.startsWith("opp-")||r.startsWith("game-"))return true;if(/^schedule\/(v|jv|c)$/.test(r))return true;if(/^calendar\/\d{4}-\d\d-\d\d$/.test(r))return true;if(r.startsWith("player-"))return true;if(r==="admin")return isAdmin();return (ROUTES[user.role]||[]).includes(r)}
@@ -1435,7 +1447,7 @@ const IC={
   roster:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c.5-3.5 3-5.5 6-5.5s5.5 2 6 5.5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.5c2.6.2 4.4 2 5 5"/>',
   stats:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   scouting:'<circle cx="11" cy="11" r="6.5"/><path d="M20.5 20.5L16 16"/>',
-  scout:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4M9 10h6M9 14h6M9 18h3"/>',
+  tracker:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2.8h6V4M9 10h6M9 14h6M9 18h3"/>',
   league:'<path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4M12 13v4M8 21h8"/>',
   playbook:'<rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.6"/><path d="M14 8l3 3m0-3l-3 3M9 15c2 0 4-1 6-3"/>',
   glossary:'<path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z"/><path d="M5 18a2 2 0 0 1 2-2h11M9 8h6"/>',
@@ -1443,10 +1455,10 @@ const IC={
   admin:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
   more:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>'
 };
-const LABEL={home:"Home",scout:"Game Scout",schedule:"Game schedule",calendar:"Calendar",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"Standings",playbook:"Playbook",glossary:"Basketball glossary",admin:"Staff & changes",more:"More"};
+const LABEL={home:"Home",tracker:"Game Tracker",schedule:"Game schedule",calendar:"Calendar",roster:"Roster",stats:"Stats",scouting:"Scouting",league:"Standings",playbook:"Playbook",glossary:"Basketball glossary",admin:"Staff & changes",more:"More"};
 const ico=k=>`<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
 const MARK=(w=36)=>`<img src="logo.png" width="${w}" height="${w}" alt="" aria-hidden="true" style="display:block;flex:none;object-fit:contain">`;
-const openSet=new Set(["keys","players-know","play-roles","play-notes"]);
+const openSet=new Set(["keys","players-know","play-roles","play-notes","game-scout"]);
 function panel(id,title,summary,body,cls=""){return `<details class="panel ${cls}" data-panel="${id}" ${openSet.has(id)?"open":""}><summary>${CHEV}<h2>${title}</h2><span class="sum">${summary||""}</span></summary><div class="pbody">${body}</div></details>`}
 const ebtn=(act,attrs="",label="Edit")=>isCoach()?`<button class="btn sm edit" data-act="${act}" ${attrs}>${PEN}${label}</button>`:"";
 /* Header overflow menu: secondary actions go behind "…" when a header would have 3+ buttons */
@@ -1467,7 +1479,7 @@ function render(){
   if(!user||!["coach","admin","player"].includes(user.role)){user=null;app.innerHTML=loginView();bindLogin();return}
   if(SB&&sbFailed){app.innerHTML=msgScreen("Couldn't load the team data. Check your connection and try again.",`<button class="btn gold" data-act="sbRetry">Retry</button><button class="btn" data-act="signout">Sign out</button>`);return}
   if(SB&&!sbLoaded){app.innerHTML=msgScreen("Loading The Nest…");return}
-  let r=route();if(!allowed(r)){r="home";if(location.hash&&location.hash!=="#home")history.replaceState(null,"","#home")}
+  let r=route();document.body.classList.toggle("on-tracker",r==="tracker"||r==="scout");if(r==="scout"){r="tracker";try{history.replaceState(history.state,"","#tracker")}catch(e){}}/* old address */if(!allowed(r)){r="home";if(location.hash&&location.hash!=="#home")history.replaceState(null,"","#home")}
   const [nm,rl]=whoLabel();const fresh=r!==render._r;render._r=r;
   const on=k=>r===k||(k==="scouting"&&r.startsWith("opp-"))||(k==="roster"&&r.startsWith("player-"))||(k==="schedule"&&(r.startsWith("game-")||r.startsWith("schedule/")))||(k==="calendar"&&r.startsWith("calendar/"));
   const moreOn=!TABS.some(on);
@@ -1485,7 +1497,7 @@ function view(r){
   if(r==="home")return homeView();if(r==="schedule"||r.startsWith("schedule/"))return scheduleView(r.split("/")[1]);
   /* #calendar/YYYY-MM-DD selects that day, then the address goes back to #calendar */
   if(r.startsWith("calendar/")){const d=r.slice(9);if(realDate(d)){const dd=D(d);calAnchor=new Date(dd.getFullYear(),dd.getMonth(),1,12);calSel=d}else{calAnchor=new Date(TODAY);calSel=ymd(TODAY)}try{history.replaceState(history.state,"","#calendar")}catch(e){}return calendarView()}if(r==="calendar")return calendarView();if(r==="roster")return rosterView();if(r==="stats")return statsView();
-  if(r==="scout")return scoutView();if(r==="scouting")return scoutingView();if(r.startsWith("opp-"))return oppView(r.slice(4));if(r==="league")return leagueView();
+  if(r==="tracker")return scoutView();if(r==="scouting")return scoutingView();if(r.startsWith("opp-"))return oppView(r.slice(4));if(r==="league")return leagueView();
   if(r==="playbook")return playbookView();if(r==="glossary")return glossaryView();if(r.startsWith("player-"))return playerView(r.slice(7));
 if(r.startsWith("game-"))return gameView(r.slice(5));if(r==="admin")return adminView();return homeView();
 }
@@ -1682,8 +1694,13 @@ function closeSheet(silent,viaPop){if(!$("#sheetroot").firstChild)return;if(ed&&
 /* ================= Shared view bits ================= */
 function gameRow(g){
   const o=O(g.opp);const isNext=g===nextGame()||(nextGame()&&g.id===nextGame().id);
-  const right=g.played?`<span class="num"><span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b></span>`:g.d<TODAY?`<span class="chip warn">Needs final score</span>`:(isNext?`<span class="nextcell"><span class="chip gold">Up next</span>${fmtTime(g.time)?`<span class="muted small num">${esc(fmtTime(g.time))}</span>`:""}</span>`:`<span class="muted small num">${esc(fmtTime(g.time))}</span>`);
-  return `<div class="li lvx ${isNext?"upnext":""}" style="${lvStyle(["V"])}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${gTitle(g,o)}</a><div class="small muted gmeta"><span class="nw">${dow(g.d)} ·</span> <span class="nw">${esc(siteText(g,o))} ·</span> ${isExh(g)?EXH_CHIP+" ·":g.lg?'<span class="nw">League ·</span>':'<span class="nw">Non-league ·</span>'} ${g.played?(hasBox(g)?`<a href="${gameLink(g)}">Box score</a>`:"Final"):`<a href="${esc(watchOf(g))}" target="_blank" rel="noopener">Watch</a>`}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
+  /* past games without a score: a small chip in the meta line (never for exhibitions); the right column only holds the result and the pencil,
+     so it can never crush the title or push the pencil out */
+  const nag=!g.played&&g.d<TODAY&&!isExh(g)&&isCoach();const tm=fmtTime(g.time);
+  const right=g.played?`<span class="num gres"><span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b></span>`:"";
+  const meta=[isNext?'<span class="chip gold">Up next</span>':"",!g.played&&g.d>=TODAY?`<span class="nw num">${esc(tm||"Time TBA")} ·</span>`:"",`<span class="nw">${dow(g.d)} ·</span>`,`<span class="gsite">${esc(siteText(g,o))} ·</span>`,isExh(g)?EXH_CHIP+" ·":g.lg?'<span class="nw">League ·</span>':'<span class="nw">Non-league ·</span>',
+    g.played?(hasBox(g)?`<a href="${gameLink(g)}">Box score</a>`:"Final"):g.d<TODAY?(nag?'<span class="chip warn">Needs final score</span>':'<span class="nw">No score</span>'):`<a href="${esc(watchOf(g))}" target="_blank" rel="noopener">Watch</a>`].filter(Boolean).join(" ");
+  return `<div class="li lvx ${isNext?"upnext":""}" style="${lvStyle(["V"])}"><div class="date">${mon(g.d)}<b>${g.d.getDate()}</b></div><div><a class="opp" href="#opp-${esc(g.opp)}">${gTitle(g,o)}</a><div class="small muted gmeta">${meta}</div></div><div class="right">${right}${isCoach()?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game">${PEN}</button>`:""}</div></div>`;
 }
 /* Home: next game for each level. Varsity from the Schedule (rich card); JV and C-Team from Calendar events of kind "game". */
 function lvNextCard(k){const t=ymd(TODAY);const e=items("events").filter(x=>x&&x.kind==="game"&&realDate(x.date)&&x.date>=t&&x.who!=="coaches"&&evTeams(x).includes(k)).sort(evCmp)[0];
@@ -2176,7 +2193,7 @@ function histCard(){const h=teamHist().slice(0,2);if(!h.length)return"";
   return `<div class="card histcard"><div class="cardhead"><h2>Our last two seasons</h2>${ebtn("editHist")}</div><div class="grid g2 histgrid">${h.map(x=>`<div class="hist"><div class="hs num">${esc(seasonTxt(x.season))}</div><div><div class="num"><b>${x.w}–${x.l}</b> <span class="muted">overall</span> · <b>${x.lw}–${x.ll}</b> <span class="muted">league</span></div>${x.finish||x.coach?`<div class="small muted">${parts(x.finish,x.coach?"Coach "+x.coach:"")}</div>`:""}${x.notes?`<div class="small muted">${esc(x.notes)}</div>`:""}</div></div>`).join("")}</div></div>`}
 /* Opponents we only meet in exhibitions (e.g. a jamboree) stay off the main Scouting list */
 const exhOnly=o=>{const gs=games().filter(g=>g.opp===o.id);return gs.length>0&&gs.every(isExh)};
-const hasScout=o=>!!((o.keys||[]).length||(o.players||[]).length||(o.last||[]).length||items("notes").some(n=>n.opp===o.id)||items("clips").some(c=>c.opp===o.id)||Object.values(o.coach||{}).some(v=>String(v||"").trim()));
+const hasScout=o=>!!(gsAll().some(s=>s.oppId===o.id&&!s.exh)||(o.keys||[]).length||(o.players||[]).length||(o.last||[]).length||items("notes").some(n=>n.opp===o.id)||items("clips").some(c=>c.opp===o.id)||Object.values(o.coach||{}).some(v=>String(v||"").trim()));
 let scoutExhOpen=false;
 /* Exhibition-only opponents are off the Scouting list; players can't reach them at all, coaches only when there's content */
 const scoutHidden=o=>!!o&&exhOnly(o)&&(!isCoach()||!hasScout(o));
@@ -2184,13 +2201,14 @@ function scoutingView(){
   const all=opps().map(o=>({o,next:nextFor(o.id)})).sort((a,b)=>(a.next?a.next.d:9e15)-(b.next?b.next.d:9e15));
   const list=all.filter(x=>!exhOnly(x.o));const exh=isCoach()?all.filter(x=>exhOnly(x.o)):[];
   return `<div class="head"><div><h1>Varsity scouting</h1></div><div class="row">${teamHist().length?"":abtn("editHist","","Our last two seasons")}${abtn("addOpp","","Add opponent")}</div></div>
-  ${histCard()}${list.length?"":`<div class="empty">No opponents yet.${isCoach()?" Tap Add opponent to start a scouting report.":""}</div>`}<div class="grid g3">${list.map(oppCard).join("")}</div>
-  ${exh.length?`<div class="exhlink"><button type="button" class="linkbtn" data-act="scoutExh" aria-expanded="${scoutExhOpen}">${scoutExhOpen?"Hide":"Show"} exhibition opponents (${exh.length})</button>${scoutExhOpen?`<p class="small muted" style="margin:4px 0 10px">Teams we only play in exhibitions. They stay off the main list.</p><div class="grid g3">${exh.map(oppCard).join("")}</div>`:""}</div>`:""}`;
+  ${list.length?"":`<div class="empty">No opponents yet.${isCoach()?" Tap Add opponent to start a scouting report.":""}</div>`}<div class="grid g3">${list.map(oppCard).join("")}</div>
+  ${exh.length?`<div class="exhlink"><button type="button" class="linkbtn" data-act="scoutExh" aria-expanded="${scoutExhOpen}">${scoutExhOpen?"Hide":"Show"} exhibition opponents (${exh.length})</button>${scoutExhOpen?`<p class="small muted" style="margin:4px 0 10px">Teams we only play in exhibitions. They stay off the main list.</p><div class="grid g3">${exh.map(oppCard).join("")}</div>`:""}</div>`:""}
+  ${histCard()?`<div class="section">${histCard()}</div>`:""}`;
 }
 function oppCard({o,next}){{const st=o.status==="ready"?'<span class="chip good">Ready</span>':o.status==="progress"?'<span class="chip warn">In progress</span>':'<span class="chip">Not started</span>';
     return `<a class="card oppcard" href="#opp-${esc(o.id)}"><div class="spread"><span class="eyebrow">${o.league?"League":"Non-league"}</span>${isCoach()?st:""}</div><h3>${esc(o.name)}</h3>${(()=>{const gs=games().filter(g=>g.opp===o.id);return gs.length?"":`<div class="small muted">${next?`Next: ${dow(next.d)}, ${mon(next.d)} ${next.d.getDate()} · ${({home:"Home",away:"Away",neutral:"Neutral"})[siteOf(next)]}`:"No games scheduled"}</div>`})()}
     ${(()=>{const gs=games().filter(g=>g.opp===o.id);return gs.length?`<div class="small muted">This season</div><div class="row">${gs.map(g=>`<span class="chip ${g.played?(g.res==="W"?"good":"bad"):(next&&g.id===next.id?"gold":"")} num">${mon(g.d)} ${g.d.getDate()} · ${SITE_L[siteOf(g)]} · ${g.played?g.res+" "+scoreTxt(g):g.d<TODAY?"No score":esc(fmtTime(g.time)||"Time TBA")}</span>`).join("")}</div>`:""})()}
-    ${(()=>{const lm=lastMet(o);return lm?`<div class="row"><span class="chip ${lm.res==="W"?"good":"bad"} num">Last met: ${lm.res} ${lm.us}–${lm.them} (${esc(lm.when)})</span></div>`:""})()}</a>`}}
+</a>`}}
 function oppView(id){
   const o=get("opps",id);if(!o)return notFound("Opponent not found","That team isn't in Scouting.","#scouting","Scouting");
   const coach=isCoach();const next=nextFor(id);const stand=get("stand",id);const c=o.coach||{};
@@ -2207,9 +2225,9 @@ function oppView(id){
   const pm=(o.last||[]).map((l,i)=>({...l,i,res:+l.us>+l.them?"W":"L"})).filter(l=>inPast2(l.date)).sort((a,b)=>b.date.localeCompare(a.date));
   const pmW=pm.filter(l=>l.res==="W").length;
   const meetRow=l=>`<div class="meet"><div class="spread"><span class="row" style="gap:8px"><span class="chip ${l.res==="W"?"good":"bad"}">${esc(l.res)}</span><b class="num">${N(l.us)}–${N(l.them)}</b><span class="small muted">${mon(D(l.date))} ${D(l.date).getDate()}, ${D(l.date).getFullYear()}${l.site?" · "+SITE_L[l.site]:""}</span></span><span class="row">${l.src?`<span class="chip good verified">${esc(l.src)}</span>`:""}${coach?`<button class="btn icon edit" data-act="editMeet" data-id="${esc(id)}" data-idx="${l.i}" aria-label="Edit meeting">${PEN}</button>`:""}</span></div>${l.note?`<p class="small muted" style="margin:4px 0 0">${esc(l.note)}</p>`:""}</div>`;
-  const lastBody=T(abtn("addMeet",`data-id="${esc(id)}"`,"Add meeting"))+(pm.length?pastSeasons().map(ps=>{const rows=pm.filter(l=>seasonOf(l.date)===ps.label);if(!rows.length)return"";const w=rows.filter(l=>l.res==="W").length;return `<div class="meetseason"><div class="tplgroup">${esc(ps.label)} · <span class="num">${w}–${rows.length-w}</span></div>${rows.map(meetRow).join("")}</div>`}).join(""):'<p class="muted" style="margin:0">No meetings in the last two seasons.</p>');
+  const lmet=lastMet(o);const lastBody=T(abtn("addMeet",`data-id="${esc(id)}"`,"Add meeting"))+(lmet?`<p class="small lastmet"><span class="chip ${lmet.res==="W"?"good":"bad"} num">Last met: ${lmet.res} ${lmet.us}–${lmet.them}</span> <span class="muted">${esc(lmet.when)}</span></p>`:"")+(pm.length?pastSeasons().map(ps=>{const rows=pm.filter(l=>seasonOf(l.date)===ps.label);if(!rows.length)return"";const w=rows.filter(l=>l.res==="W").length;return `<div class="meetseason"><div class="tplgroup">${esc(ps.label)} · <span class="num">${w}–${rows.length-w}</span></div>${rows.map(meetRow).join("")}</div>`}).join(""):'<p class="muted" style="margin:0">No meetings in the last two seasons.</p>');
   const mine=games().filter(g=>g.opp===id);const mrec=mine.filter(g=>g.played&&!isExh(g));
-  const seasonBody=T(abtn("addGame",`data-opp="${esc(id)}"`,"Add game vs "+esc(o.name)))+(mine.length?mine.map(g=>`<div class="spread" style="padding:7px 0;border-top:1px solid var(--line)"><span>${dow(g.d)}, ${mon(g.d)} ${g.d.getDate()} · ${vsAt(g)} ${esc(o.name)}${siteOf(g)==="neutral"?" (neutral)":""}${g.venue?" · "+esc(g.venue):""}${g.lg&&!isExh(g)?" · League":""}${isExh(g)?" "+EXH_CHIP+(g.event?" "+esc(g.event):""):""}</span><span class="num row" style="white-space:nowrap;gap:6px">${g.played?`<span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b>`:g.d<TODAY?'<span class="chip warn">Needs final score</span>':esc(fmtTime(g.time)||"Time TBA")}${coach?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game on ${esc(mon(g.d)+" "+g.d.getDate())}">${PEN}</button>`:""}</span></div>`).join(""):'<p class="muted" style="margin:0">No games against them this season.</p>');
+  const seasonBody=T(abtn("addGame",`data-opp="${esc(id)}"`,"Add game vs "+esc(o.name)))+(mine.length?mine.map(g=>`<div class="spread" style="padding:7px 0;border-top:1px solid var(--line)"><span>${dow(g.d)}, ${mon(g.d)} ${g.d.getDate()} · ${vsAt(g)} ${esc(o.name)}${siteOf(g)==="neutral"?" (neutral)":""}${g.venue?" · "+esc(g.venue):""}${g.lg&&!isExh(g)?" · League":""}${isExh(g)?" "+EXH_CHIP+(g.event?" "+esc(g.event):""):""}</span><span class="num row" style="white-space:nowrap;gap:6px">${g.played?`<span class="res ${g.res}">${g.res}</span><b>${scoreTxt(g)}</b>`:g.d<TODAY?(isExh(g)?'<span class="muted small">No score</span>':'<span class="chip warn">Needs final score</span>'):esc(fmtTime(g.time)||"Time TBA")}${coach?`<button class="btn icon edit" data-act="editGame" data-id="${esc(g.id)}" aria-label="Edit game on ${esc(mon(g.d)+" "+g.d.getDate())}">${PEN}</button>`:""}</span></div>`).join(""):'<p class="muted" style="margin:0">No games against them this season.</p>');
   return `<a class="backlink" href="#scouting">‹ Scouting</a><div class="head"><div><div class="eyebrow">${o.league?"League":"Non-league"}${o.city?" · "+esc(o.city):""}${stand?` · ${N(stand.lw)}–${N(stand.ll)}`:""}</div><h1>${esc(o.name)}</h1><p class="small muted nextline">${next?`Next: ${longDate(next.d)}${next.time?" · "+esc(fmtTime(next.time)):""}, ${({home:"home",away:"away",neutral:"neutral site"})[siteOf(next)]}${coach?`<button class="btn icon edit" data-act="editGame" data-id="${esc(next.id)}" aria-label="Edit next game">${PEN}</button>`:""}`:"No games scheduled"}</p></div><div class="row">${(()=>{const pr=`<button class="btn sm" data-act="printReport" data-id="${esc(id)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6h-2"/><rect x="6" y="14" width="12" height="7"/></svg>Print report</button>`;return isCoach()?ebtn("editOpp",`data-id="${esc(id)}"`,"Edit team")+hmenu([pr,`<button class="btn sm del" data-act="del" data-k="opp" data-id="${esc(id)}">${TRASH}Delete team</button>`]):pr})()}</div></div>
   ${panel("this-season","This season",mine.length?plural(mine.length,"game")+(mrec.length?` · ${mrec.filter(g=>g.res==="W").length}–${mrec.filter(g=>g.res==="L").length}`:""):"No games",seasonBody)}
   ${panel("keys","Keys to the game",keys.length?plural(keys.length,"key"):"",keysBody,"keys")}
@@ -2218,7 +2236,7 @@ function oppView(id){
   ${panel("film","Film",plural(clips.length,"clip"),filmBody)}
   ${(()=>{const sh=notes.filter(n=>n.vis==="team").length;return coach?panel("opp-notes",`<span class="pc-only">Scouting notes</span><span class="pp-only">Notes from your coaches</span>`,`<span class="pc-only">${plural(notes.length,"note")}</span><span class="pp-only">${plural(sh,"note")}</span>`,notesBody,sh?"":"coachonly"):panel("opp-notes","Notes from your coaches",plural(notes.length,"note"),notesBody)})()}
   ${gsOppPanel(id)}
-  ${panel("past-meetings","Past meetings",pm.length?`${plural(pm.length,"game")} · ${pmW}–${pm.length-pmW}`:"Last two seasons",lastBody)}`;
+  ${panel("past-meetings","Past meetings",pm.length?`${plural(pm.length,"game")} · ${pmW}–${pm.length-pmW}`:lmet?"Last met "+esc(lmet.when):"Last two seasons",lastBody)}`;
 }
 
 function reportHTML(id,forPlayers){
@@ -2961,19 +2979,19 @@ const gsExhChip='<span class="chip gold">Exhibition</span>';
 const gsWhen=x=>`${dow(D(x.date))}, ${mon(D(x.date))} ${D(x.date).getDate()}${x.time&&/^\d\d:\d\d$/.test(x.time)?" · "+fmtTime(x.time):""}`;
 function gsPickRow(x){const cur=LS.get(GS_LAST)===x.key;const n=gsEnts(x.key).length;return `<button type="button" class="gsrow lvx ${cur?"cur":""}" style="${lvStyle([x.level])}" data-act="gsPick" data-k="${esc(x.key)}"><span class="gsrt"><b>${esc(x.title)}</b><span class="small muted">${esc(gsWhen(x))}</span></span><span class="gsrc">${gsLvChip(x.level)}${x.exh?gsExhChip:""}${n?'<span class="chip num">'+n+'</span>':""}</span></button>`}
 function gsPicker(){const t=ymd(TODAY);const L=gsGames();const today=L.filter(x=>x.date===t),up=L.filter(x=>x.date>t),past=L.filter(x=>x.date<t).reverse();
-  return `<div class="head"><div><h1>Game Scout</h1></div><div class="row"><button class="btn sm edit" data-act="gsQuick">${PLUS}Quick exhibition</button></div></div>
+  return `<div class="head"><div><h1>Game Tracker</h1></div><div class="row"><button class="btn sm edit" data-act="gsQuick">${PLUS}Quick exhibition</button></div></div>
   <section class="gssec" aria-label="Today"><h2 class="gsh">Today</h2>${today.map(gsPickRow).join("")||'<p class="muted small">No games today.</p>'}</section>
   ${up.length?`<section class="gssec" aria-label="Upcoming"><h2 class="gsh">Upcoming</h2>${up.slice(0,12).map(gsPickRow).join("")}</section>`:""}
   ${past.length?`<details class="gssec gspast"><summary class="gsh">${CHEV}Past <span class="chip num">${past.length}</span></summary>${past.map(gsPickRow).join("")}</details>`:""}`}
-function gsHeadRow(g){return `<div class="gshead"><button type="button" class="gshmain" data-act="gsGo" data-v="home" aria-label="Game Scout home"><span class="gsht"><b>${esc(g.oppName)}</b>${gsLvChip(g.level)}${g.exh?gsExhChip:""}</span><span class="small muted">${esc(mon(D(g.date))+" "+D(g.date).getDate())}</span></button><button type="button" class="gshsw" data-act="gsSwitch" aria-label="Switch game">Switch${CHEV}</button></div>`}
+function gsHeadRow(g){return `<div class="gshead"><button type="button" class="gshmain" data-act="gsGo" data-v="home" aria-label="Game Tracker home"><span class="gsht"><b>${esc(g.oppName)}</b>${gsLvChip(g.level)}${g.exh?gsExhChip:""}</span><span class="small muted">${esc(mon(D(g.date))+" "+D(g.date).getDate())}</span></button><button type="button" class="gshsw" data-act="gsSwitch" aria-label="Switch game">Switch${CHEV}</button></div>`}
 const GS_NAV=[["fouls","Fouls"],["to","TOs"],["eagles","Eagles"],["opp","Opponent"],["feed","Feed"]];
 const GS_NAVIC={feed:'<path d="M4 6h16M4 12h16M4 18h10"/>'};
-function gsNav(){return `<nav class="gsnav" aria-label="Game Scout sections">${GS_NAV.map(([k,l])=>`<button type="button" data-act="gsGo" data-v="${k}" class="${gsView===k?"on":""}" ${gsView===k?'aria-current="page"':""}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GS_IC[k==="fouls"?"fouls":k]||GS_NAVIC[k]}</svg><span>${l}</span></button>`).join("")}</nav>`}
+function gsNav(){return `<nav class="gsnav" aria-label="Game Tracker sections">${GS_NAV.map(([k,l])=>`<button type="button" data-act="gsGo" data-v="${k}" class="${gsView===k?"on":""}" ${gsView===k?'aria-current="page"':""}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GS_IC[k==="fouls"?"fouls":k]||GS_NAVIC[k]}</svg><span>${l}</span></button>`).join("")}</nav>`}
 const GS_IC={eagles:'<path d="M3 13c3-1 5-4 9-4 3 0 5 1 9-1-1 4-4 7-8 7l-3 4-1-4c-3 0-5-1-6-2z"/>',opp:'<circle cx="9" cy="8" r="3"/><path d="M3 20c.5-3.5 3-5.5 6-5.5s5.5 2 6 5.5M16 4l5 5M21 4l-5 5"/>',fouls:'<path d="M12 7v6M12 16.5v.5"/><circle cx="12" cy="12" r="9"/>',to:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/>',opp_off:'<path d="M4 12h13M13 6l6 6-6 6"/>',opp_def:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/>',our_off:'<path d="M4 12h13M13 6l6 6-6 6"/><circle cx="5" cy="5" r="1.5"/>',our_def:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>'};
 function gsHome(g,s,E){const Fu=E.filter(e=>e.sec==="foul"&&gsFTeamOf(e)==="us").length,Fo=E.filter(e=>e.sec==="foul"&&gsFTeamOf(e)==="opp").length;const us=gsToLeft(s,E,"us"),op=gsToLeft(s,E,"opp");const n=sec=>plural(E.filter(e=>gsGrp(e)===sec).length,"note");
   const c={fouls:`Eagles ${Fu} · Opp ${Fo}`,to:`Us ${us.left} · Opp ${op.left} left`,eagles:n("eagles"),opp:n("opp")};
   return `<div class="gsgrid">${GS_HOME.map(([k,l])=>`<button type="button" class="gsbig" data-act="gsGo" data-v="${k}"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GS_IC[k]}</svg><b>${esc(l)}</b><span class="num" data-count="${k}">${esc(c[k])}</span></button>`).join("")}</div>
-  <button type="button" class="gsfeedbar" data-act="gsGo" data-v="feed"><span><b>Feed</b> <span class="muted small">${E.length?esc(E.length+(E.length===1?" entry":" entries"))+" · newest first":"Every coach's entries"}</span></span>${CHEV}</button>`}
+  <button type="button" class="gsfeedbar" data-act="gsGo" data-v="feed"><span><b>Feed</b> <span class="muted small">${(()=>{const k=E.filter(e=>gsGrp(e)==="eagles"||gsGrp(e)==="opp").length;return k?esc(plural(k,"note"))+" · newest first":"Every coach's notes"})()}</span></span>${CHEV}</button>`}
 const gsBack=t=>`<div class="gsback"><button type="button" class="btn icon gsbk" data-act="gsGo" data-v="home" aria-label="Back">${CHEV}</button><h2>${esc(t)}</h2></div>`;
 const gsAgo=ts=>{const m=Math.round((Date.now()-ts)/6e4);return m<1?"now":m<60?m+"m":new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
 const gsLabelOf=e=>e.sec==="foul"?(gsFTeamOf(e)==="us"?"Eagles":"Opponent")+" foul #"+e.no:e.sec==="to"?"Timeout · "+(e.team==="us"?"Us":"Opponent"):e.sec==="note"?"Game Notes":GS_LBL[gsGrp(e)]||"Note";
@@ -2992,11 +3010,11 @@ function gsTimeouts(g,s,E){const c=gsToConf(s);const big=t=>{const r=gsToLeft(s,
   ${c.reset?`<button type="button" class="gshalf ${h2?"on":""}" data-act="gsHalf" role="switch" aria-checked="${h2}"><span>2nd half</span><span class="gssw" aria-hidden="true"></span></button>`:""}<div class="gstos">${big("us")}${big("opp")}</div><p class="small muted gshint">${esc(per)}${c.own?" (this game)":""}</p>`+gsList(E.filter(e=>e.sec==="to"))}
 function gsTextSec(g,s,E,sec){
   return gsBack(GS_LBL[sec])+`<form class="gsform" data-sec="${sec}"><label class="f" for="gstext">${sec==="eagles"?"Eagles note (offense or defense)":"Opponent note (offense or defense)"}<textarea id="gstext" rows="2" maxlength="400" enterkeyhint="done"></textarea></label><button type="submit" class="btn gold gsaddbtn">${PLUS}Add</button></form>`+gsList(E.filter(e=>gsGrp(e)===sec))}
-function gsFeed(g,s,E){const names=[...new Set(E.map(e=>e.byName||"Coach"))].sort();const secs=["foul","to","eagles","opp"];
+function gsFeed(g,s,E){E=E.filter(e=>gsGrp(e)==="eagles"||gsGrp(e)==="opp");const names=[...new Set(E.map(e=>e.byName||"Coach"))].sort();const secs=["eagles","opp"];
   [...gsF.by].forEach(n=>{if(!names.includes(n))gsF.by.delete(n)});
   const L=E.filter(e=>(!gsF.by.size||gsF.by.has(e.byName||"Coach"))&&(!gsF.sec.size||gsF.sec.has(gsGrp(e))));
   const chip=(kind,v,l,on)=>`<button type="button" class="gchip ${on?"on":""}" data-act="gsFilt" data-kind="${kind}" data-v="${esc(v)}" aria-pressed="${on}">${esc(l)}</button>`;
-  return gsBack("Feed")+`<div class="gschips" role="group" aria-label="Filter by coach">${names.map(n=>chip("by",n,n,gsF.by.has(n))).join("")}</div><div class="gschips" role="group" aria-label="Filter by section">${secs.map(k=>chip("sec",k,k==="foul"?"Fouls":k==="to"?"Timeouts":GS_LBL[k],gsF.sec.has(k))).join("")}</div>`+gsList(L)}
+  return gsBack("Feed")+`<div class="gschips" role="group" aria-label="Filter by coach">${names.map(n=>chip("by",n,n,gsF.by.has(n))).join("")}</div><div class="gschips" role="group" aria-label="Filter by section">${secs.map(k=>chip("sec",k,GS_LBL[k],gsF.sec.has(k))).join("")}</div>`+gsList(L)}
 function scoutView(){if(!isCoach())return homeView();const g=gsCur();if(!g)return gsPicker();const s=gsDoc(g);const E=gsEnts(g.key);
   if(SB&&user&&!user.name&&!gsNameAsked)gsAskName();
   const body=gsView==="fouls"?gsFouls(g,s,E):gsView==="to"?gsTimeouts(g,s,E):gsView==="feed"?gsFeed(g,s,E):GS_TEXT_SECS.includes(gsView)?gsTextSec(g,s,E,gsView):gsHome(g,s,E);
@@ -3006,10 +3024,11 @@ async function gsAskName(){gsNameAsked=true;try{const em=gsMe();const {data}=awa
 /* Opponent page: past sessions (never exhibitions) */
 const gsTopFouls=E=>Object.entries(gsFoulsOf(E)).sort((a,b)=>b[1].length-a[1].length||gsNum(a[0],b[0])).slice(0,3).map(([n,l])=>`#${n} ×${l.length}`).join(", ");
 function gsOppPanel(oid){if(!isCoach())return"";const L=gsAll().filter(s=>s.oppId===oid&&!s.exh).sort((a,b)=>String(b.date).localeCompare(String(a.date)));if(!L.length)return"";
-  const body=L.map(s=>{const E=gsEnts(s.id);const byQ=["opp","eagles"].map(sec=>{const es=E.filter(e=>gsGrp(e)===sec);return es.length?`<div class="gsqgrp"><span class="gsgl">${esc(GS_LBL[sec])}</span>${es.map(e=>`<div class="small">${e.sec==="note"?'<span class="muted">Game Notes:</span> ':""}${esc(gsTextOf(e))} <span class="muted">· ${esc(e.byName||"Coach")}</span></div>`).join("")}</div>`:""}).join("");
+  let nn=0;const body=L.map(s=>{const E=gsEnts(s.id);const notes=E.filter(e=>gsGrp(e)==="opp"||gsGrp(e)==="eagles").sort((a,b)=>(b.ts||0)-(a.ts||0));nn+=notes.length;
     const tf=gsTopFouls(E);const tu=E.filter(e=>e.sec==="to"&&e.team==="us").length,tp=E.filter(e=>e.sec==="to"&&e.team==="opp").length;
-    return `<details class="gsopp"><summary><span><b>${esc(mon(D(s.date))+" "+D(s.date).getDate()+", "+D(s.date).getFullYear())}</b> ${gsLvChip(s.level)}</span><span class="small muted">${tf?"Fouls "+esc(tf):"No fouls"}${tu||tp?` · Timeouts: Us ${tu} · Opp ${tp}`:""}</span></summary><div class="gsoppb">${byQ||'<p class="muted small">No notes.</p>'}</div></details>`}).join("");
-  return panel("game-scout",'Game Scout <span class="chip">Coaches only</span>',plural(L.length,"game"),body,"coachonly")}
+    const sum=[tf?"Fouls "+tf:"",tu||tp?`Timeouts: Us ${tu} · Opp ${tp}`:""].filter(Boolean).join(" · ");
+    return `<div class="gsopp"><div class="gsopph"><b>${esc(mon(D(s.date))+" "+D(s.date).getDate()+", "+D(s.date).getFullYear())}</b> ${gsLvChip(s.level)}${sum?`<span class="small muted">${esc(sum)}</span>`:""}</div>${notes.map(e=>`<div class="gsoppn"><span class="gstag ${gsGrp(e)}">${esc(e.sec==="note"?"Game Notes":GS_LBL[gsGrp(e)])}</span><span>${esc(gsTextOf(e))}</span><span class="small muted">${esc(e.byName||"Coach")}</span></div>`).join("")||'<p class="muted small" style="margin:4px 0 0">No notes from this game.</p>'}</div>`}).join("");
+  return panel("game-scout",'Game Tracker <span class="chip">Coaches only</span>',plural(L.length,"game")+(nn?" · "+plural(nn,"note"):""),body,"coachonly")}
 function gsKeypadHTML(){return `<div class="gskp"><div class="gskd num" id="gskd" aria-live="polite">#</div><div class="gskeys">${["1","2","3","4","5","6","7","8","9","bk","0","ok"].map(k=>k==="bk"?`<button type="button" class="gskey" data-act="gsKey" data-k="bk" aria-label="Delete digit">⌫</button>`:k==="ok"?`<button type="button" class="gskey ok" data-act="gsKey" data-k="ok" id="gskok" disabled>Add</button>`:`<button type="button" class="gskey num" data-act="gsKey" data-k="${k}">${k}</button>`).join("")}</div></div>`}
 let gsKp="";
 function gsAddFoul(no){const g=gsCur();if(!g)return;const team=gsFT();const k=(gsFoulsOf(gsEnts(g.key),team)[no]||[]).length+1;gsAdd(g,{sec:"foul",no:String(no),team},`${team==="us"?"Eagles":"Opponent"} #${no}: ${plural(k,"foul")}`)}
@@ -3378,7 +3397,7 @@ document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if
 
 /* ================= Admin: Staff & changes (live site only; staff names appear only here) ================= */
 let ADM;function admReset(){ADM={tab:"staff",staff:null,staffBusy:false,staffErr:"",reqs:null,reqsBusy:false,log:[],logDone:false,logBusy:false,logErr:"",logLoaded:false,logGen:ADM?ADM.logGen+1:0,f:{actor:"",coll:"",from:"",to:""},exact:new Set()}}admReset();
-const SECT={games:"Game schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"Standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Basketball glossary",calls:"Calls",playsets:"Playbook (hidden list)",posts:"Team feed (old)",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",events:"Calendar",staffdir:"Staff directory",settings:"Settings",accounts:"Passwords",gscout:"Game Scout",gscout_e:"Game Scout",gscout_conf:"Game Scout settings"};
+const SECT={games:"Game schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"Standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Basketball glossary",calls:"Calls",playsets:"Playbook (hidden list)",posts:"Team feed (old)",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",events:"Calendar",staffdir:"Staff directory",settings:"Settings",accounts:"Passwords",gscout:"Game Tracker",gscout_e:"Game Tracker",gscout_conf:"Game Tracker settings"};
 const sectName=c=>SECT[c]||c;
 /* Sections of removed features: their old rows stay in the database but never show in the change log. */
 const GONE_COLLS=["badges","awards"];
@@ -3431,9 +3450,9 @@ function admLabel(a){a=admEff(a);const o=a.old||{},n=a.new||{};let d=a.action===
     case"events":s=d.title?"Event: "+snip(d.title)+(d.date?" · "+shortDate(d.date):""):"";break;
     case"playsets":s="Basic plays hidden from players";break;
     case"accounts":s="Password";break;
-    case"gscout":s="Game Scout: "+(d.oppName||"Game")+(d.date?" · "+shortDate(d.date):"");break;
-    case"gscout_e":{const ss=store.gscout[d.sess];s="Game Scout: "+gsLabelOf(d)+(d.text?" “"+snip(d.text)+"”":"")+(ss&&ss.oppName?" ("+ss.oppName+")":"");break}
-    case"gscout_conf":s="Game Scout timeout settings";break;
+    case"gscout":s="Game Tracker: "+(d.oppName||"Game")+(d.date?" · "+shortDate(d.date):"");break;
+    case"gscout_e":{const ss=store.gscout[d.sess];s="Game Tracker: "+gsLabelOf(d)+(d.text?" “"+snip(d.text)+"”":"")+(ss&&ss.oppName?" ("+ss.oppName+")":"");break}
+    case"gscout_conf":s="Game Tracker timeout settings";break;
     default:s=d.name||d.title||"";
   }}catch(e){s=""}
   return String(s||"").trim()||String(id)}
@@ -3574,7 +3593,7 @@ Object.assign(ACT,{
 
 /* ================= Page bindings ================= */
 function bindView(r){
-  if(r==="scout")gsBind();
+  if(r==="tracker")gsBind();
   if(r==="stats"){
     $$("[data-tab]").forEach(b=>b.onclick=()=>{statTab=b.dataset.tab;render()});
     $$("[data-sort]").forEach(th=>th.onclick=()=>{const k=th.dataset.sort;statSort=statSort.k===k?{k,d:-statSort.d}:{k,d:k==="name"?1:-1};render()});
