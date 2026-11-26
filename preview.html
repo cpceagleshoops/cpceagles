@@ -791,6 +791,10 @@ body.on-tracker .toast{top:auto;bottom:calc(84px + var(--safe-b));transform:tran
 .gsoppn{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 8px;align-items:baseline;padding:5px 0}.gsoppn>span:nth-child(2){overflow-wrap:anywhere}.gsoppn>.small{grid-column:2}
 .gstag{font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:6px;background:var(--surface-3);color:var(--muted)}.gstag.opp{color:#ff9a8f}.gstag.eagles{color:var(--gold-ink)}
 .lastmet{margin:0 0 8px;display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.gslv{margin:0 0 14px}.gslv button{min-height:44px}
+.gsmon{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:12px 2px 6px;font-variant:small-caps}
+.gsmore{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:48px;margin-top:2px;border-radius:12px;border:1px dashed var(--line);background:none;color:var(--gold-ink);font:inherit;font-weight:700;cursor:pointer}
+.gsmore svg{transform:rotate(90deg);width:12px;height:12px}.gsmore[aria-expanded=true] svg{transform:rotate(-90deg)}
 </style>
 </head>
 <body>
@@ -2978,10 +2982,16 @@ const gsLvChip=lv=>`<span class="lvtag" data-lv="${esc(String(lv).toLowerCase())
 const gsExhChip='<span class="chip gold">Exhibition</span>';
 const gsWhen=x=>`${dow(D(x.date))}, ${mon(D(x.date))} ${D(x.date).getDate()}${x.time&&/^\d\d:\d\d$/.test(x.time)?" · "+fmtTime(x.time):""}`;
 function gsPickRow(x){const cur=LS.get(GS_LAST)===x.key;const n=gsEnts(x.key).length;return `<button type="button" class="gsrow lvx ${cur?"cur":""}" style="${lvStyle([x.level])}" data-act="gsPick" data-k="${esc(x.key)}"><span class="gsrt"><b>${esc(x.title)}</b><span class="small muted">${esc(gsWhen(x))}</span></span><span class="gsrc">${gsLvChip(x.level)}${x.exh?gsExhChip:""}${n?'<span class="chip num">'+n+'</span>':""}</span></button>`}
-function gsPicker(){const t=ymd(TODAY);const L=gsGames();const today=L.filter(x=>x.date===t),up=L.filter(x=>x.date>t),past=L.filter(x=>x.date<t).reverse();
-  return `<div class="head"><div><h1>Game Tracker</h1></div><div class="row"><button class="btn sm edit" data-act="gsQuick">${PLUS}Quick exhibition</button></div></div>
+/* picker level: remembered per device; first time = the level of the last game picked, else Varsity */
+const GS_PLV="cpc_gs_plv";let gsUpAll=false;
+function gsPickLv(){const v=LS.get(GS_PLV);if(["V","JV","C"].includes(v))return v;const k=LS.get(GS_LAST);const g=k&&gsGameOf(k);return g&&["V","JV","C"].includes(g.level)?g.level:"V"}
+function gsPicker(){const t=ymd(TODAY);const lv=gsPickLv();const L=gsGames().filter(x=>x.level===lv);const today=L.filter(x=>x.date===t),up=L.filter(x=>x.date>t),past=L.filter(x=>x.date<t).reverse();
+  const seg=`<div class="seg rtabs gslv" role="group" aria-label="Level">${PLV.map(([k,l])=>`<button type="button" data-act="gsPickLv" data-v="${k}" data-lv="${k}" class="${lv===k?"on":""}" aria-pressed="${lv===k}">${l}</button>`).join("")}</div>`;
+  const N=3;const more=up.length-N;let last="";
+  const upRows=(gsUpAll?up:up.slice(0,N)).map(x=>{const m=x.date.slice(0,7);const hd=gsUpAll&&more>0&&m!==last?`<div class="gsmon">${esc(D(x.date).toLocaleDateString("en-US",{month:"long",year:D(x.date).getFullYear()!==TODAY.getFullYear()?"numeric":undefined}))}</div>`:"";last=m;return hd+gsPickRow(x)}).join("");
+  return `<div class="head"><div><h1>Game Tracker</h1></div><div class="row"><button class="btn sm edit" data-act="gsQuick">${PLUS}Quick exhibition</button></div></div>${seg}
   <section class="gssec" aria-label="Today"><h2 class="gsh">Today</h2>${today.map(gsPickRow).join("")||'<p class="muted small">No games today.</p>'}</section>
-  ${up.length?`<section class="gssec" aria-label="Upcoming"><h2 class="gsh">Upcoming</h2>${up.slice(0,12).map(gsPickRow).join("")}</section>`:""}
+  <section class="gssec" aria-label="Upcoming"><h2 class="gsh">Upcoming${up.length?` <span class="chip num">${up.length}</span>`:""}</h2>${upRows||`<p class="muted small">No upcoming ${esc(lvName(lv))} games.</p>`}${more>0?`<button type="button" class="gsmore" data-act="gsUpAll" aria-expanded="${gsUpAll}">${gsUpAll?"Show fewer":`Show all upcoming (${up.length})`}${CHEV}</button>`:""}</section>
   ${past.length?`<details class="gssec gspast"><summary class="gsh">${CHEV}Past <span class="chip num">${past.length}</span></summary>${past.map(gsPickRow).join("")}</details>`:""}`}
 function gsHeadRow(g){return `<div class="gshead"><button type="button" class="gshmain" data-act="gsGo" data-v="home" aria-label="Game Tracker home"><span class="gsht"><b>${esc(g.oppName)}</b>${gsLvChip(g.level)}${g.exh?gsExhChip:""}</span><span class="small muted">${esc(mon(D(g.date))+" "+D(g.date).getDate())}</span></button><button type="button" class="gshsw" data-act="gsSwitch" aria-label="Switch game">Switch${CHEV}</button></div>`}
 const GS_NAV=[["fouls","Fouls"],["to","TOs"],["eagles","Eagles"],["opp","Opponent"],["feed","Feed"]];
@@ -3038,7 +3048,7 @@ function gsRemoveFoul(no){const g=gsCur();if(!g)return;const l=(gsFoulsOf(gsEnts
   gsDelEnt(g,t,`Foul #${no}: ${plural(l.length-1,"foul")}`)}
 function gsEntOf(id){const g=gsCur();return g?gsEnts(g.key).find(e=>e.id===id):null}
 const GS_ACT={
-  gsPick(d){LS.set(GS_LAST,d.k);gsView="home";gsEdit=false;render();window.scrollTo(0,0)},
+  gsPick(d){LS.set(GS_LAST,d.k);const pg_=gsGameOf(d.k);if(pg_)LS.set(GS_PLV,pg_.level);gsView="home";gsEdit=false;render();window.scrollTo(0,0)},
   gsSwitch(){LS.set(GS_LAST,null);gsView="home";render();window.scrollTo(0,0)},
   gsGo(d){gsView=d.v;gsEdit=false;gsDef="";render();window.scrollTo(0,0)},
   gsSetQ(d){const g=gsCur();if(!g)return;const s=gsGet(g.key);if((s&&s.q||"Q1")===d.q)return;const prev=s?JSON.parse(JSON.stringify(s)):undefined;
@@ -3072,9 +3082,11 @@ const GS_ACT={
         if(e.legacy){const s=gsGet(g.key);const n={...s};if(foul){const F={...(n.fouls||{})};const i=+e.id.split(":")[3];const it=(F[e.no]||[])[i];F[e.no]=(F[e.no]||[]).filter((x,j)=>j!==i);if(!F[e.no].length)delete F[e.no];F[v.no]=[...(F[v.no]||[]),{...it}];n.fouls=F}
           else n.entries=(n.entries||[]).map(x=>x.id!==e.lid?x:{...x,text:t});return saveDoc("gscout",g.key,n)}
         const raw={...store.gscout_e[e.id]};if(foul)raw.no=String(v.no);else raw.text=t;return saveDoc("gscout_e",e.id,raw)}})},
-  gsQuick(){openSheet({title:"Quick exhibition",fields:[{key:"level",label:"Level",type:"seg",options:[["V","Varsity"],["JV","JV"],["C","C-Team"]],req:true},{key:"opp",label:"Opponent",req:true,max:60}],value:{level:"V"},saved:"Game started",
+  gsPickLv(d){if(!["V","JV","C"].includes(d.v))return;LS.set(GS_PLV,d.v);render()},
+  gsUpAll(){gsUpAll=!gsUpAll;render();const b=$('[data-act="gsUpAll"]');b&&b.focus()},
+  gsQuick(){openSheet({title:"Quick exhibition",fields:[{key:"level",label:"Level",type:"seg",options:[["V","Varsity"],["JV","JV"],["C","C-Team"]],req:true},{key:"opp",label:"Opponent",req:true,max:60}],value:{level:gsPickLv()},saved:"Game started",
     onSave:async v=>{const nm=String(v.opp||"").replace(/\s+/g," ").trim();if(!nm)throw new Error("Opponent is required");const id="q-"+uid("");const lv=["V","JV","C"].includes(v.level)?v.level:"V";
-      await saveDoc("gscout",id,{ref:{kind:"quick",id},level:lv,date:ymd(TODAY),oppId:null,oppName:nm,exh:true,q:"Q1"});LS.set(GS_LAST,id);gsView="home"}})}
+      await saveDoc("gscout",id,{ref:{kind:"quick",id},level:lv,date:ymd(TODAY),oppId:null,oppName:nm,exh:true,q:"Q1"});LS.set(GS_LAST,id);LS.set(GS_PLV,lv);gsView="home"}})}
 };
 function gsBind(){
   $$(".gsform").forEach(f=>f.addEventListener("submit",e=>{e.preventDefault();const g=gsCur();if(!g)return;const t=f.querySelector("textarea");const sec=f.dataset.sec==="eagles"?"eagles":"opp";
