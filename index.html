@@ -758,6 +758,17 @@ td a{text-decoration:none;font-weight:600}td a:hover{color:var(--accent-text)}
 .gsopp{border-top:1px solid var(--line);padding:8px 0}.gsopp summary{display:flex;flex-direction:column;gap:2px;cursor:pointer;list-style:none}.gsopp summary::-webkit-details-marker{display:none}
 .gsoppb{padding:8px 0 0}.gsqgrp{display:flex;flex-direction:column;gap:4px;margin:6px 0}.gsqgrp .chip{align-self:flex-start}
 @media (prefers-reduced-motion:reduce){.gsbig,.gstap,.gskey,.gsdef,.gsrow{transition:none}.gsbig:active,.gstap:active,.gskey:active,.gsdef:active,.gsrow:active{transform:none}}
+.gsfeedbar{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:56px;margin-top:10px;padding:10px 14px;border-radius:14px;background:var(--surface-2);border:1px solid var(--line);color:#fff;font:inherit;text-align:left;cursor:pointer}
+.gsfeedbar>span:first-child{flex:1;min-width:0}
+.gstos{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:6px}
+.gsto{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:132px;border-radius:16px;background:var(--surface-2);border:1px solid var(--line);color:#fff;font:inherit;cursor:pointer;transition:transform .12s ease}
+.gsto b{font-size:18px}.gstol{font-size:22px;font-weight:800;color:var(--gold-ink)}.gsto .small{display:inline-flex;align-items:center;gap:4px;color:var(--muted)}
+.gsto:active{transform:scale(.97)}
+.gsback .sp{flex:1}.gsgear{min-width:48px;min-height:48px}
+.gschips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}.gschips .gchip{min-height:40px}
+.gsmeta{display:block;color:var(--muted)}.gsmeta b{color:#fff}
+.gsent.mine{border-color:rgba(194,176,138,.45)}
+@media (prefers-reduced-motion:reduce){.gsto{transition:none}.gsto:active{transform:none}}
 </style>
 </head>
 <body>
@@ -807,6 +818,10 @@ td a{text-decoration:none;font-weight:600}td a:hover{color:var(--accent-text)}
        gscout   {ref:{kind:"game|event|quick",id}, level, date, oppId?, oppName, exh, q:"Q1|Q2|Q3|Q4|OT", fouls:{"23":[{q,ts}]},
                  entries:[{id, sec:"off|def|note", q, text, def?, ts, by}]}  id = "g-"+game id, "e-"+event id, or "q-…" (quick exhibition)
                 Game Scout (coaches only; players never read it, by the database rule and by the page). Exhibitions never attach to an opponent.
+                V2: fouls/entries live in gscout_e (one doc per action); the arrays above are V1 data, shown read-only.
+       gscout_e {sess, sec:"foul|to|opp_off|opp_def|our_off|our_def|note", q, text?, def?, no?, team?:"us|opp", by:<email lowercased>, byName, ts}
+                Only the author (by = my email) or an admin can change or delete one (database rule).
+       gscout_conf {n, reset, ot}  id = "timeouts": default timeout rules; a session can override with gscout.to
        accounts {salt, hash, setAt}  id = "coach" or "player" (one shared login each; stored only as salted hashes)
    - On the live site (GitHub Pages) the same collections live in Supabase table public.docs
      as rows {coll:"<name>", id, data:{...}}; logins are Supabase users (CONFIG.supabase).
@@ -1165,7 +1180,7 @@ const slug=x=>String(x).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/
 const DEF={
  players:[],games:[],opps:[],notes:[],clips:[],posts:[],calls:[],
  terms:GLOSS.flatMap(([cat,a])=>a.map(([name,def])=>({id:"gl-"+slug(name),cat,name,def}))),
- stand:[],lres:[],plays:[],playsets:[],templates:[],statgames:[],accounts:[],talk:[],talks:[],history:[],events:[],staffdir:[],settings:[],gscout:[]
+ stand:[],lres:[],plays:[],playsets:[],templates:[],statgames:[],accounts:[],talk:[],talks:[],history:[],events:[],staffdir:[],settings:[],gscout:[],gscout_e:[],gscout_conf:[]
 };
 /* Terms saved by older versions under ids t0..t15 duplicate the built-in list; hide those copies. */
 const DEF_TERM_NAMES=new Set(DEF.terms.map(t=>t.name.trim().toLowerCase()));
@@ -2862,16 +2877,27 @@ function tplListHTML(){const row=(t,mine)=>`<div class="tplitem"><button type="b
   const ours=tplAll().sort((a,b)=>String(a.name).localeCompare(String(b.name)));
   return `<p class="small muted" style="margin:0">Copies the court, steps and roles into this play, and sets offense or defense. Your play name stays.</p><div class="tplgroup">Offense base sets</div>${BASE_SETS.map(t=>row(t,false)).join("")}<div class="tplgroup">Defensive alignments</div>${DEF_SETS.map(t=>row(t,false)).join("")}<div class="tplgroup">Our templates</div>${ours.map(t=>row(t,true)).join("")||'<p class="small muted" style="margin:0">None saved yet. Build a play and tap <b>Save as template</b>.</p>'}`}
 
-/* ================= Game Scout (coaches only): live opponent tracking from the bench ================= */
+/* ================= Game Scout (coaches only): live opponent tracking from the bench =================
+   gscout      one doc per game session: metadata only (ref, level, date, oppId, oppName, exh, q, to? = timeout override)
+   gscout_e    one doc per action, so coaches on the same game never overwrite each other:
+               {sess, sec:"foul|to|opp_off|opp_def|our_off|our_def|note", q, text?, def?, no?, team?:"us|opp", by:<email>, byName, ts}
+   gscout_conf id "timeouts": {n, reset, ot}  default timeout rules (any coach can change them)
+   V1 sessions kept fouls/entries inside the session doc: they still show (read-only, "Coach (V1)"; admins can edit/delete). */
 const GS_DEFS=["Man","2-3 Zone","1-3-1","3-2","Full-Court Press","Half-Court Trap"];
 const GS_QS=["Q1","Q2","Q3","Q4","OT"];
-const GS_SEC={fouls:"Fouls",off:"Opponent Offense",def:"Opponent Defense",note:"Game Notes"};
+const GS_LBL={foul:"Foul",to:"Timeout",opp_off:"Opponent Offense",opp_def:"Opponent Defense",our_off:"Our Offense",our_def:"Our Defense",note:"Game Notes"};
+const GS_HOME=[["fouls","Fouls"],["to","Timeouts"],["opp_off","Opponent Offense"],["opp_def","Opponent Defense"],["our_off","Our Offense"],["our_def","Our Defense"]];
+const GS_TEXT_SECS=["opp_off","opp_def","our_off","our_def","note"];
 const GS_LAST="cpc_gs_last";
-let gsView="home",gsEdit=false,gsQ=Promise.resolve(),gsDef="";
+let gsView="home",gsEdit=false,gsQ=Promise.resolve(),gsDef="";const gsF={by:new Set(),sec:new Set()};
 const gsExhRe=/jamboree|exhibition|scrimmage/i;
 const gsAll=()=>isCoach()?items("gscout"):[];
 const gsGet=id=>isCoach()?get("gscout",id):null;
-/* Every game a coach can scout: varsity games, JV/C game events, and quick exhibitions already started */
+/* who am I: the signed-in email (lowercased) and a display name */
+const gsMe=()=>SB?String((user&&user.email)||"").toLowerCase():String((user&&user.cid)||"coach");
+const gsMyName=()=>{if(!SB)return "Coach";const em=gsMe();if(em===String(CONFIG.supabase.coachEmail).toLowerCase())return "Coach";return (user&&user.name)||em.split("@")[0]||"Coach"};
+const gsMine=e=>!e.legacy&&String(e.by||"").toLowerCase()===gsMe();
+const gsCan=e=>isAdmin()||gsMine(e);
 function gsGames(){if(!isCoach())return[];const out=[];
   games().forEach(g=>{const o=O(g.opp);const exh=isExh(g)||gsExhRe.test(String(g.event||""));out.push({key:"g-"+g.id,ref:{kind:"game",id:g.id},level:"V",date:g.date,time:parseTime(g.time)||"",oppName:o.name,oppId:exh||!get("opps",g.opp)?null:g.opp,exh,title:(isExh(g)&&g.event?g.event+": ":"")+vsAt(g)+" "+o.name})});
   evs().filter(e=>e&&e.kind==="game"&&realDate(e.date)).forEach(e=>{const t=evTeams(e);const lv=t.length===1?t[0]:(t.find(k=>k!=="V")||"V");
@@ -2881,20 +2907,41 @@ function gsGames(){if(!isCoach())return[];const out=[];
   return out.sort((a,b)=>a.date.localeCompare(b.date)||String(a.time).localeCompare(String(b.time)))}
 const gsGameOf=key=>gsGames().find(x=>x.key===key)||null;
 function gsCur(){const k=LS.get(GS_LAST);if(!k)return null;const g=gsGameOf(k);if(g)return g;const s=gsGet(k);return s?{key:s.id,ref:s.ref,level:s.level,date:s.date,oppName:s.oppName,oppId:s.oppId||null,exh:!!s.exh,title:"vs "+s.oppName}:null}
-const gsBlank=g=>({ref:g.ref,level:g.level,date:g.date,oppId:g.oppId||null,oppName:g.oppName,exh:!!g.exh,q:"Q1",fouls:{},entries:[]});
-const gsDoc=g=>{const s=gsGet(g.key);return s?{...gsBlank(g),...s,ref:g.ref,level:g.level,date:g.date,oppId:g.oppId||null,oppName:g.oppName,exh:!!g.exh}:gsBlank(g)};
-const gsFoulN=s=>Object.values(s.fouls||{}).reduce((a,l)=>a+l.length,0);
-const gsSecN=(s,sec)=>(s.entries||[]).filter(e=>e.sec===sec).length;
-const gsNum=(a,b)=>(+a-+b)||(a.length-b.length)||a.localeCompare(b);
-/* Save the whole session doc: shows at once, saves in order, Undo puts the previous version back */
-function gsSave(key,next,msg){const prev=store.gscout[key]===undefined?undefined:JSON.parse(JSON.stringify(store.gscout[key]));
-  const clean=JSON.parse(JSON.stringify(next));delete clean.id;store.gscout[key]=clean;render();
-  gsQ=gsQ.then(()=>saveDoc("gscout",key,clean)).catch(e=>{if(prev===undefined)delete store.gscout[key];else store.gscout[key]=prev;render();toast(e.message||"Couldn't save",true)});
-  toastUndo(msg,async()=>{await gsQ;if(prev===undefined)await removeDoc("gscout",key);else await saveDoc("gscout",key,prev)})}
+const gsMeta=g=>({ref:g.ref,level:g.level,date:g.date,oppId:g.oppId||null,oppName:g.oppName,exh:!!g.exh});
+const gsDoc=g=>{const s=gsGet(g.key);return {q:"Q1",...(s||{}),...gsMeta(g)}};
+const gsNum=(a,b)=>(+a-+b)||(String(a).length-String(b).length)||String(a).localeCompare(String(b));
+/* every action for one session: new per-action docs plus V1 items still inside the session doc */
+function gsEnts(key){if(!isCoach())return[];const out=items("gscout_e").filter(e=>e&&e.sess===key);const s=gsGet(key);
+  if(s){Object.entries(s.fouls||{}).forEach(([no,l])=>(l||[]).forEach((f,i)=>out.push({id:"L:f:"+no+":"+i,legacy:true,sess:key,sec:"foul",no,q:f.q,ts:f.ts||0,byName:"Coach (V1)"})));
+    (s.entries||[]).forEach(e=>out.push({...e,id:"L:e:"+e.id,lid:e.id,legacy:true,sess:key,sec:e.sec==="off"?"opp_off":e.sec==="def"?"opp_def":"note",byName:"Coach (V1)"}))}
+  return out.sort((a,b)=>(b.ts||0)-(a.ts||0))}
+const gsFoulsOf=E=>{const F={};E.filter(e=>e.sec==="foul"&&e.no!=null).slice().sort((a,b)=>(a.ts||0)-(b.ts||0)).forEach(e=>(F[e.no]=F[e.no]||[]).push(e));return F};
+/* timeouts: defaults in gscout_conf/timeouts, optional per-game override on the session doc */
+const GS_TO_DEF={n:4,reset:false,ot:1};
+const gsToConf=s=>{const d=get("gscout_conf","timeouts")||{};const o=(s&&s.to)||null;const c={...GS_TO_DEF,...d,...(o||{})};return {n:Math.max(0,+c.n||0),reset:!!c.reset,ot:Math.max(0,+c.ot||0),own:!!o}};
+const gsPeriod=(q,c)=>!c.reset?"G":q==="OT"?"OT":(q==="Q1"||q==="Q2")?"H1":"H2";
+function gsToLeft(s,E,team){const c=gsToConf(s);const p=gsPeriod(s.q||"Q1",c);const used=E.filter(e=>e.sec==="to"&&e.team===team&&gsPeriod(e.q,c)===p).length;const tot=p==="OT"?c.ot:c.n;return {left:Math.max(0,tot-used),tot,used,p}}
+/* optimistic save of one doc: shows at once, saves in order, rolls back on error */
+function gsPut(coll,id,data){const prev=store[coll][id]===undefined?undefined:JSON.parse(JSON.stringify(store[coll][id]));const clean=JSON.parse(JSON.stringify(data));delete clean.id;store[coll][id]=clean;render();
+  const p=gsQ.then(()=>saveDoc(coll,id,clean));gsQ=p.catch(e=>{if(prev===undefined)delete store[coll][id];else store[coll][id]=prev;render();toast(e.message||"Couldn't save",true)});return p}
+function gsDrop(coll,id){const prev=store[coll][id];delete store[coll][id];render();
+  const p=gsQ.then(()=>removeDoc(coll,id)).then(r=>{if(r===false)throw new Error("Couldn't delete")});gsQ=p.catch(e=>{if(prev!==undefined)store[coll][id]=prev;render();toast(e.message||"Couldn't delete",true)});return p}
+/* make sure the session doc exists (metadata only; keeps any V1 items as they are) */
+function gsEnsure(g){const s=gsGet(g.key);if(s&&s.date)return;gsPut("gscout",g.key,{q:"Q1",...(s||{}),...gsMeta(g)})}
+function gsAdd(g,e,msg){gsEnsure(g);const id=uid("x");const s=gsDoc(g);const doc={sess:g.key,q:s.q||"Q1",...e,by:gsMe(),byName:gsMyName(),ts:Date.now()};
+  gsPut("gscout_e",id,doc);toastUndo(msg,async()=>{await gsQ;await removeDoc("gscout_e",id)});return id}
+function gsDelEnt(g,e,msg){if(e.legacy){if(!isAdmin())return toast("Only an admin can change V1 entries",true);return gsLegacyDel(g,e,msg)}
+  if(!gsCan(e))return toast("Only "+(e.byName||"that coach")+" can remove theirs",true);
+  const raw=store.gscout_e[e.id]?JSON.parse(JSON.stringify(store.gscout_e[e.id])):null;gsDrop("gscout_e",e.id);
+  if(raw&&gsMine(e))toastUndo(msg,async()=>{await gsQ;await saveDoc("gscout_e",e.id,raw)});else toast(msg)}
+function gsLegacyDel(g,e,msg){const s=gsGet(g.key);if(!s)return;const n={...s};
+  if(e.sec==="foul"){const F={...(n.fouls||{})};const i=+e.id.split(":")[3];F[e.no]=(F[e.no]||[]).filter((x,j)=>j!==i);if(!F[e.no].length)delete F[e.no];n.fouls=F}
+  else n.entries=(n.entries||[]).filter(x=>x.id!==e.lid);
+  const prev=JSON.parse(JSON.stringify(s));gsPut("gscout",g.key,n);toastUndo(msg,async()=>{await gsQ;await saveDoc("gscout",g.key,prev)})}
 const gsLvChip=lv=>`<span class="lvtag" data-lv="${esc(String(lv).toLowerCase())}">${esc(lv==="C"?"C-Team":lv)}</span>`;
 const gsExhChip='<span class="chip gold">Exhibition</span>';
 const gsWhen=x=>`${dow(D(x.date))}, ${mon(D(x.date))} ${D(x.date).getDate()}${x.time&&/^\d\d:\d\d$/.test(x.time)?" · "+fmtTime(x.time):""}`;
-function gsPickRow(x){const cur=LS.get(GS_LAST)===x.key;return `<button type="button" class="gsrow lvx ${cur?"cur":""}" style="${lvStyle([x.level])}" data-act="gsPick" data-k="${esc(x.key)}"><span class="gsrt"><b>${esc(x.title)}</b><span class="small muted">${esc(gsWhen(x))}</span></span><span class="gsrc">${gsLvChip(x.level)}${x.exh?gsExhChip:""}${gsGet(x.key)?'<span class="chip num">'+gsFoulN(gsGet(x.key))+'F</span>':""}</span></button>`}
+function gsPickRow(x){const cur=LS.get(GS_LAST)===x.key;const n=gsEnts(x.key).length;return `<button type="button" class="gsrow lvx ${cur?"cur":""}" style="${lvStyle([x.level])}" data-act="gsPick" data-k="${esc(x.key)}"><span class="gsrt"><b>${esc(x.title)}</b><span class="small muted">${esc(gsWhen(x))}</span></span><span class="gsrc">${gsLvChip(x.level)}${x.exh?gsExhChip:""}${n?'<span class="chip num">'+n+'</span>':""}</span></button>`}
 function gsPicker(){const t=ymd(TODAY);const L=gsGames();const today=L.filter(x=>x.date===t),up=L.filter(x=>x.date>t),past=L.filter(x=>x.date<t).reverse();
   return `<div class="head"><div><h1>Game Scout</h1></div><div class="row"><button class="btn sm edit" data-act="gsQuick">${PLUS}Quick exhibition</button></div></div>
   <section class="gssec" aria-label="Today"><h2 class="gsh">Today</h2>${today.map(gsPickRow).join("")||'<p class="muted small">No games today.</p>'}</section>
@@ -2902,63 +2949,95 @@ function gsPicker(){const t=ymd(TODAY);const L=gsGames();const today=L.filter(x=
   ${past.length?`<details class="gssec gspast"><summary class="gsh">${CHEV}Past <span class="chip num">${past.length}</span></summary>${past.map(gsPickRow).join("")}</details>`:""}`}
 function gsHeadRow(g){return `<button type="button" class="gshead" data-act="gsSwitch" aria-label="Switch game"><span class="gsht"><b>${esc(g.oppName)}</b>${gsLvChip(g.level)}${g.exh?gsExhChip:""}</span><span class="small muted">${esc(mon(D(g.date))+" "+D(g.date).getDate())} ${CHEV}</span></button>`}
 function gsQuarter(s){return `<div class="gsq seg" role="group" aria-label="Quarter">${GS_QS.map(q=>`<button type="button" data-act="gsSetQ" data-q="${q}" class="${s.q===q?"on":""}" aria-pressed="${s.q===q}">${q}</button>`).join("")}</div>`}
-const GS_IC={fouls:'<path d="M12 3v10M12 17v.5"/><circle cx="12" cy="12" r="10"/>',off:'<path d="M4 12h13M13 6l6 6-6 6"/>',def:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/>',note:'<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>'};
-function gsHome(s){const c={fouls:plural(gsFoulN(s),"foul"),off:plural(gsSecN(s,"off"),"note"),def:plural(gsSecN(s,"def"),"note"),note:plural(gsSecN(s,"note"),"note")};
-  return `<div class="gsgrid">${Object.keys(GS_SEC).map(k=>`<button type="button" class="gsbig" data-act="gsGo" data-v="${k}"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GS_IC[k]}</svg><b>${esc(GS_SEC[k])}</b><span class="num" data-count="${k}">${esc(c[k])}</span></button>`).join("")}</div>`}
+const GS_IC={fouls:'<path d="M12 7v6M12 16.5v.5"/><circle cx="12" cy="12" r="9"/>',to:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/>',opp_off:'<path d="M4 12h13M13 6l6 6-6 6"/>',opp_def:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/>',our_off:'<path d="M4 12h13M13 6l6 6-6 6"/><circle cx="5" cy="5" r="1.5"/>',our_def:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>'};
+function gsHome(g,s,E){const F=E.filter(e=>e.sec==="foul").length;const us=gsToLeft(s,E,"us"),op=gsToLeft(s,E,"opp");const n=sec=>plural(E.filter(e=>e.sec===sec).length,"note");
+  const c={fouls:plural(F,"foul"),to:`Us ${us.left} · Opp ${op.left} left`,opp_off:n("opp_off"),opp_def:n("opp_def"),our_off:n("our_off"),our_def:n("our_def")};
+  const legacyNotes=E.filter(e=>e.sec==="note").length;
+  return `<div class="gsgrid">${GS_HOME.map(([k,l])=>`<button type="button" class="gsbig" data-act="gsGo" data-v="${k}"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GS_IC[k]}</svg><b>${esc(l)}</b><span class="num" data-count="${k}">${esc(c[k])}</span></button>`).join("")}</div>
+  <button type="button" class="gsfeedbar" data-act="gsGo" data-v="feed"><span><b>Feed</b> <span class="muted small">${E.length?esc(E.length+(E.length===1?" entry":" entries"))+" · newest first":"Every coach's entries"}</span></span>${legacyNotes?`<span class="chip">${plural(legacyNotes,"game note")}</span>`:""}${CHEV}</button>`}
 const gsBack=t=>`<div class="gsback"><button type="button" class="btn icon gsbk" data-act="gsGo" data-v="home" aria-label="Back">${CHEV}</button><h2>${esc(t)}</h2></div>`;
-function gsFouls(s){const F=s.fouls||{};const nos=Object.keys(F).filter(n=>F[n].length).sort(gsNum);
+const gsAgo=ts=>{const m=Math.round((Date.now()-ts)/6e4);return m<1?"now":m<60?m+"m":new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
+const gsLabelOf=e=>e.sec==="foul"?"Foul #"+e.no:e.sec==="to"?"Timeout · "+(e.team==="us"?"Us":"Opponent"):GS_LBL[e.sec]||"Note";
+function gsRow(e){const can=e.legacy?isAdmin():gsCan(e);const editable=can&&e.sec!=="to";
+  return `<div class="gsent ${gsMine(e)?"mine":""}" data-id="${esc(e.id)}"><span class="chip gsqc">${esc(e.q||"")}</span><div class="gset"><span class="gsmeta small"><b>${esc(gsLabelOf(e))}</b> · ${esc(e.byName||"Coach")} · <span class="muted">${esc(gsAgo(e.ts||0))}</span></span>${e.def?`<b>${esc(e.def)}</b>`:""}${e.text?`<span>${esc(e.text)}</span>`:""}</div>${editable?`<button type="button" class="btn icon edit" data-act="gsEditEnt" data-id="${esc(e.id)}" aria-label="Edit">${PEN}</button>`:"<span></span>"}${can?`<button type="button" class="btn icon del" data-act="gsDelEnt" data-id="${esc(e.id)}" aria-label="Delete">${TRASH}</button>`:"<span></span>"}</div>`}
+const gsList=L=>`<div class="gslist">${L.map(gsRow).join("")||'<p class="muted small">Nothing yet.</p>'}</div>`;
+function gsFouls(g,s,E){const F=gsFoulsOf(E);const nos=Object.keys(F).sort(gsNum);
   return gsBack("Fouls")+`<div class="gsfbar"><button type="button" class="btn gold gsadd" data-act="gsKeypad">${PLUS}Foul</button>${nos.length?`<button type="button" class="btn gsedit ${gsEdit?"on":""}" data-act="gsEditMode" aria-pressed="${gsEdit}">${gsEdit?"Done":"Edit"}</button>`:""}</div>
   <div class="gstiles ${gsEdit?"editing":""}">${nos.map(n=>{const l=F[n];const k=l.length;return `<div class="gstile ${k>=4?"red":k===3?"yel":""}" data-no="${esc(n)}"><button type="button" class="gstap" data-act="gsFoul" data-no="${esc(n)}" aria-label="#${esc(n)}: ${plural(k,"foul")}. Tap to add one"><span class="gsno">#${esc(n)}</span><span class="gsfc num">${k}</span><span class="gsqb">${esc(l.map(x=>x.q).join(" · "))}</span></button>${gsEdit?`<button type="button" class="gsminus" data-act="gsUnfoul" data-no="${esc(n)}" aria-label="Remove a foul from #${esc(n)}">−</button>`:""}</div>`}).join("")}</div>
-  ${nos.length?'<p class="small muted gshint">Tap a player for +1. Hold to remove one.</p>':""}`}
-function gsEntries(s,sec){const L=(s.entries||[]).filter(e=>e.sec===sec).sort((a,b)=>b.ts-a.ts);
-  return `<div class="gslist">${L.map(e=>`<div class="gsent"><span class="chip gsqc">${esc(e.q)}</span><div class="gset">${e.def?`<b>${esc(e.def)}</b>`:""}${e.text?`<span>${esc(e.text)}</span>`:""}</div><button type="button" class="btn icon edit" data-act="gsEditEnt" data-id="${esc(e.id)}" aria-label="Edit">${PEN}</button><button type="button" class="btn icon del" data-act="gsDelEnt" data-id="${esc(e.id)}" aria-label="Delete">${TRASH}</button></div>`).join("")||'<p class="muted small">Nothing yet.</p>'}</div>`}
-function gsTextSec(s,sec){const lab=sec==="off"?"What are they running?":"Note";
-  return gsBack(GS_SEC[sec])+`<form class="gsform" data-sec="${sec}"><label class="f" for="gstext">${lab}<textarea id="gstext" rows="2" maxlength="400" enterkeyhint="done"></textarea></label><button type="submit" class="btn gold gsaddbtn">${PLUS}Add</button></form>`+gsEntries(s,sec)}
-function gsDefSec(s){return gsBack(GS_SEC.def)+`<form class="gsform" data-sec="def"><div class="gsdefs" role="group" aria-label="Defense">${GS_DEFS.map(d=>`<button type="button" class="gsdef ${gsDef===d?"on":""}" data-act="gsPickDef" data-v="${esc(d)}" aria-pressed="${gsDef===d}">${esc(d)}</button>`).join("")}</div><label class="f" for="gstext">Note<textarea id="gstext" rows="2" maxlength="400" enterkeyhint="done"></textarea></label><button type="submit" class="btn gold gsaddbtn">${PLUS}Add</button></form>`+gsEntries(s,"def")}
-function scoutView(){if(!isCoach())return homeView();const g=gsCur();if(!g)return gsPicker();const s=gsDoc(g);
-  const body=gsView==="fouls"?gsFouls(s):gsView==="def"?gsDefSec(s):gsView==="off"||gsView==="note"?gsTextSec(s,gsView):gsHome(s);
+  ${nos.length?'<p class="small muted gshint">Tap a player for +1. Hold, or Edit then −, to remove one.</p>':""}`}
+function gsTimeouts(g,s,E){const c=gsToConf(s);const big=t=>{const r=gsToLeft(s,E,t);return `<button type="button" class="gsto" data-act="gsTO" data-team="${t}"><b>${t==="us"?"Us":"Opponent"}</b><span class="gstol num">${r.left} of ${r.tot} left</span><span class="small">${PLUS}Timeout</span></button>`};
+  const per=c.reset?`${c.n} per half · OT ${c.ot}`:`${c.n} per game`;
+  return `<div class="gsback"><button type="button" class="btn icon gsbk" data-act="gsGo" data-v="home" aria-label="Back">${CHEV}</button><h2>Timeouts</h2><span class="sp"></span><button type="button" class="btn icon gsgear" data-act="gsToConf" aria-label="Timeout settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
+  <div class="gstos">${big("us")}${big("opp")}</div><p class="small muted gshint">${esc(per)}${c.own?" (this game)":""}</p>`+gsList(E.filter(e=>e.sec==="to"))}
+function gsTextSec(g,s,E,sec){const isDef=sec==="opp_def"||sec==="our_def";
+  return gsBack(GS_LBL[sec])+`<form class="gsform" data-sec="${sec}">${isDef?`<div class="gsdefs" role="group" aria-label="Defense">${GS_DEFS.map(d=>`<button type="button" class="gsdef ${gsDef===d?"on":""}" data-act="gsPickDef" data-v="${esc(d)}" aria-pressed="${gsDef===d}">${esc(d)}</button>`).join("")}</div>`:""}<label class="f" for="gstext">${isDef?"Note":sec==="opp_off"?"What are they running?":"Note"}<textarea id="gstext" rows="2" maxlength="400" enterkeyhint="done"></textarea></label><button type="submit" class="btn gold gsaddbtn">${PLUS}Add</button></form>`+gsList(E.filter(e=>e.sec===sec))}
+function gsFeed(g,s,E){const names=[...new Set(E.map(e=>e.byName||"Coach"))].sort();const secs=["foul","to","opp_off","opp_def","our_off","our_def",...(E.some(e=>e.sec==="note")?["note"]:[])];
+  [...gsF.by].forEach(n=>{if(!names.includes(n))gsF.by.delete(n)});
+  const L=E.filter(e=>(!gsF.by.size||gsF.by.has(e.byName||"Coach"))&&(!gsF.sec.size||gsF.sec.has(e.sec)));
+  const chip=(kind,v,l,on)=>`<button type="button" class="gchip ${on?"on":""}" data-act="gsFilt" data-kind="${kind}" data-v="${esc(v)}" aria-pressed="${on}">${esc(l)}</button>`;
+  return gsBack("Feed")+`<div class="gschips" role="group" aria-label="Filter by coach">${names.map(n=>chip("by",n,n,gsF.by.has(n))).join("")}</div><div class="gschips" role="group" aria-label="Filter by section">${secs.map(k=>chip("sec",k,k==="foul"?"Fouls":k==="to"?"Timeouts":GS_LBL[k],gsF.sec.has(k))).join("")}</div>`+gsList(L)}
+function scoutView(){if(!isCoach())return homeView();const g=gsCur();if(!g)return gsPicker();const s=gsDoc(g);const E=gsEnts(g.key);
+  if(SB&&user&&!user.name&&!gsNameAsked)gsAskName();
+  const body=gsView==="fouls"?gsFouls(g,s,E):gsView==="to"?gsTimeouts(g,s,E):gsView==="feed"?gsFeed(g,s,E):GS_TEXT_SECS.includes(gsView)?gsTextSec(g,s,E,gsView):gsHome(g,s,E);
   return `<div class="gs">${gsHeadRow(g)}${gsQuarter(s)}<div class="gsbody">${body}</div></div>`}
-/* Opponent page: past scouting sessions (never exhibitions) */
-const gsTally=s=>{const t={};(s.entries||[]).filter(e=>e.sec==="def"&&e.def).forEach(e=>t[e.def]=(t[e.def]||0)+1);return Object.entries(t).sort((a,b)=>b[1]-a[1]).map(([d,n])=>`${d} ×${n}`).join(", ")};
-const gsTopFouls=s=>Object.entries(s.fouls||{}).filter(([,l])=>l.length).sort((a,b)=>b[1].length-a[1].length||gsNum(a[0],b[0])).slice(0,3).map(([n,l])=>`#${n} ×${l.length}`).join(", ");
+let gsNameAsked=false;
+async function gsAskName(){gsNameAsked=true;try{const em=gsMe();const {data}=await SB.from("staff").select("name").eq("email",em);const nm=data&&data[0]&&String(data[0].name||"").trim();if(nm&&user&&em!==String(CONFIG.supabase.coachEmail).toLowerCase()&&!/shared coach/i.test(nm)){user={...user,name:nm.slice(0,40)};requestRender()}}catch(e){}}
+/* Opponent page: past sessions (never exhibitions) */
+const gsTally=E=>{const t={};E.filter(e=>e.sec==="opp_def"&&e.def).forEach(e=>t[e.def]=(t[e.def]||0)+1);return Object.entries(t).sort((a,b)=>b[1]-a[1]).map(([d,n])=>`${d} ×${n}`).join(", ")};
+const gsTopFouls=E=>Object.entries(gsFoulsOf(E)).sort((a,b)=>b[1].length-a[1].length||gsNum(a[0],b[0])).slice(0,3).map(([n,l])=>`#${n} ×${l.length}`).join(", ");
 function gsOppPanel(oid){if(!isCoach())return"";const L=gsAll().filter(s=>s.oppId===oid&&!s.exh).sort((a,b)=>String(b.date).localeCompare(String(a.date)));if(!L.length)return"";
-  const body=L.map(s=>{const byQ=GS_QS.map(q=>{const es=(s.entries||[]).filter(e=>e.q===q).sort((a,b)=>a.ts-b.ts);return es.length?`<div class="gsqgrp"><span class="chip gsqc">${q}</span>${es.map(e=>`<div class="small"><span class="muted">${e.sec==="off"?"Offense":e.sec==="def"?"Defense":"Note"}:</span> ${e.def?`<b>${esc(e.def)}</b> `:""}${esc(e.text||"")}</div>`).join("")}</div>`:""}).join("");
-    const tf=gsTopFouls(s),td=gsTally(s);
-    return `<details class="gsopp"><summary><span><b>${esc(mon(D(s.date))+" "+D(s.date).getDate()+", "+D(s.date).getFullYear())}</b> ${gsLvChip(s.level)}</span><span class="small muted">${tf?"Fouls "+esc(tf):"No fouls"}${td?" · "+esc(td):""}</span></summary><div class="gsoppb">${byQ||'<p class="muted small">No notes.</p>'}</div></details>`}).join("");
+  const body=L.map(s=>{const E=gsEnts(s.id);const byQ=GS_QS.map(q=>{const es=E.filter(e=>e.q===q&&e.sec!=="foul").sort((a,b)=>(a.ts||0)-(b.ts||0));return es.length?`<div class="gsqgrp"><span class="chip gsqc">${q}</span>${es.map(e=>`<div class="small"><span class="muted">${esc(gsLabelOf(e))}:</span> ${e.def?`<b>${esc(e.def)}</b> `:""}${esc(e.text||"")} <span class="muted">· ${esc(e.byName||"Coach")}</span></div>`).join("")}</div>`:""}).join("");
+    const tf=gsTopFouls(E),td=gsTally(E);const tu=E.filter(e=>e.sec==="to"&&e.team==="us").length,tp=E.filter(e=>e.sec==="to"&&e.team==="opp").length;
+    return `<details class="gsopp"><summary><span><b>${esc(mon(D(s.date))+" "+D(s.date).getDate()+", "+D(s.date).getFullYear())}</b> ${gsLvChip(s.level)}</span><span class="small muted">${tf?"Fouls "+esc(tf):"No fouls"}${td?" · "+esc(td):""}${tu||tp?` · Timeouts: Us ${tu} · Opp ${tp}`:""}</span></summary><div class="gsoppb">${byQ||'<p class="muted small">No notes.</p>'}</div></details>`}).join("");
   return panel("game-scout",'Game Scout <span class="chip">Coaches only</span>',plural(L.length,"game"),body,"coachonly")}
 function gsKeypadHTML(){return `<div class="gskp"><div class="gskd num" id="gskd" aria-live="polite">#</div><div class="gskeys">${["1","2","3","4","5","6","7","8","9","bk","0","ok"].map(k=>k==="bk"?`<button type="button" class="gskey" data-act="gsKey" data-k="bk" aria-label="Delete digit">⌫</button>`:k==="ok"?`<button type="button" class="gskey ok" data-act="gsKey" data-k="ok" id="gskok" disabled>Add</button>`:`<button type="button" class="gskey num" data-act="gsKey" data-k="${k}">${k}</button>`).join("")}</div></div>`}
 let gsKp="";
-function gsAddFoul(no){const g=gsCur();if(!g)return;const s=gsDoc(g);const F={...(s.fouls||{})};F[no]=[...(F[no]||[]),{q:s.q||"Q1",ts:Date.now()}];
-  const k=F[no].length;gsSave(g.key,{...s,fouls:F},`#${no}: ${plural(k,"foul")}`+(k>=4?" ⚠":""))}
-function gsRemoveFoul(no){const g=gsCur();if(!g)return;const s=gsDoc(g);const F={...(s.fouls||{})};if(!F[no]||!F[no].length)return;F[no]=F[no].slice(0,-1);if(!F[no].length)delete F[no];
-  gsSave(g.key,{...s,fouls:F},`#${no}: ${plural((F[no]||[]).length,"foul")}`)}
-function gsAddEntry(sec,text,def){const g=gsCur();if(!g)return false;const s=gsDoc(g);text=String(text||"").replace(/\s+$/,"").trim().slice(0,400);
-  if(!text&&!(sec==="def"&&def)){toast(sec==="def"?"Pick a defense or type a note":"Type a note first",true);return false}
-  const e={id:uid("x"),sec,q:s.q||"Q1",text,ts:Date.now(),by:(user&&(user.cid||user.name))||"coach"};if(sec==="def"&&def)e.def=def;
-  gsSave(g.key,{...s,entries:[...(s.entries||[]),e]},"Added to "+(s.q||"Q1"));return true}
+function gsAddFoul(no){const g=gsCur();if(!g)return;const k=(gsFoulsOf(gsEnts(g.key))[no]||[]).length+1;gsAdd(g,{sec:"foul",no:String(no)},`Foul #${no}: ${plural(k,"foul")}`)}
+function gsRemoveFoul(no){const g=gsCur();if(!g)return;const l=(gsFoulsOf(gsEnts(g.key))[no]||[]);if(!l.length)return;const last=l[l.length-1];
+  let t=gsCan(last)||(last.legacy&&isAdmin())?last:l.filter(gsMine).pop();
+  if(!t)return toast("Only "+(last.byName||"that coach")+" can remove theirs",true);
+  gsDelEnt(g,t,`Foul #${no}: ${plural(l.length-1,"foul")}`)}
+function gsEntOf(id){const g=gsCur();return g?gsEnts(g.key).find(e=>e.id===id):null}
 const GS_ACT={
   gsPick(d){LS.set(GS_LAST,d.k);gsView="home";gsEdit=false;render();window.scrollTo(0,0)},
   gsSwitch(){LS.set(GS_LAST,null);gsView="home";render();window.scrollTo(0,0)},
-  gsGo(d){gsView=d.v;gsEdit=false;if(d.v!=="def")gsDef="";render();window.scrollTo(0,0)},
-  gsSetQ(d){const g=gsCur();if(!g)return;const s=gsDoc(g);if(s.q===d.q)return;gsSave(g.key,{...s,q:d.q},"Quarter: "+d.q)},
+  gsGo(d){gsView=d.v;gsEdit=false;gsDef="";render();window.scrollTo(0,0)},
+  gsSetQ(d){const g=gsCur();if(!g)return;const s=gsGet(g.key);if((s&&s.q||"Q1")===d.q)return;const prev=s?JSON.parse(JSON.stringify(s)):undefined;
+    gsPut("gscout",g.key,{...(s||{}),...gsMeta(g),q:d.q});toastUndo("Quarter: "+d.q,async()=>{await gsQ;const cur=gsGet(g.key)||{};await saveDoc("gscout",g.key,{...cur,q:prev&&prev.q||"Q1"})})},
   gsKeypad(){gsKp="";listSheet("Jersey number",gsKeypadHTML())},
   gsKey(d){if(d.k==="ok"){if(!gsKp)return;const n=gsKp;gsKp="";closeSheetPop();gsAddFoul(n);return}
     if(d.k==="bk")gsKp=gsKp.slice(0,-1);else if(gsKp.length<2)gsKp+=d.k;const el=$("#gskd");if(el)el.textContent="#"+gsKp;const ok=$("#gskok");if(ok)ok.disabled=!gsKp},
   gsFoul(d,el){if(el&&el.dataset.lp==="1"){el.dataset.lp="";return}gsAddFoul(d.no)},
   gsUnfoul(d){gsRemoveFoul(d.no)},
   gsEditMode(){gsEdit=!gsEdit;render()},
+  gsTO(d){const g=gsCur();if(!g)return;const team=d.team==="us"?"us":"opp";const s=gsDoc(g);const r=gsToLeft(s,gsEnts(g.key),team);
+    gsAdd(g,{sec:"to",team},`Timeout · ${team==="us"?"Us":"Opponent"}: ${Math.max(0,r.left-1)} of ${r.tot} left`)},
+  gsToConf(){const g=gsCur();if(!g)return;const s=gsDoc(g);const c=gsToConf(s);
+    openSheet({title:"Timeout settings",fields:[{key:"scope",label:"Apply to",type:"seg",options:[["all","All games"],["game","This game only"]],req:true},{key:"n",label:"Timeouts per game (per half when they reset)",type:"number",int:true,lo:0,hi:10,req:true,half:true},{key:"ot",label:"OT timeouts",type:"number",int:true,lo:0,hi:5,half:true,hint:"Used when they reset at half"},{key:"reset",label:"Reset at half (Q3 starts a fresh count)",type:"check"}],
+      value:{scope:c.own?"game":"all",n:c.n,ot:c.ot,reset:c.reset},saved:"Timeout settings saved",
+      onSave:async v=>{const o={n:Math.max(0,Math.min(10,+v.n||0)),reset:!!v.reset,ot:Math.max(0,Math.min(5,+v.ot||0))};const cur=gsGet(g.key);
+        if(v.scope==="game")await saveDoc("gscout",g.key,{q:"Q1",...(cur||{}),...gsMeta(g),to:o});
+        else{await saveDoc("gscout_conf","timeouts",o);if(cur&&cur.to){const n={...cur};delete n.to;await saveDoc("gscout",g.key,n)}}}})},
   gsPickDef(d){gsDef=gsDef===d.v?"":d.v;$$(".gsdef").forEach(b=>{const on=b.dataset.v===gsDef;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)})},
-  gsDelEnt(d){const g=gsCur();if(!g)return;const s=gsDoc(g);const e=(s.entries||[]).find(x=>x.id===d.id);if(!e)return;gsSave(g.key,{...s,entries:s.entries.filter(x=>x.id!==d.id)},"Note deleted")},
-  gsEditEnt(d){const g=gsCur();if(!g)return;const s=gsDoc(g);const e=(s.entries||[]).find(x=>x.id===d.id);if(!e)return;
-    openSheet({title:"Edit "+(GS_SEC[e.sec]||"note").toLowerCase(),fields:[...(e.sec==="def"?[{key:"def",label:"Defense",type:"select",options:[["","None"],...GS_DEFS.map(x=>[x,x])]}]:[]),{key:"q",label:"Quarter",type:"select",options:GS_QS.map(x=>[x,x]),half:true},{key:"text",label:"Note",type:"textarea",max:400}],value:{...e,def:e.def||""},saved:"Saved",
-      onSave:async v=>{const t=String(v.text||"").trim().slice(0,400);if(!t&&!(e.sec==="def"&&v.def))throw new Error("Type a note first");const cur=gsDoc(g);const ne={...e,text:t,q:GS_QS.includes(v.q)?v.q:e.q};if(e.sec==="def"){if(v.def)ne.def=v.def;else delete ne.def}
-        await saveDoc("gscout",g.key,{...cur,entries:cur.entries.map(x=>x.id===e.id?ne:x)})}})},
+  gsFilt(d){const S=gsF[d.kind==="by"?"by":"sec"];S.has(d.v)?S.delete(d.v):S.add(d.v);render()},
+  gsDelEnt(d){const g=gsCur();const e=gsEntOf(d.id);if(!g||!e)return;gsDelEnt(g,e,gsLabelOf(e)+" deleted")},
+  gsEditEnt(d){const g=gsCur();const e=gsEntOf(d.id);if(!g||!e)return;if(e.legacy?!isAdmin():!gsCan(e))return toast("Only "+(e.byName||"that coach")+" can edit theirs",true);
+    const isDef=e.sec==="opp_def"||e.sec==="our_def";const foul=e.sec==="foul";
+    openSheet({title:"Edit "+gsLabelOf(e).toLowerCase(),fields:[...(isDef?[{key:"def",label:"Defense",type:"select",options:[["","None"],...GS_DEFS.map(x=>[x,x])]}]:[]),...(foul?[{key:"no",label:"Jersey #",im:"numeric",max:2,req:true,half:true}]:[]),{key:"q",label:"Quarter",type:"select",options:GS_QS.map(x=>[x,x]),half:true},...(foul?[]:[{key:"text",label:"Note",type:"textarea",max:400}])],value:{...e,def:e.def||"",no:String(e.no??"")},saved:"Saved",
+      onSave:async v=>{const q=GS_QS.includes(v.q)?v.q:e.q;
+        if(foul&&!/^\d{1,2}$/.test(String(v.no||"")))throw new Error("Jersey # must be 1 or 2 digits");
+        const t=String(v.text||"").trim().slice(0,400);if(!foul&&!t&&!(isDef&&v.def))throw new Error("Type a note first");
+        if(e.legacy){const s=gsGet(g.key);const n={...s};if(foul){const F={...(n.fouls||{})};const i=+e.id.split(":")[3];const it=(F[e.no]||[])[i];F[e.no]=(F[e.no]||[]).filter((x,j)=>j!==i);if(!F[e.no].length)delete F[e.no];F[v.no]=[...(F[v.no]||[]),{...it,q}];n.fouls=F}
+          else n.entries=(n.entries||[]).map(x=>{if(x.id!==e.lid)return x;const y={...x,q,text:t};if(isDef&&v.def)y.def=v.def;else delete y.def;return y});return saveDoc("gscout",g.key,n)}
+        const raw={...store.gscout_e[e.id]};raw.q=q;if(foul)raw.no=String(v.no);else{raw.text=t;if(isDef){if(v.def)raw.def=v.def;else delete raw.def}}return saveDoc("gscout_e",e.id,raw)}})},
   gsQuick(){openSheet({title:"Quick exhibition",fields:[{key:"level",label:"Level",type:"seg",options:[["V","Varsity"],["JV","JV"],["C","C-Team"]],req:true},{key:"opp",label:"Opponent",req:true,max:60}],value:{level:"V"},saved:"Game started",
     onSave:async v=>{const nm=String(v.opp||"").replace(/\s+/g," ").trim();if(!nm)throw new Error("Opponent is required");const id="q-"+uid("");const lv=["V","JV","C"].includes(v.level)?v.level:"V";
-      await saveDoc("gscout",id,{ref:{kind:"quick",id},level:lv,date:ymd(TODAY),oppId:null,oppName:nm,exh:true,q:"Q1",fouls:{},entries:[]});LS.set(GS_LAST,id);gsView="home"}})}
+      await saveDoc("gscout",id,{ref:{kind:"quick",id},level:lv,date:ymd(TODAY),oppId:null,oppName:nm,exh:true,q:"Q1"});LS.set(GS_LAST,id);gsView="home"}})}
 };
 function gsBind(){
-  $$(".gsform").forEach(f=>f.addEventListener("submit",e=>{e.preventDefault();const t=f.querySelector("textarea");const sec=f.dataset.sec;const dv=sec==="def"?gsDef:"";gsDef="";if(!gsAddEntry(sec,t.value,dv))gsDef=dv}));
+  $$(".gsform").forEach(f=>f.addEventListener("submit",e=>{e.preventDefault();const g=gsCur();if(!g)return;const t=f.querySelector("textarea");const sec=f.dataset.sec;const isDef=sec==="opp_def"||sec==="our_def";
+    const text=String(t.value||"").trim().slice(0,400);const dv=isDef?gsDef:"";if(!text&&!dv)return toast(isDef?"Pick a defense or type a note":"Type a note first",true);
+    gsDef="";const s=gsDoc(g);const en={sec};if(text)en.text=text;if(dv)en.def=dv;gsAdd(g,en,(GS_LBL[sec])+" · "+(s.q||"Q1"))}));
   $$(".gsform textarea").forEach(t=>t.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();t.form.requestSubmit()}}));
   /* Hold a player tile to take one foul back */
   $$(".gstap").forEach(b=>{let tm=null;const clear=()=>{clearTimeout(tm);tm=null};
@@ -3277,7 +3356,7 @@ document.addEventListener("click",e=>{const el=e.target.closest("[data-act]");if
 
 /* ================= Admin: Staff & changes (live site only; staff names appear only here) ================= */
 let ADM;function admReset(){ADM={tab:"staff",staff:null,staffBusy:false,staffErr:"",reqs:null,reqsBusy:false,log:[],logDone:false,logBusy:false,logErr:"",logLoaded:false,logGen:ADM?ADM.logGen+1:0,f:{actor:"",coll:"",from:"",to:""},exact:new Set()}}admReset();
-const SECT={games:"Game schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"Standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Basketball glossary",calls:"Calls",playsets:"Playbook (hidden list)",posts:"Team feed (old)",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",events:"Calendar",staffdir:"Staff directory",settings:"Settings",accounts:"Passwords",gscout:"Game Scout"};
+const SECT={games:"Game schedule",players:"Roster",statgames:"Stats",opps:"Scouting",notes:"Notes",clips:"Film",stand:"Standings",lres:"League results",plays:"Playbook",templates:"Play templates",terms:"Basketball glossary",calls:"Calls",playsets:"Playbook (hidden list)",posts:"Team feed (old)",talk:"Coach Talk",talks:"Coach Talk (past)",history:"Team history",events:"Calendar",staffdir:"Staff directory",settings:"Settings",accounts:"Passwords",gscout:"Game Scout",gscout_e:"Game Scout",gscout_conf:"Game Scout settings"};
 const sectName=c=>SECT[c]||c;
 /* Sections of removed features: their old rows stay in the database but never show in the change log. */
 const GONE_COLLS=["badges","awards"];
@@ -3331,6 +3410,8 @@ function admLabel(a){a=admEff(a);const o=a.old||{},n=a.new||{};let d=a.action===
     case"playsets":s="Basic plays hidden from players";break;
     case"accounts":s="Password";break;
     case"gscout":s="Game Scout: "+(d.oppName||"Game")+(d.date?" · "+shortDate(d.date):"");break;
+    case"gscout_e":{const ss=store.gscout[d.sess];s="Game Scout: "+gsLabelOf(d)+(d.text?" “"+snip(d.text)+"”":"")+(ss&&ss.oppName?" ("+ss.oppName+")":"");break}
+    case"gscout_conf":s="Game Scout timeout settings";break;
     default:s=d.name||d.title||"";
   }}catch(e){s=""}
   return String(s||"").trim()||String(id)}
