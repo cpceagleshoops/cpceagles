@@ -3051,16 +3051,16 @@ function gsNotes(g,s,E){
   return gsBack("Game Notes")+`<form class="gsform" data-sec="note"><label class="f" for="gstext">Note<textarea id="gstext" rows="2" maxlength="400" enterkeyhint="done"></textarea></label><button type="submit" class="btn gold gsaddbtn">${PLUS}Add</button></form>`+gsList(E.filter(gsIsNote))}
 /* Turnovers: one tap logs it; the points prompt appears inline (never blocks the counters) and turns into "Later" after 8 s */
 function gsTov(g,s,E){const t=gsTovStats(E);const ask=gsTovAsk&&E.find(e=>e.id===gsTovAsk.id&&e.sec==="tov");if(gsTovAsk&&!ask)gsTovAsk=null;
-  const big=(tm,l,n)=>`<button type="button" class="gstov ${tm}" data-act="gsTovAdd" data-team="${tm}"><span class="gstovn num">${n}</span><b>${l}</b><span class="small">${PLUS}Tap to log</span></button>`;
+  const big=(tm,l,n,pts,who)=>`<button type="button" class="gstov ${tm}" data-act="gsTovAdd" data-team="${tm}" aria-label="Log ${l}"><span class="gstovn num">${n}</span><b>${l}</b><span class="small">${who} scored <b class="num">${pts}</b> off</span></button>`;
   const prompt=ask?`<div class="gsask ${gsTovAsk.fresh?"in":""}" role="group" aria-label="Points off this turnover"><div class="gsaskh"><b>Points off this turnover?</b><span class="small muted">${ask.team==="us"?"Eagles turnover: points go to Opp":"Opponent turnover: points go to CPC"}</span></div><div class="gsaskb">${[0,1,2,3,4].map(n=>`<button type="button" class="gspt num" data-act="gsTovPts" data-id="${esc(ask.id)}" data-v="${n}">${n}</button>`).join("")}<button type="button" class="gspt later" data-act="gsTovLater">Later</button></div>${gsTovAsk.auto?`<span class="gsaskbar" style="animation-duration:8000ms;animation-delay:-${Math.min(8000,Date.now()-gsTovAsk.t0)}ms"></span>`:""}</div>`:"";
   if(gsTovAsk)gsTovAsk.fresh=false;
   const open=t.open.slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
-  return gsBack("Turnovers")+`<div class="gstovs2">${big("us","Eagles TO",t.us)}${big("opp","Opponent TO",t.opp)}</div>${prompt}
+  return gsBack("Turnovers")+`<div class="gstovs2">${big("us","Eagles TO",t.us,t.ptsOpp,"Opp")}${big("opp","Opponent TO",t.opp,t.ptsUs,"CPC")}</div>${prompt}
   ${open.length?`<div class="gsneed"><h3 class="gsh">Needs points (${open.length})</h3><div class="gsneedl">${open.map(e=>gsCan(e)?`<button type="button" class="gsneedi" data-act="gsTovAsk" data-id="${esc(e.id)}">${e.team==="us"?"Eagles":"Opponent"} TO <span class="muted">· ${esc(gsAgo(e.ts||0))}</span></button>`:`<span class="gsneedi ro">${e.team==="us"?"Eagles":"Opponent"} TO <span class="muted">· ${esc(e.byName||"Coach")}</span></span>`).join("")}</div></div>`:""}`+gsList(E.filter(e=>e.sec==="tov"))}
 function scoutView(){if(!isCoach())return homeView();const g=gsCur();if(!g)return gsPicker();const s=gsDoc(g);const E=gsEnts(g.key);
   if(SB&&user&&!user.name&&!gsNameAsked)gsAskName();
   const body=gsView==="fouls"?gsFouls(g,s,E):gsView==="to"?gsTimeouts(g,s,E):gsView==="tov"?gsTov(g,s,E):gsView==="notes"?gsNotes(g,s,E):gsHome(g,s,E);
-  return `<div class="gs">${gsHeadRow(g)}<div class="gspin">${gsNav()}${gsTovStrip(E)}</div><div class="gsbody">${body}</div></div>`}
+  return `<div class="gs">${gsHeadRow(g)}<div class="gspin">${gsNav()}</div><div class="gsbody">${body}</div></div>`}
 let gsNameAsked=false;
 async function gsAskName(){gsNameAsked=true;try{const em=gsMe();const {data}=await SB.from("staff").select("name").eq("email",em);const nm=data&&data[0]&&String(data[0].name||"").trim();if(nm&&user&&em!==String(CONFIG.supabase.coachEmail).toLowerCase()&&!/shared coach/i.test(nm)){user={...user,name:nm.slice(0,40)};requestRender()}}catch(e){}}
 /* Opponent page: past sessions (never exhibitions) */
