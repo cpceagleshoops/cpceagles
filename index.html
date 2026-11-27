@@ -795,6 +795,31 @@ body.on-tracker .toast{top:auto;bottom:calc(84px + var(--safe-b));transform:tran
 .gsmon{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:12px 2px 6px;font-variant:small-caps}
 .gsmore{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:48px;margin-top:2px;border-radius:12px;border:1px dashed var(--line);background:none;color:var(--gold-ink);font:inherit;font-weight:700;cursor:pointer}
 .gsmore svg{transform:rotate(90deg);width:12px;height:12px}.gsmore[aria-expanded=true] svg{transform:rotate(-90deg)}
+.gspin{position:sticky;top:0;z-index:5;margin:8px 0 12px;border-radius:12px;border:1px solid var(--line);background:rgba(11,21,34,.92);-webkit-backdrop-filter:saturate(180%) blur(16px);backdrop-filter:saturate(180%) blur(16px)}
+@media (max-width:820px){.gspin{top:calc(var(--safe-t) + 45px)}}
+.gspin .gsnav{position:static;margin:0;border:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none;grid-template-columns:repeat(4,minmax(0,1fr))}
+.gspin .gsnav button{font-size:11.5px}
+.gstovs{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 14px;padding:5px 8px 6px;border-top:1px solid var(--line);font-size:11.5px;line-height:1.3;color:#fff}
+.gstovs .gstl{color:var(--muted);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.04em}.gstovs i{font-style:normal;color:var(--muted);margin:0 4px}
+.gsbsub{color:var(--muted);font-weight:600;font-size:12px}.gsbsub .nw{white-space:nowrap}
+.gstovs2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.gstov{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:168px;border-radius:18px;border:1px solid var(--line);background:var(--surface-2);color:#fff;font:inherit;cursor:pointer;touch-action:manipulation;transition:transform .14s cubic-bezier(.2,.8,.2,1)}
+.gstov.us{border-color:rgba(212,178,110,.45)}.gstov.opp{border-color:rgba(255,154,143,.4)}
+.gstovn{font-family:var(--display);font-size:52px;font-weight:800;line-height:1}.gstov b{font-size:17px}.gstov .small{color:var(--muted)}
+.gstov:active{transform:scale(.96)}
+.gsask{position:relative;overflow:hidden;margin-top:10px;padding:12px;border-radius:16px;border:1px solid var(--gold);background:var(--surface-2)}
+.gsask.in{animation:gsIn .32s cubic-bezier(.2,.9,.25,1)}
+@keyframes gsIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+.gsaskh{display:flex;flex-direction:column;gap:2px;margin-bottom:10px}.gsaskh b{font-size:16px}
+.gsaskb{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) 1.4fr;gap:6px}
+.gspt{min-height:56px;border-radius:12px;border:1px solid var(--line);background:var(--surface-3);color:#fff;font:inherit;font-size:22px;font-weight:800;cursor:pointer;touch-action:manipulation}
+.gspt.later{font-size:14px;font-weight:700;color:var(--muted)}.gspt:active{transform:scale(.95)}
+.gsaskbar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:var(--gold);transform-origin:left;animation:gsBar linear forwards}
+@keyframes gsBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.gsneed{margin:14px 0 4px}.gsneedl{display:flex;flex-wrap:wrap;gap:6px}
+.gsneedi{min-height:44px;padding:6px 12px;border-radius:999px;border:1px dashed var(--gold);background:none;color:#fff;font:inherit;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:4px}.gsneedi.ro{border-color:var(--line);cursor:default}
+@media (max-width:340px){.gstovs{font-size:10.5px;gap:1px 10px}.gstovs .gstl{font-size:9.5px}.gspin .gsnav button{font-size:10.5px}.gsaskb{grid-template-columns:repeat(5,minmax(0,1fr));}.gspt.later{grid-column:span 5;min-height:48px}}
+@media (prefers-reduced-motion:reduce){.gsask.in{animation:none}.gstov,.gspt{transition:none}.gstov:active,.gspt:active{transform:none}}
 </style>
 </head>
 <body>
@@ -2913,18 +2938,18 @@ function tplListHTML(){const row=(t,mine)=>`<div class="tplitem"><button type="b
 /* ================= Game Scout (coaches only): live opponent tracking from the bench =================
    gscout      one doc per game session: metadata only (ref, level, date, oppId, oppName, exh, q, to? = timeout override)
    gscout_e    one doc per action, so coaches on the same game never overwrite each other:
-               {sess, sec:"foul|to|opp_off|opp_def|our_off|our_def|note", q, text?, def?, no?, team?:"us|opp", by:<email>, byName, ts}
+               {sess, sec:"foul|to|tov|note" (older: eagles|opp|opp_off|opp_def|our_off|our_def), text?, def?, no?, team?:"us|opp", pts? (tov: points the OTHER team scored off it; null = not answered), half?, by:<email>, byName, ts}
    gscout_conf id "timeouts": {n, reset, ot}  default timeout rules (any coach can change them)
    V1 sessions kept fouls/entries inside the session doc: they still show (read-only, "Coach (V1)"; admins can edit/delete). */
 const GS_DEFS=["Man","2-3 Zone","1-3-1","3-2","Full-Court Press","Half-Court Trap"];
 const GS_QS=["Q1","Q2","Q3","Q4","OT"];
-const GS_LBL={foul:"Foul",to:"Timeout",eagles:"Eagles",opp:"Opponent",opp_off:"Opponent",opp_def:"Opponent",our_off:"Eagles",our_def:"Eagles",note:"Game Notes"};
-const GS_HOME=[["fouls","Fouls"],["to","Timeouts"],["eagles","Eagles"],["opp","Opponent"]];
-const GS_TEXT_SECS=["eagles","opp"];
-/* old sections fold into the two V2.2 ones: Opponent (incl. V1 game notes) and Eagles */
-const gsGrp=e=>/^(opp|opp_off|opp_def|note)$/.test(e.sec)?"opp":/^(eagles|our_off|our_def)$/.test(e.sec)?"eagles":e.sec;
+const GS_LBL={foul:"Foul",to:"Timeout",tov:"Turnover",note:"Game Notes"};
+const GS_HOME=[["fouls","Fouls"],["to","Timeouts"],["tov","Turnovers"],["notes","Game Notes"]];
+/* every kind of note (V2.3 single Game Notes; older Eagles/Opponent/offense/defense sections and V1 notes fold into it) */
+const GS_NOTE_SECS=["note","eagles","opp","opp_off","opp_def","our_off","our_def"];
+const gsIsNote=e=>GS_NOTE_SECS.includes(e.sec);
 const GS_LAST="cpc_gs_last";
-let gsView="home",gsEdit=false,gsQ=Promise.resolve(),gsDef="";const gsF={by:new Set(),sec:new Set()};
+let gsView="home",gsEdit=false,gsQ=Promise.resolve(),gsTovAsk=null,gsTovTimer=0;
 const gsExhRe=/jamboree|exhibition|scrimmage/i;
 const gsAll=()=>isCoach()?items("gscout"):[];
 const gsGet=id=>isCoach()?get("gscout",id):null;
@@ -2994,19 +3019,23 @@ function gsPicker(){const t=ymd(TODAY);const lv=gsPickLv();const L=gsGames().fil
   <section class="gssec" aria-label="Upcoming"><h2 class="gsh">Upcoming${up.length?` <span class="chip num">${up.length}</span>`:""}</h2>${upRows||`<p class="muted small">No upcoming ${esc(lvName(lv))} games.</p>`}${more>0?`<button type="button" class="gsmore" data-act="gsUpAll" aria-expanded="${gsUpAll}">${gsUpAll?"Show fewer":`Show all upcoming (${up.length})`}${CHEV}</button>`:""}</section>
   ${past.length?`<details class="gssec gspast"><summary class="gsh">${CHEV}Past <span class="chip num">${past.length}</span></summary>${past.map(gsPickRow).join("")}</details>`:""}`}
 function gsHeadRow(g){return `<div class="gshead"><button type="button" class="gshmain" data-act="gsGo" data-v="home" aria-label="Game Tracker home"><span class="gsht"><b>${esc(g.oppName)}</b>${gsLvChip(g.level)}${g.exh?gsExhChip:""}</span><span class="small muted">${esc(mon(D(g.date))+" "+D(g.date).getDate())}</span></button><button type="button" class="gshsw" data-act="gsSwitch" aria-label="Switch game">Switch${CHEV}</button></div>`}
-const GS_NAV=[["fouls","Fouls"],["to","TOs"],["eagles","Eagles"],["opp","Opponent"],["feed","Feed"]];
-const GS_NAVIC={feed:'<path d="M4 6h16M4 12h16M4 18h10"/>'};
-function gsNav(){return `<nav class="gsnav" aria-label="Game Tracker sections">${GS_NAV.map(([k,l])=>`<button type="button" data-act="gsGo" data-v="${k}" class="${gsView===k?"on":""}" ${gsView===k?'aria-current="page"':""}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GS_IC[k==="fouls"?"fouls":k]||GS_NAVIC[k]}</svg><span>${l}</span></button>`).join("")}</nav>`}
-const GS_IC={eagles:'<path d="M3 13c3-1 5-4 9-4 3 0 5 1 9-1-1 4-4 7-8 7l-3 4-1-4c-3 0-5-1-6-2z"/>',opp:'<circle cx="9" cy="8" r="3"/><path d="M3 20c.5-3.5 3-5.5 6-5.5s5.5 2 6 5.5M16 4l5 5M21 4l-5 5"/>',fouls:'<path d="M12 7v6M12 16.5v.5"/><circle cx="12" cy="12" r="9"/>',to:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/>',opp_off:'<path d="M4 12h13M13 6l6 6-6 6"/>',opp_def:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/>',our_off:'<path d="M4 12h13M13 6l6 6-6 6"/><circle cx="5" cy="5" r="1.5"/>',our_def:'<path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/>'};
-function gsHome(g,s,E){const Fu=E.filter(e=>e.sec==="foul"&&gsFTeamOf(e)==="us").length,Fo=E.filter(e=>e.sec==="foul"&&gsFTeamOf(e)==="opp").length;const us=gsToLeft(s,E,"us"),op=gsToLeft(s,E,"opp");const n=sec=>plural(E.filter(e=>gsGrp(e)===sec).length,"note");
-  const c={fouls:`Eagles ${Fu} · Opp ${Fo}`,to:`Us ${us.left} · Opp ${op.left} left`,eagles:n("eagles"),opp:n("opp")};
-  return `<div class="gsgrid">${GS_HOME.map(([k,l])=>`<button type="button" class="gsbig" data-act="gsGo" data-v="${k}"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GS_IC[k]}</svg><b>${esc(l)}</b><span class="num" data-count="${k}">${esc(c[k])}</span></button>`).join("")}</div>
-  <button type="button" class="gsfeedbar" data-act="gsGo" data-v="feed"><span><b>Feed</b> <span class="muted small">${(()=>{const k=E.filter(e=>gsGrp(e)==="eagles"||gsGrp(e)==="opp").length;return k?esc(plural(k,"note"))+" · newest first":"Every coach's notes"})()}</span></span>${CHEV}</button>`}
+const GS_NAV=[["fouls","Fouls"],["to","Timeouts"],["tov","Turnovers"],["notes","Notes"]];
+
+function gsNav(){return `<nav class="gsnav" aria-label="Game Tracker sections">${GS_NAV.map(([k,l])=>`<button type="button" data-act="gsGo" data-v="${k}" class="${gsView===k?"on":""}" ${gsView===k?'aria-current="page"':""}><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GS_IC[k]}</svg><span>${l}</span></button>`).join("")}</nav>`}
+const GS_IC={fouls:'<path d="M12 7v6M12 16.5v.5"/><circle cx="12" cy="12" r="9"/>',to:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9.5 2.5h5"/>',tov:'<path d="M4 9h12l-3-3M20 15H8l3 3"/>',notes:'<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>'};
+/* turnovers: pts on a turnover were scored by the OTHER team */
+function gsTovStats(E){const T=E.filter(e=>e.sec==="tov");const sum=l=>l.reduce((a,e)=>a+(Number.isFinite(+e.pts)&&e.pts!==null&&e.pts!==""?+e.pts:0),0);
+  const us=T.filter(e=>e.team==="us"),op=T.filter(e=>e.team!=="us");return {us:us.length,opp:op.length,ptsUs:sum(op),ptsOpp:sum(us),open:T.filter(e=>e.pts==null||e.pts==="")}}
+function gsTovStrip(E){const t=gsTovStats(E);return `<div class="gstovs" aria-label="Turnover summary"><span><span class="gstl">Turnovers</span> <b class="num">CPC ${t.us}</b><i>|</i><b class="num">Opp ${t.opp}</b></span><span><span class="gstl">Points off turnovers</span> <b class="num">CPC ${t.ptsUs}</b><i>|</i><b class="num">Opp ${t.ptsOpp}</b></span></div>`}
+function gsHome(g,s,E){const Fu=E.filter(e=>e.sec==="foul"&&gsFTeamOf(e)==="us").length,Fo=E.filter(e=>e.sec==="foul"&&gsFTeamOf(e)==="opp").length;const us=gsToLeft(s,E,"us"),op=gsToLeft(s,E,"opp");const t=gsTovStats(E);
+  const c={fouls:`Eagles ${Fu} · Opp ${Fo}`,to:`Us ${us.left} · Opp ${op.left} left`,tov:`CPC ${t.us} · Opp ${t.opp}`,notes:plural(E.filter(gsIsNote).length,"note")};
+  return `<div class="gsgrid">${GS_HOME.map(([k,l])=>`<button type="button" class="gsbig" data-act="gsGo" data-v="${k}"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${GS_IC[k]}</svg><b>${esc(l)}</b><span class="num" data-count="${k}">${esc(c[k])}</span>${k==="tov"?`<span class="small gsbsub num"><span class="nw">Pts off: CPC ${t.ptsUs}</span> <span class="nw">· Opp ${t.ptsOpp}</span></span>`:""}</button>`).join("")}</div>`}
 const gsBack=t=>`<div class="gsback"><button type="button" class="btn icon gsbk" data-act="gsGo" data-v="home" aria-label="Back">${CHEV}</button><h2>${esc(t)}</h2></div>`;
 const gsAgo=ts=>{const m=Math.round((Date.now()-ts)/6e4);return m<1?"now":m<60?m+"m":new Date(ts).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})};
-const gsLabelOf=e=>e.sec==="foul"?(gsFTeamOf(e)==="us"?"Eagles":"Opponent")+" foul #"+e.no:e.sec==="to"?"Timeout · "+(e.team==="us"?"Us":"Opponent"):e.sec==="note"?"Game Notes":GS_LBL[gsGrp(e)]||"Note";
+const gsPtsTxt=e=>e.pts==null||e.pts===""?"points not set":`${e.pts} pt${+e.pts===1?"":"s"} for ${e.team==="us"?"Opp":"CPC"}`;
+const gsLabelOf=e=>e.sec==="foul"?(gsFTeamOf(e)==="us"?"Eagles":"Opponent")+" foul #"+e.no:e.sec==="to"?"Timeout · "+(e.team==="us"?"Us":"Opponent"):e.sec==="tov"?(e.team==="us"?"Eagles":"Opponent")+" turnover · "+gsPtsTxt(e):gsIsNote(e)?"Game Notes":"Note";
 const gsTextOf=e=>[e.def,e.text].filter(x=>String(x||"").trim()).join(" — ");
-function gsRow(e){const can=e.legacy?isAdmin():gsCan(e);const editable=can&&e.sec!=="to";
+function gsRow(e){const can=e.legacy?isAdmin():gsCan(e);const editable=can&&e.sec!=="to";/* tov rows: edit = team + points */
   return `<div class="gsent ${gsMine(e)?"mine":""}" data-id="${esc(e.id)}"><div class="gset"><span class="gsmeta small"><b>${esc(gsLabelOf(e))}</b> · ${esc(e.byName||"Coach")} · <span class="muted">${esc(gsAgo(e.ts||0))}</span></span>${gsTextOf(e)?`<span>${esc(gsTextOf(e))}</span>`:""}</div>${editable?`<button type="button" class="btn icon edit" data-act="gsEditEnt" data-id="${esc(e.id)}" aria-label="Edit">${PEN}</button>`:"<span></span>"}${can?`<button type="button" class="btn icon del" data-act="gsDelEnt" data-id="${esc(e.id)}" aria-label="Delete">${TRASH}</button>`:"<span></span>"}</div>`}
 const gsList=L=>`<div class="gslist">${L.map(gsRow).join("")||'<p class="muted small">Nothing yet.</p>'}</div>`;
 function gsFouls(g,s,E){const ft=gsFT();const F=gsFoulsOf(E,ft);const nos=Object.keys(F).sort(gsNum);
@@ -3018,26 +3047,29 @@ function gsTimeouts(g,s,E){const c=gsToConf(s);const big=t=>{const r=gsToLeft(s,
   const per=c.reset?`${c.n} per half`:`${c.n} per game`;const h2=gsCurHalf(s)===2;
   return `<div class="gsback"><button type="button" class="btn icon gsbk" data-act="gsGo" data-v="home" aria-label="Back">${CHEV}</button><h2>Timeouts</h2><span class="sp"></span><button type="button" class="btn icon gsgear" data-act="gsToConf" aria-label="Timeout settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div>
   ${c.reset?`<button type="button" class="gshalf ${h2?"on":""}" data-act="gsHalf" role="switch" aria-checked="${h2}"><span>2nd half</span><span class="gssw" aria-hidden="true"></span></button>`:""}<div class="gstos">${big("us")}${big("opp")}</div><p class="small muted gshint">${esc(per)}${c.own?" (this game)":""}</p>`+gsList(E.filter(e=>e.sec==="to"))}
-function gsTextSec(g,s,E,sec){
-  return gsBack(GS_LBL[sec])+`<form class="gsform" data-sec="${sec}"><label class="f" for="gstext">${sec==="eagles"?"Eagles note (offense or defense)":"Opponent note (offense or defense)"}<textarea id="gstext" rows="2" maxlength="400" enterkeyhint="done"></textarea></label><button type="submit" class="btn gold gsaddbtn">${PLUS}Add</button></form>`+gsList(E.filter(e=>gsGrp(e)===sec))}
-function gsFeed(g,s,E){E=E.filter(e=>gsGrp(e)==="eagles"||gsGrp(e)==="opp");const names=[...new Set(E.map(e=>e.byName||"Coach"))].sort();const secs=["eagles","opp"];
-  [...gsF.by].forEach(n=>{if(!names.includes(n))gsF.by.delete(n)});
-  const L=E.filter(e=>(!gsF.by.size||gsF.by.has(e.byName||"Coach"))&&(!gsF.sec.size||gsF.sec.has(gsGrp(e))));
-  const chip=(kind,v,l,on)=>`<button type="button" class="gchip ${on?"on":""}" data-act="gsFilt" data-kind="${kind}" data-v="${esc(v)}" aria-pressed="${on}">${esc(l)}</button>`;
-  return gsBack("Feed")+`<div class="gschips" role="group" aria-label="Filter by coach">${names.map(n=>chip("by",n,n,gsF.by.has(n))).join("")}</div><div class="gschips" role="group" aria-label="Filter by section">${secs.map(k=>chip("sec",k,GS_LBL[k],gsF.sec.has(k))).join("")}</div>`+gsList(L)}
+function gsNotes(g,s,E){
+  return gsBack("Game Notes")+`<form class="gsform" data-sec="note"><label class="f" for="gstext">Note<textarea id="gstext" rows="2" maxlength="400" enterkeyhint="done"></textarea></label><button type="submit" class="btn gold gsaddbtn">${PLUS}Add</button></form>`+gsList(E.filter(gsIsNote))}
+/* Turnovers: one tap logs it; the points prompt appears inline (never blocks the counters) and turns into "Later" after 8 s */
+function gsTov(g,s,E){const t=gsTovStats(E);const ask=gsTovAsk&&E.find(e=>e.id===gsTovAsk.id&&e.sec==="tov");if(gsTovAsk&&!ask)gsTovAsk=null;
+  const big=(tm,l,n)=>`<button type="button" class="gstov ${tm}" data-act="gsTovAdd" data-team="${tm}"><span class="gstovn num">${n}</span><b>${l}</b><span class="small">${PLUS}Tap to log</span></button>`;
+  const prompt=ask?`<div class="gsask ${gsTovAsk.fresh?"in":""}" role="group" aria-label="Points off this turnover"><div class="gsaskh"><b>Points off this turnover?</b><span class="small muted">${ask.team==="us"?"Eagles turnover: points go to Opp":"Opponent turnover: points go to CPC"}</span></div><div class="gsaskb">${[0,1,2,3,4].map(n=>`<button type="button" class="gspt num" data-act="gsTovPts" data-id="${esc(ask.id)}" data-v="${n}">${n}</button>`).join("")}<button type="button" class="gspt later" data-act="gsTovLater">Later</button></div>${gsTovAsk.auto?`<span class="gsaskbar" style="animation-duration:8000ms;animation-delay:-${Math.min(8000,Date.now()-gsTovAsk.t0)}ms"></span>`:""}</div>`:"";
+  if(gsTovAsk)gsTovAsk.fresh=false;
+  const open=t.open.slice().sort((a,b)=>(b.ts||0)-(a.ts||0));
+  return gsBack("Turnovers")+`<div class="gstovs2">${big("us","Eagles TO",t.us)}${big("opp","Opponent TO",t.opp)}</div>${prompt}
+  ${open.length?`<div class="gsneed"><h3 class="gsh">Needs points (${open.length})</h3><div class="gsneedl">${open.map(e=>gsCan(e)?`<button type="button" class="gsneedi" data-act="gsTovAsk" data-id="${esc(e.id)}">${e.team==="us"?"Eagles":"Opponent"} TO <span class="muted">· ${esc(gsAgo(e.ts||0))}</span></button>`:`<span class="gsneedi ro">${e.team==="us"?"Eagles":"Opponent"} TO <span class="muted">· ${esc(e.byName||"Coach")}</span></span>`).join("")}</div></div>`:""}`+gsList(E.filter(e=>e.sec==="tov"))}
 function scoutView(){if(!isCoach())return homeView();const g=gsCur();if(!g)return gsPicker();const s=gsDoc(g);const E=gsEnts(g.key);
   if(SB&&user&&!user.name&&!gsNameAsked)gsAskName();
-  const body=gsView==="fouls"?gsFouls(g,s,E):gsView==="to"?gsTimeouts(g,s,E):gsView==="feed"?gsFeed(g,s,E):GS_TEXT_SECS.includes(gsView)?gsTextSec(g,s,E,gsView):gsHome(g,s,E);
-  return `<div class="gs">${gsHeadRow(g)}${gsNav()}<div class="gsbody">${body}</div></div>`}
+  const body=gsView==="fouls"?gsFouls(g,s,E):gsView==="to"?gsTimeouts(g,s,E):gsView==="tov"?gsTov(g,s,E):gsView==="notes"?gsNotes(g,s,E):gsHome(g,s,E);
+  return `<div class="gs">${gsHeadRow(g)}<div class="gspin">${gsNav()}${gsTovStrip(E)}</div><div class="gsbody">${body}</div></div>`}
 let gsNameAsked=false;
 async function gsAskName(){gsNameAsked=true;try{const em=gsMe();const {data}=await SB.from("staff").select("name").eq("email",em);const nm=data&&data[0]&&String(data[0].name||"").trim();if(nm&&user&&em!==String(CONFIG.supabase.coachEmail).toLowerCase()&&!/shared coach/i.test(nm)){user={...user,name:nm.slice(0,40)};requestRender()}}catch(e){}}
 /* Opponent page: past sessions (never exhibitions) */
 const gsTopFouls=E=>Object.entries(gsFoulsOf(E)).sort((a,b)=>b[1].length-a[1].length||gsNum(a[0],b[0])).slice(0,3).map(([n,l])=>`#${n} ×${l.length}`).join(", ");
 function gsOppPanel(oid){if(!isCoach())return"";const L=gsAll().filter(s=>s.oppId===oid&&!s.exh).sort((a,b)=>String(b.date).localeCompare(String(a.date)));if(!L.length)return"";
-  let nn=0;const body=L.map(s=>{const E=gsEnts(s.id);const notes=E.filter(e=>gsGrp(e)==="opp"||gsGrp(e)==="eagles").sort((a,b)=>(b.ts||0)-(a.ts||0));nn+=notes.length;
+  let nn=0;const body=L.map(s=>{const E=gsEnts(s.id);const notes=E.filter(gsIsNote).sort((a,b)=>(b.ts||0)-(a.ts||0));nn+=notes.length;const tv=gsTovStats(E);
     const tf=gsTopFouls(E);const tu=E.filter(e=>e.sec==="to"&&e.team==="us").length,tp=E.filter(e=>e.sec==="to"&&e.team==="opp").length;
-    const sum=[tf?"Fouls "+tf:"",tu||tp?`Timeouts: Us ${tu} · Opp ${tp}`:""].filter(Boolean).join(" · ");
-    return `<div class="gsopp"><div class="gsopph"><b>${esc(mon(D(s.date))+" "+D(s.date).getDate()+", "+D(s.date).getFullYear())}</b> ${gsLvChip(s.level)}${sum?`<span class="small muted">${esc(sum)}</span>`:""}</div>${notes.map(e=>`<div class="gsoppn"><span class="gstag ${gsGrp(e)}">${esc(e.sec==="note"?"Game Notes":GS_LBL[gsGrp(e)])}</span><span>${esc(gsTextOf(e))}</span><span class="small muted">${esc(e.byName||"Coach")}</span></div>`).join("")||'<p class="muted small" style="margin:4px 0 0">No notes from this game.</p>'}</div>`}).join("");
+    const sum=[tf?"Fouls "+tf:"",tu||tp?`Timeouts: Us ${tu} · Opp ${tp}`:"",tv.us||tv.opp?`Turnovers: CPC ${tv.us} / Opp ${tv.opp} · Points off: CPC ${tv.ptsUs} / Opp ${tv.ptsOpp}`:""].filter(Boolean).join(" · ");
+    return `<div class="gsopp"><div class="gsopph"><b>${esc(mon(D(s.date))+" "+D(s.date).getDate()+", "+D(s.date).getFullYear())}</b> ${gsLvChip(s.level)}${sum?`<span class="small muted">${esc(sum)}</span>`:""}</div>${notes.map(e=>`<div class="gsoppn"><span>${esc(gsTextOf(e))}</span><span class="small muted">${esc(e.byName||"Coach")}</span></div>`).join("")||'<p class="muted small" style="margin:4px 0 0">No notes from this game.</p>'}</div>`}).join("");
   return panel("game-scout",'Game Tracker <span class="chip">Coaches only</span>',plural(L.length,"game")+(nn?" · "+plural(nn,"note"):""),body,"coachonly")}
 function gsKeypadHTML(){return `<div class="gskp"><div class="gskd num" id="gskd" aria-live="polite">#</div><div class="gskeys">${["1","2","3","4","5","6","7","8","9","bk","0","ok"].map(k=>k==="bk"?`<button type="button" class="gskey" data-act="gsKey" data-k="bk" aria-label="Delete digit">⌫</button>`:k==="ok"?`<button type="button" class="gskey ok" data-act="gsKey" data-k="ok" id="gskok" disabled>Add</button>`:`<button type="button" class="gskey num" data-act="gsKey" data-k="${k}">${k}</button>`).join("")}</div></div>`}
 let gsKp="";
@@ -3046,11 +3078,19 @@ function gsRemoveFoul(no){const g=gsCur();if(!g)return;const l=(gsFoulsOf(gsEnts
   let t=gsCan(last)||(last.legacy&&isAdmin())?last:l.filter(gsMine).pop();
   if(!t)return toast("Only "+(last.byName||"that coach")+" can remove theirs",true);
   gsDelEnt(g,t,`Foul #${no}: ${plural(l.length-1,"foul")}`)}
+function gsTovOpen(id,auto){clearTimeout(gsTovTimer);gsTovAsk={id,auto,t0:Date.now(),fresh:true};render();
+  if(auto)gsTovTimer=setTimeout(()=>{if(gsTovAsk&&gsTovAsk.id===id){gsTovAsk=null;requestRender()}},8000)}
 function gsEntOf(id){const g=gsCur();return g?gsEnts(g.key).find(e=>e.id===id):null}
 const GS_ACT={
   gsPick(d){LS.set(GS_LAST,d.k);const pg_=gsGameOf(d.k);if(pg_)LS.set(GS_PLV,pg_.level);gsView="home";gsEdit=false;render();window.scrollTo(0,0)},
   gsSwitch(){LS.set(GS_LAST,null);gsView="home";render();window.scrollTo(0,0)},
-  gsGo(d){gsView=d.v;gsEdit=false;gsDef="";render();window.scrollTo(0,0)},
+  gsGo(d){gsView=["fouls","to","tov","notes"].includes(d.v)?d.v:"home";gsEdit=false;render();window.scrollTo(0,0)},
+  gsTovAdd(d){const g=gsCur();if(!g)return;const team=d.team==="us"?"us":"opp";const id=gsAdd(g,{sec:"tov",team,pts:null},(team==="us"?"Eagles":"Opponent")+" turnover");gsTovOpen(id,true)},
+  gsTovAsk(d){gsTovOpen(d.id,false)},
+  gsTovLater(){clearTimeout(gsTovTimer);gsTovAsk=null;render()},
+  gsTovPts(d){const e=gsEntOf(d.id);clearTimeout(gsTovTimer);gsTovAsk=null;if(!e){render();return}if(!gsCan(e)){render();return toast("Only "+(e.byName||"that coach")+" can set theirs",true)}
+    const raw=JSON.parse(JSON.stringify(store.gscout_e[e.id]||{}));const prev=raw.pts===undefined?null:raw.pts;const n=Math.max(0,Math.min(4,+d.v||0));gsPut("gscout_e",e.id,{...raw,pts:n});
+    toastUndo(`${n} pt${n===1?"":"s"} for ${e.team==="us"?"Opp":"CPC"}`,async()=>{await gsQ;const cur=store.gscout_e[e.id];if(cur)await saveDoc("gscout_e",e.id,{...cur,pts:prev})})},
   gsSetQ(d){const g=gsCur();if(!g)return;const s=gsGet(g.key);if((s&&s.q||"Q1")===d.q)return;const prev=s?JSON.parse(JSON.stringify(s)):undefined;
     gsPut("gscout",g.key,{...(s||{}),...gsMeta(g),q:d.q});toastUndo("Quarter: "+d.q,async()=>{await gsQ;const cur=gsGet(g.key)||{};await saveDoc("gscout",g.key,{...cur,q:prev&&prev.q||"Q1"})})},
   gsKeypad(){gsKp="";listSheet((gsFT()==="us"?"Eagles":"Opponent")+" jersey number",gsKeypadHTML())},
@@ -3070,11 +3110,11 @@ const GS_ACT={
       onSave:async v=>{const o={n:Math.max(0,Math.min(10,+v.n||0)),reset:!!v.reset,ot:c.ot};const cur=gsGet(g.key);
         if(v.scope==="game")await saveDoc("gscout",g.key,{q:"Q1",...(cur||{}),...gsMeta(g),to:o});
         else{await saveDoc("gscout_conf","timeouts",o);if(cur&&cur.to){const n={...cur};delete n.to;await saveDoc("gscout",g.key,n)}}}})},
-  gsPickDef(d){gsDef=gsDef===d.v?"":d.v;$$(".gsdef").forEach(b=>{const on=b.dataset.v===gsDef;b.classList.toggle("on",on);b.setAttribute("aria-pressed",on)})},
-  gsFilt(d){const S=gsF[d.kind==="by"?"by":"sec"];S.has(d.v)?S.delete(d.v):S.add(d.v);render()},
   gsDelEnt(d){const g=gsCur();const e=gsEntOf(d.id);if(!g||!e)return;gsDelEnt(g,e,gsLabelOf(e)+" deleted")},
   gsEditEnt(d){const g=gsCur();const e=gsEntOf(d.id);if(!g||!e)return;if(e.legacy?!isAdmin():!gsCan(e))return toast("Only "+(e.byName||"that coach")+" can edit theirs",true);
     const foul=e.sec==="foul";
+    if(e.sec==="tov")return openSheet({title:"Edit turnover",fields:[{key:"team",label:"Who turned it over",type:"seg",options:[["us","Eagles"],["opp","Opponent"]],req:true},{key:"pts",label:"Points off it (scored by the other team)",type:"select",options:[["","Not set"],["0","0"],["1","1"],["2","2"],["3","3"],["4","4"]]}],value:{team:e.team==="us"?"us":"opp",pts:e.pts==null?"":String(e.pts)},saved:"Saved",
+      onSave:async v=>{const raw={...store.gscout_e[e.id]};raw.team=v.team==="us"?"us":"opp";raw.pts=v.pts===""||v.pts==null?null:Math.max(0,Math.min(4,+v.pts));return saveDoc("gscout_e",e.id,raw)}});
     openSheet({title:"Edit "+gsLabelOf(e).toLowerCase(),fields:foul?[{key:"no",label:"Jersey #",im:"numeric",max:2,req:true}]:[{key:"text",label:e.def?"Note ("+e.def+")":"Note",type:"textarea",max:400}],value:{...e,no:String(e.no??"")},saved:"Saved",
       onSave:async v=>{
         if(foul&&!/^\d{1,2}$/.test(String(v.no||"")))throw new Error("Jersey # must be 1 or 2 digits");
@@ -3089,8 +3129,8 @@ const GS_ACT={
       await saveDoc("gscout",id,{ref:{kind:"quick",id},level:lv,date:ymd(TODAY),oppId:null,oppName:nm,exh:true,q:"Q1"});LS.set(GS_LAST,id);LS.set(GS_PLV,lv);gsView="home"}})}
 };
 function gsBind(){
-  $$(".gsform").forEach(f=>f.addEventListener("submit",e=>{e.preventDefault();const g=gsCur();if(!g)return;const t=f.querySelector("textarea");const sec=f.dataset.sec==="eagles"?"eagles":"opp";
-    const text=String(t.value||"").trim().slice(0,400);if(!text)return toast("Type a note first",true);gsAdd(g,{sec,text},"Added to "+GS_LBL[sec])}));
+  $$(".gsform").forEach(f=>f.addEventListener("submit",e=>{e.preventDefault();const g=gsCur();if(!g)return;const t=f.querySelector("textarea");
+    const text=String(t.value||"").trim().slice(0,400);if(!text)return toast("Type a note first",true);gsAdd(g,{sec:"note",text},"Note added")}));
   $$(".gsform textarea").forEach(t=>t.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();t.form.requestSubmit()}}));
   /* Hold a player tile to take one foul back */
   $$(".gstap").forEach(b=>{let tm=null;const clear=()=>{clearTimeout(tm);tm=null};
